@@ -1,9 +1,10 @@
 
  
-%%\documentclass[sn-nature]{sn-jnl}% Style for submissions to Nature Portfolio journals
-%%\documentclass[sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
 %\documentclass[sn-mathphys,Numbered]{sn-jnl}% Math and Physical Sciences Reference Style
 \documentclass[sn-mathphys,Numbered,draft]{sn-jnl}% Math and Physical Sciences Reference Style
+
+%%\documentclass[sn-nature]{sn-jnl}% Style for submissions to Nature Portfolio journals
+%%\documentclass[sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
 %%\documentclass[sn-aps]{sn-jnl}% American Physical Society (APS) Reference Style
 %%\documentclass[sn-vancouver,Numbered]{sn-jnl}% Vancouver Reference Style
 %%\documentclass[sn-apa]{sn-jnl}% APA Reference Style 
@@ -14,6 +15,7 @@
 %%%% Standard Packages
 %%<additional latex packages if required can be included here>
 
+\setlength{\parskip}{\baselineskip}
 
 \usepackage{graphicx}%
 \usepackage{amsmath,amssymb,amsfonts,bm}%
@@ -58,6 +60,7 @@ textheight=24cm, % llncs has 19.3cm
 \usepackage[section]{placeins}
 \usepackage{enumitem}
 \usepackage{color,soul}
+\usepackage{xfrac}
 
 %% New math commands
 \newcommand{\s}[1]{\overset{*}{#1}}
@@ -67,6 +70,7 @@ textheight=24cm, % llncs has 19.3cm
 \newcommand{\RV}{\bm{\psi}}
 \newcommand{\magRV}{\psi}
 \newcommand{\RMTS}{\s{\bm{\Lambda}}_t}
+\newcommand{\bb}{\boldsymbol}
 
 %% For contact
 \newcommand{\rbar}{\bar{\bm{r}}}
@@ -208,238 +212,911 @@ The article ends with a summary of the main conclusions.
 \section{Mathematical Model}\label{sec:math_model}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Governing equation}
+This section outlines the Lagrangian finite strain finite volume methodology, where details of the constitutive laws are left to Secton \ref{sec:constitutive_laws}.
 
-The dynamic, Lagrangian, strong integral form of linear momentum conservation for a body $\Omega$, bounded by a surface $\Gamma$ with outwards pointing normal $\textbf{n}$, can be expressed as
-\begin{equation} \label{eqn:strongIntegralMomentum}
-    \int_{\mathrm{\Omega}} \frac{\partial }{\partial t} \left( \rho \frac{\partial \mathbf{u} }{\partial t} \right) d\mathrm{\Omega}
-    =
-    \oint_{\mathrm{\Gamma}}{\mathbf{n}\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma}
-\end{equation}
-where $\rho$ is the density, $\partial \mathbf{u}$ is the displacement vector, $\boldsymbol{\sigma}$ is the true (Cauchy) stress, and body forces are neglected.
+\subsection{Linear momentum conservation}
 
-Equivalently, momentum conservation can be reformulated with respect to the initial reference configuration as
-\begin{equation}
+The dynamic, Lagrangian, strong integral form of linear momentum conservation for a body $\Omega$, bounded by a surface $\Gamma$ with outwards pointing normal $\textbf{n}$, can be equivalently expressed in \emph{total} Lagrangian form as
+\begin{equation} \label{eqn:totalLagFormulation}
+%    \int_{\mathrm{\Omega}} \frac{\partial }{\partial t} \left( \rho \frac{\partial \mathbf{u} }{\partial t} \right) d\mathrm{\Omega}
+%    =
+%    \oint_{\mathrm{\Gamma}}{\mathbf{n}\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma}
     \int_{\mathrm{\Omega}_o} \rho_o \frac{\partial^2 \mathbf{u} }{\partial t^2} d\mathrm{\Omega}_o
     =
     \oint_{\mathrm{\Gamma_o}} \left( J \mathbf{F}^{-T} \cdot \mathbf{n}_o \right) \cdot \boldsymbol{\sigma} \ d\mathrm{\Gamma}_o
 \end{equation}
-where subscript $o$ indicates quantities in the initial reference configuration.
-To achieve this equivalent form, Nanson’s formula \cite{bathe_finite_1996} has been employed to relate the deformed area vector $\mathbf{\Gamma}$ with the initial area vector $\mathbf{\Gamma}_{o}$:
-\begin{equation}
-    \mathbf{\Gamma} = J\mathbf{F}^{-T}\cdot\mathbf{\Gamma}_o
-\end{equation}
-where the deformation gradient is defined as $\mathbf{F} = \textbf{I} + (\boldsymbol{\nabla} \boldsymbol{u})^T$ and its determinant (Jacobian) as $J = \text{det}(\boldsymbol{F})$.
-
-Similarly, the momentum equation can be reformulated with respect to the \emph{updated} configuration as
-\begin{equation}
-\label{eqn:updatedLagFormulation}
+or \emph{updated} Lagrangian form as
+\begin{equation} \label{eqn:updatedLagFormulation}
     \int_{\mathrm{\Omega_u}} \frac{\partial }{\partial t} \left( \rho_u \frac{\partial \mathbf{u} }{\partial t} \right) d\mathrm{\Omega}_u
     = \oint_{\mathrm{\Gamma_u}}(j\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma_u}
     %= \oint_{\mathrm{\Gamma_u}}(\frac{j}{J}\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\tau}}\
 \end{equation}
-where subscript $u$ indicates quantities in the updated configuration.
+where $\rho$ is the density, $\mathbf{u}$ is the displacement vector, $\boldsymbol{\sigma}$ is the true (Cauchy) stress, and body forces are neglected.
+Subscript $o$ indicates quantities in the initial reference configuration, and subscript $u$ indicates quantities in the updated configuration.
+The two forms are connected through Nanson’s formula \cite{bathe_finite_1996}, which relate the deformed area vector $\mathbf{\Gamma}$ with the initial area vector $\mathbf{\Gamma}_{o}$:
+\begin{equation}
+    \mathbf{\Gamma} = J\mathbf{F}^{-T}\cdot\mathbf{\Gamma}_o
+\end{equation}
+where the deformation gradient is defined as $\mathbf{F} = \textbf{I} + (\boldsymbol{\nabla} \boldsymbol{u})^T$ and its determinant (Jacobian) as $J = \text{det}(\boldsymbol{F})$.
+%Equivalently, momentum conservation can be reformulated with respect to the initial reference configuration as
+%where subscript $o$ indicates quantities in the initial reference configuration.
+%To achieve this equivalent form, Nanson’s formula \cite{bathe_finite_1996} has been employed to 
+%Similarly, the momentum equation can be reformulated with respect to the \emph{updated} configuration as
+%\begin{equation}
+%\label{eqn:updatedLagFormulation}
+%    \int_{\mathrm{\Omega_u}} \frac{\partial }{\partial t} \left( \rho_u \frac{\partial \mathbf{u} }{\partial t} \right) d\mathrm{\Omega}_u
+%    = \oint_{\mathrm{\Gamma_u}}(j\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma_u}
+%    %= \oint_{\mathrm{\Gamma_u}}(\frac{j}{J}\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\tau}}\
+%\end{equation}
+%where subscript $u$ indicates quantities in the updated configuration.
 The \emph{relative} deformation gradient is given in terms of the displacement increment as $\mathbf{f}=\mathbf{I}+\nabla(\Delta \mathbf{u})^T$ and the relative Jacobian as $j = \text{det}(\mathbf{f})$.
 
-The updated configuration form will be adopted in the current work, resulting in an updated Lagrangian formulation. Although the total Lagrangian (initial configuration) is a viable option, developing Eulerian-type upstream and downstream mesh layer addition and removal conditions is conceptually easier in an updated Lagrangian formulation.
+Although the total Lagrangian approach is a viable option, the current work adopts the updated Lagrangian approach as developing Eulerian-type upstream and downstream mesh layer addition and removal conditions is conceptually easier in an updated Lagrangian formulation, as described in Section \ref{sec:euler_BCs}.
+
+The definition of the true stress in Equations \ref{eqn:totalLagFormulation} and \ref{eqn:updatedLagFormulation} comes from the constitutive law, as is described in Section \ref{sec:constitutive_laws}.
+
+
+\subsection{Solution Domain Discretisation} \label{sec:solDomDiscret}
+
+%- domain and time discretisation: time marching
+%- summary FVM discretisation
+%- details of stabilisation: pressure and Rhie-Chow
+%- stress calculation: plasticity/damage procedure
+%- numerics of constitutive laws
+%- novel Lemaitre
+
+%Discretisation of the solution domain comprises the discretisation of time and the discretisation of space. The total specified simulation time is divided into a finite number of time increments, t, and the discretised governing equations are solved in a time-marching manner. The solution domain space is divided into a finite number of contiguous convex polyhedral cells bounded by polygonal faces that do not overlap and fill the space completely. A typical control volume (or cell or control mass), shown in Figure 2, has a computational node P located at the cell centroid, with cell volume P , N is the centroid of a neighbouring control volume, face f has area vector  f , vector d f joins P to N and r is the positional vector of P . No distinction is made between different cell volume shapes, as all general polyhedra (for example tetrahedra, hexahedra, triangular prism, dodecahedra, etc.) are discretised in the same general fashion; this is in contrast to standard FE methods where shape functions are specific to the shape of the element.
+
+%\begin{figure}[htb]
+%\begin{center}
+%	\includegraphics[width=0.3\textwidth]{./figures/controlVolume.png}
+%\caption{A polyhedral control volume. Taken from \cite{cardiff2016}}
+%\label{fig:finite_volume}
+%\end{center}
+%\end{figure}
+
+The solution domain is discretised in space and time.
+The total specified simulation time is divided into a finite number of time increments $\Delta t$, and the discretised governing momentum equation is solved in a time-marching manner. 
+
+The space domain is divided into a finite number of contiguous convex polyhedral cells.
+The proposed solution discretisation follows closely the approach of \citet{cardiff_lagrangian_2017}; consequently, only an overview of the final discretised form of equations and adopted solution algorithm are given below.
+
+%A cell or control volume is shown in Figure \ref{fig:finite volume}. It has the following associated values:
+%\begin{itemize}
+%	\item A computational node $P$ located at the centre of the cell
+%	\item The cell volume $\Omega_{p}$
+%	\item The centroid of a neighbouring cell $N$
+%	\item Face $f$ with area vector $\mathbf{\Gamma}_f$
+%    \item The positional vector of $P$ is $\textbf{r}$
+%    \item $P$ and $N$ are joined by the vector $\mathbf{d}_{f}$
+%\end{itemize}
+
+To facilitate the use of a segregated solution algorithm, the surface forces term (term on the right-hand side of Equation \ref{eqn:updatedLagFormulation}) is split into explicit and implicit components:
+\begin{eqnarray} \label{eqn:MomentumImplicitExplicit}
+%	\underbrace{\int_{\Omega_u} \frac{\partial}{\partial t}\left(\rho_u \frac{\partial\left(\boldsymbol{u}^{[m-1]}+\Delta \boldsymbol{u}\right)}{\partial t}\right) \mathrm{d} \Omega_u}_{\text {implicit }}
+	\int_{\mathrm{\Omega_u}} \frac{\partial }{\partial t} \left( \rho_u \frac{\partial \mathbf{u} }{\partial t} \right) d\mathrm{\Omega}_u
+	&=&
+	\underbrace{\oint_{\mathrm{\Gamma}_u}{K_{imp}\  \mathbf{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \mathbf{u}}\right)}\ d\mathrm{\Gamma}_u}_{\text {implicit }} \notag \\
+    &&+
+    \underbrace{
+    \oint_{\mathrm{\Gamma_u}}(j\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma_u}
+    - 
+    \oint_{\mathrm{\Gamma}_u}{K_{imp}\ 
+ \mathbf{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \mathbf{u}}\right)}\ d\mathrm{\Gamma}_u
+ }_{\text {explicit }}  %\notag \\
+% &&+ \; \mathcal{D}_{\text {Rhie-Chow }} 
+\end{eqnarray}
+where the first term on the right-hand side (Laplacian term) is treated implicitly, and the second and third terms on the right-hand side are treated explicitly.
+Here, by implicit, we mean that the term contributes coefficients to the resulting linear(-ised) system of equations, while the explicit terms will contribute only to the source of the system of linear equations.
+The overall procedure will be implicit in time in that the time step size is not constrained by the Courant–Friedrichs–Lewy condition.
+This Laplacian term can be considered an approximate compact-stencil linearisation of the surface stress term.
+This allows the coupled vector system to be temporarily decoupled in three scalar component equations.
+This allows the scalar component equations to be solved independently, where outer Picard iterations provide the inter-component coupling.
+Unlike Newton-Raphson approaches, where quadratic convergence may be expected, we can expect linear convergence of the residuals when using a segregated approach; however, this disadvantage is offset in several ways: (i) an exact Jacobian stiffness matrix need not be assembled, which is often costly; (ii) a material tangent is not required for the material laws, as instead the scalar coefficient $K_{imp}$ is only required; (iii) outer Picard iterations are less expensive than Newton iterations as the discretised systems are smaller to assemble and quicker to solve; (iv) Picard iteration may provide superior convergence when the solution is far from the asymptotic region, potentially resulting in a more robust approach for highly nonlinear large strain fracture and damage cases.
+Nonetheless, as noted previously \citep{cardiff_block-coupled_2016}, segregated solution procedures can suffer slow convergence relative to coupled approaches, particularly in high aspect ratio linear cases.
+In the current work, 
+% and third terms on the right-hand side of this equation represent an approximation of the traction field in terms of the displacement field. For this work, the term 
+$K_{imp}$ is chosen following the work of \citet{jasak_application_2000} as %which found strong convergence for:
+\begin{equation}
+	K_{imp} = \frac{4}{3}\mu + \kappa
+\end{equation}
+where $\mu$ is the material shear modulus and $\kappa$ is the bulk modulus.
+It should be reinforced that the value of $K_{imp}$ affects convergence but does not affect the final converged solution, assuming convergence is achieved.
+
+The primary unknown to be solved for is the displacement increment $\Delta \boldsymbol{u}=\boldsymbol{u}^{[m+1]}-\boldsymbol{u}^{[m]}$ where the $[m]$ superscript indicates a quantity from the previous time-step and $[m+1]$ a quantity from the current (to be calculated) time step. 
+
+%Each term of this equation is then discretised as follows (in order):
+%\begin{itemize}
+%	\item
+The resulting conservation equation (Equation \ref{eqn:MomentumImplicitExplicit}) is applied to each cell (control volume) in the computational mesh and discretised in terms of the displacement increment at the cell centre/centroid $(\Delta \mathbf{u})_P$ and at the centres of the neighbouring cells $N_i$.
+
+ The temporal volume integral term is discretised in space using the mid-point rule and discretised in time using a first-order accurate implicit backward Euler scheme \cite{jasak_application_2000}:
+% The temporal component containing $\mathbf{u}^{\left[m-1\right]}$ is discretized similarly to what is shown in equation 2.50. However, this term is fully explicit, meaning it only contributes to the source vector in the resulting equation system.
+%While it's easy to discretise this temporal term with a second-order accuracy, as demonstrated in the FV method in \citet{jasak_application_2000}, the current elastoplastic method's temporal accuracy is constrained by the first-order backward Euler integration used for the plastic deformation rate for the constitutive law in the models we will encounter throughout this work.
+\begin{eqnarray} \label{eq:timeTerm}
+	\int_{\mathrm{\Omega_u}} \frac{\partial }{\partial t} \left( \rho_u \frac{\partial (\Delta \mathbf{u}) }{\partial t} \right) d\mathrm{\Omega}_u
+	&\approx&
+	\frac{\partial }{\partial t} \left( \rho_u \frac{\partial (\Delta \mathbf{u}) }{\partial t} \right)_P \mathrm{\Omega}_P \notag \\
+	&\approx&
+	\left(
+	\frac{ \rho_u^{[m+1]} \frac{\partial (\Delta \mathbf{u}) }{\partial t}^{[m+1]}
+	- \rho_u^{[m]} \frac{\partial (\Delta \mathbf{u}) }{\partial t}^{[m]}}{ \Delta t } \right)_P
+	\mathrm{\Omega}_P \notag \\
+	&\approx&
+	\left[
+	\frac{ \rho_u^{[m+1]} \left(\frac{\Delta \mathbf{u}^{[m+1]} - \Delta \mathbf{u}^{[m]}}{\Delta t} \right)
+	- \rho_u^{[m]} \left(\frac{\Delta \mathbf{u}^{[m]} - \Delta \mathbf{u}^{[m-1]}}{\Delta t} \right)
+	}{ \Delta t } 
+	\right]_P \mathrm{\Omega}_P \notag \\
+	&\approx&
+	\frac{1}{\Delta t^2} \left[
+	 \rho_{u_P}^{[m+1]} \Delta \mathbf{u}^{[m+1]}_P
+	- \left(\rho_{u_P}^{[m+1]} + \rho_{u_P}^{[m]} \right)  \Delta \mathbf{u}^{[m]}_P
+	+ \rho_{u_P}^{[m]}  \Delta \mathbf{u}^{[m-1]}_P
+	\right]
+	 \mathrm{\Omega}_P
+%	\int_{\mathrm{\Omega}_u}{\frac{\partial}{\partial t}\left(\rho_u\dot{\mathbf{u} }\right)}d\mathrm{\Omega}_u &\approx&\ \frac{1}{\mathrm{\Delta}t^{\left[m\right]}}\left[\left(\rho_u\mathrm{\Omega}_u\right)_p^{\left[m\right]}\left(\frac{\mathrm{\Delta}\mathbf{u}_P^{\left[m\right]}-\mathrm{\Delta}\mathbf{u}_P^{\left[m-1\right]}}{\mathrm{\Delta}t^{\left[m\right]}}\right)\right. \notag \\
+% &&-\left(\rho_u\mathrm{\Omega}_u\right)_p^{\left[m-1\right]}\left.\left(\frac{\mathrm{\Delta}\mathbf{u}_P^{\left[m-1\right]}-\mathrm{\Delta}\mathbf{u}_P^{\left[m-2\right]}}{\mathrm{\Delta}t^{\left[m-1\right]}}\right)\right]
+\end{eqnarray}
+The $\boldsymbol{u}^{[m-1]}$ term is discretised in a similar fashion, noting that $\boldsymbol{u}^{[m]} = \boldsymbol{u}^{[m-1]} + \Delta \boldsymbol{u}$ in Equation \ref{eqn:MomentumImplicitExplicit}. 
+
+%\item
+ The surface forces Laplacian term (first term on the right-hand side of Equation \ref{eqn:MomentumImplicitExplicit}) is discretised using central differencing with over-relaxed non-orthogonal correction \cite{demirdzic_finite_1993, jasak_application_2000, cardiff_development_2014, cardiff_large_2014, cardiff_lagrangian_2017}:
+\begin{eqnarray} \label{eq:diffusion}
+	\oint_{\mathrm{\Gamma}_u}
+	K_{imp} \mathbf{n}_u\cdot\nabla\left(\Delta\mathbf{u}\right) d\mathrm{\Gamma}_u
+	&\approx&
+	\sum_{f \in N_f} K_{imp}^f \left|\boldsymbol{\Delta}_{u_f}\right|\left(\frac{\Delta \mathbf{u}_{N_f} - \Delta \mathbf{u}_P}{\left|\mathbf{d}_f\right|}\right)\left|\mathbf{\Gamma}_{u_f}\right| \notag \\
+	    &&+ \sum_{f \in N_f} K_{imp}^f \; \mathbf{k}_{u_f} \cdot
+	    \left[
+	    \boldsymbol{\nabla} \left(\mathrm{\Delta}\mathbf{u}\right)
+	    \right]_f
+	    \left|\mathbf{\Gamma}_{u_f}\right|
+\end{eqnarray}
+where $N_f$ represents the set of faces $f$ in cell $P$, where neighbouring cell centre $N_f$ shares face $f$ with the cell $P$.
+The over-relaxed orthogonal vector $\boldsymbol{\Delta}_{u_f} = \frac{\boldsymbol{d}_{u_f}}{\boldsymbol{d}_{u_f} \cdot \boldsymbol{n}_{u_f}}$ and non-orthogonal correction vector is $\boldsymbol{k}_{u_f}=\boldsymbol{n}_{u_f}-\boldsymbol{\Delta}_{u_f}$, where $\boldsymbol{n}_{u_f}$ is the outward-facing unit normal to the face $f$.
+The first term on the right-hand side is treated implicitly, while the second term - representing non-orthogonal corrections at the face - is treated explicitly.
+
+%	\item
+ The remaining surface force terms (second and third terms on the right-hand side of Equation \ref{eqn:MomentumImplicitExplicit}) are discretised by assuming that they vary linearly across the face as follows \cite{noauthor_openfoam_2015}:
+\begin{equation}
+	\oint_{\mathrm{\Gamma_u}}(j\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma_u}
+%	&=& \sum_{F}\int_{\mathrm{\Gamma_{uf}}}(j\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\sigma}}d\Gamma_{uf}
+	\approx 
+	\sum_{f \in N_f} \mathbf{\Gamma}_{u_f} \cdot
+	\left(j\boldsymbol{\sigma}\cdot\mathbf{f}^{-T}\right)_f
+\end{equation}
+	
+\begin{equation} \label{eq:diffusion_exp}
+	    \oint_{\mathrm{\Gamma}_u}{K_{imp} \; \mathbf{n}_u\cdot \bb{\nabla} \left(\Delta\mathbf{u}\right)}\ d\mathrm{\Gamma}_u
+	    %= 
+%	    \sum_{F}\int_{\mathrm{\Gamma}_{uf}}{\left(\frac{4}{3}\mu+K\right)\mathbf{n}_u\cdot\nabla\left(\Delta\mathbf{u}\right)}\ d\mathrm{\Gamma}_{uf}
+	\approx
+	\sum_{f \in N_f} K_{imp} \; \mathbf{\Gamma}_{u_f} \cdot \left[\bb{\nabla}\left(\mathrm{\Delta}\mathbf{u}\right)\right]_f
+\end{equation}
+
+The terms at a face, indicated by the subscript f, are calculated by linearly interpolating from the adjacent cell-centre values. The cell-centre gradients $\bb{\nabla}\left(\mathrm{\Delta}\mathbf{u}\right)$ are determined using a least squares method \cite{noauthor_openfoam_2015}.
+
+%\end{itemize}
+
+
+%\subsection{Initial and boundary conditions}
+
+All dependent variables must be specified at the initial time.
+Boundary conditions must be applied to the faces that coincide with the boundary of the solution domain.
+The discretised expressions on boundary faces are modified to account for either the known displacement components in Dirichlet conditions or the known traction for Neumann conditions.
+%Mixed condition conditions, such as symmetry planes, treated each component as 
+%The expressions for diffusion fluxes and sources remain valid for a Dirichlet boundary condition, but the user-specified boundary value is used in place of the neighbouring cell-centre value.
+%On boundaries where Neumann boundary conditions are specified, the boundary fluxes are added to the source term, and the variable values at the boundary are extrapolated from the internal domain using the specified boundary gradient. This process is explained in more detail in \cite{jasak_application_2000}.
+Coulomb friction contact boundaries are handled using an iterative penalty method, as described previously \citep{cardiff_lagrangian_2017, cardiff_development_2012}.
+More recent segment-to-segment finite volume contact procedures could also be used \citep{Batistic2022, Batistic2023}.
+%This method involves measuring the penetration between intersecting cells, calculating penalty forces, and applying them as a Neumann boundary condition. This approach, which was developed for OpenFOAM \cite{cardiff_development_2012}, has also been expanded by the same authors to include the effects of Coulomb friction \cite{cardiff_lagrangian_2017}, which is the friction assumption used in the simulations in this thesis.
 
 
 
+\subsubsection{Rhie-Chow Stabilisation}
+
+The difference in the computational stencil for the first and third terms on the right-hand side in Equation \ref{eqn:MomentumImplicitExplicit} introduces third-order numerical diffusion to the discretisation, which quells spurious zero-energy checkerboarding solution oscillations.
+First introduced by Rhie and Chow \cite{rhie_numerical_1983} for cell-centred finite volume methods, 
+This approach was first proposed for cell-centred solid mechanics procedures by \citet{demirdzic_numerical_1995}, based on the earlier approach of Rhie and Chow \citet{demirdzic_numerical_1995}.
+%One issue encountered with the finite volume method is that the discretisation of the governing conservation of momentum equation ( can be unstable and is known to suffer from checker-boarding errors .
+%In order to rectify these issues, the Rhie-Chow stabilisation term \cite{rhie_numerical_1983} as introduced into solid mechanics by  is added to the discretised divergence of the stress in equation \ref{eqn:MomentumImplicitExplicit}.
+In the current approach, the so-called Rhie-Chow stabilisation term $\mathcal{D}_{\text {Rhie-Chow }}$ takes the following form:
+\begin{equation} \label{eq:RhieChow}
+	\mathcal{D}_{\text {Rhie-Chow }}
+%	&=\sum_{f=1}^{n \text { Faces }}\left\{K_f\left[\left|\boldsymbol{\Delta}_f\right| \frac{\boldsymbol{u}_{N_f}-\boldsymbol{u}_P}{\left|\boldsymbol{d}_f\right|}+\left(\boldsymbol{\Gamma}_f-\boldsymbol{\Delta}_f\right) \cdot(\boldsymbol{\nabla} \boldsymbol{u})_f\right]-\boldsymbol{\Gamma}_f \cdot\left[K_f(\boldsymbol{\nabla} \boldsymbol{u})_f\right]\right\} \\
+	= \sum_{f \in N_f} K_{imp}^f
+	\left[
+	\left|\boldsymbol{\Delta}_f\right| \frac{\Delta \boldsymbol{u}_{N_f} - \Delta \boldsymbol{u}_P}{\left|\boldsymbol{d}_f\right|}
+	- \boldsymbol{\Delta}_f \cdot(\boldsymbol{\nabla} (\Delta  \boldsymbol{u}))_f
+	\right]
+\end{equation}
+which comes from the difference between Equations \ref{eq:diffusion} and \ref{eq:diffusion_exp}.
+The first term on the right-hand side represents a compact stencil (two-node) approximation of the face normal gradient, while the second term represents a larger stencil approximation.
+In the limit of mesh refinement, these two terms cancel out; otherwise, they produce a stabilisation effect which tends to smooth the solution fields.
+As the term reduces at a third-order rate, it does not affect the overall scheme's second-order accuracy.
+
+As shown in Section \ref{sec:test_cases}, the magnitude of the Rhie-Chow stabilisation affects the localisation behaviour for damage and fracture mechanics models, with a tendency to artificially \emph{smear out} damage fields.
+%In this section, this effect will be explored and quantified.
+Two mitigation strategies are proposed here to produce a modified Rhie-Chow stabilisation $\hat{\mathcal{D}}_{\text {Rhie-Chow}}$:
+\begin{itemize}
+	\item The Rhie-Chow stabilisation is scaled by a global scalar constant $0 \leq \mathcal{R}$ supplied by the user:
+	\begin{equation}
+		\hat{\mathcal{D}}_{\text{Rhie-Chow}} = \mathcal{R} \; \mathcal{D}_{\text {Rhie-Chow}}
+	\end{equation}
+	\item The Rhie-Chow stabilisation is scaled by a global scalar constant in addition to a damage-dependent field:
+	\begin{equation}
+		\hat{\mathcal{D}}_{\text{Rhie-Chow}} = \mathcal{R} (1-D)^2 \; \mathcal{D}_{\text {Rhie-Chow}}
+	\end{equation}
+\end{itemize}
+In the first approach, the smoothing effect is reduced globally with the result that the smearing of damage fields is reduced; however, the disadvantage of this approach is that solution convergence is slowed as the stabilisation term is reduced in magnitude; in addition, numerical oscillations are more likely to appear, particularly in regions undergoing purely elastic deformation where no dissipation mechanisms exist.
+In the second approach, a damage variable $0 < D \leq 1$ (to be introduced in Section \ref{sec:constitutive_laws}) reduces the smoothing effect only in regions of damage.
+The effect of these proposed modifications are examined in Section \ref{sec:test_cases}.
+
+%\begin{equation}
+%\label{eqn:scaleEquation}
+%K_f=\mathcal{R} \left(2 \mu+\lambda\right)
+%\end{equation}
+%where $\mathcal{R}$ is the Rhie-Chow scale factor.
+
+%In order to mitigate the effect of the Rhie-Chow term on the material behaviour, a strategy is proposed in this work whereby the Rhie-Chow scale factor $\mathcal{R}$ in equation \ref{eqn:scaleEquation} is replaced with a field $\mathcal{R}_{field}$ that is a function of the damage field $D$ in the case of the Lemaitre model and the crack variable $d$ in the phase field model. 
+%\begin{equation}
+%   \mathcal{R}_{field}(D)=(1-D)^2\mathcal{R}
+%\end{equation}
+%\begin{equation}
+%   \mathcal{R}_{field}(d)=(1-d)^2\mathcal{R} 
+%\end{equation}
 
 
-\subsection{Constitutive laws}
+\subsubsection{Hydrostatic Pressure Calculation}
+As is well-known, displacement-only formulations are susceptible to displaying numerical hydrostatic pressure oscillations in regions of large isochoric plastic strains.
+In \citet{cardiff_lagrangian_2017}, it was proposed to smooth the relative deformation gradient Jacobian field.
+In contrast, the current approach forms and solves a pressure Poisson equation:
+\begin{equation}
+	p = -\frac{\kappa}{2} (J^{2} - 1) + \mathcal{D}_{\text{Rhie-Chow}}^p
+\end{equation}
+where $p = - \text{tr}(\bb{\sigma})/3$ is the hydrostatic pressure and trace operator is indicated by $\text{tr}(\bullet)$.
+The Rhie-Chow pressure stabilisation term $\mathcal{D}_{\text{Rhie-Chow}}^p$ is discretised according to Equation \ref{eq:RhieChow} with the displacement increment $\Delta \bb{u}$ replaced by the pressure $p$.
+As in the case of the discretised momentum equation, the magnitude of the Rhie-Chow stabilisation term can be controlled with a global scale constant $0 \leq \mathcal{R}_p$ supplied by the user.
+The effect of the Rhie-Chow stabilisation term here is to smooth out any pressure oscillations.
+The final form stabilised form of the pressure Poisson equation is 
+\begin{equation} \label{eq:pressureEqn}
+	p - \mathbb{D} \bb{\nabla}^2 p = -\frac{\kappa}{2} (J^{2} - 1) - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p \right)
+\end{equation}
+where the terms on the left-hand side are discretised implicitly and the terms on the right-hand side are discretised explicitly, following similar methods to Equations \ref{eq:timeTerm} and \ref{eq:diffusion}.
+The second terms on the left and right-hand sides come from the Rhie-Chow stabilisation.
+The described approach is similar to the formulation proposed by Bijelonja et al. \cite{Bijelonja2002, Bijelonja2005a, Bijelonja2005b, Bijelonja2006} for incompressibility, quasi-incompressibility and elastoplasticity.
 
-- maths details of the three damage laws
-- proposed modifications
+\subsection{Solution Algorithm}
+
+The linear momentum equation is discretised for each control volume $P$, and a linear algebraic equation of the following form is assembled \cite{jasak_application_2000}.
+
+\begin{equation}
+a_p \Delta \mathbf{u}_p+\sum_F a_n \Delta \mathbf{u}_n=\mathbf{b}_p
+\end{equation}
+
+Where $a_{p}$ is the central coefficient, $a_{n}$ are the coefficients associated with the centre of neighbouring cells, $F$ is the number of internal faces of the control volume,  $\mathbf{b}_p$ is the source vector contribution.
+
+These linear algebraic equations are then assembled for all control volumes creating a system of linear algebraic equations:
+\begin{equation}
+    \mathbf{K}\mathbf{u}=\mathbf{f}
+\end{equation}
+
+Where $\mathbf{K}$ is an $M \times M$ coefficient matrix containing the implicit operators where $M$ is the total number of control volumes. The solution vector $\mathbf{u}$ contains the unknown cell-centre displacement increments $\Delta\mathbf{ u}$. $\mathbf{f}$ is the source term containing the explicit operators.
+A similar scalar system is formed and solved for the hydrostatic pressure (Equation \ref{eq:pressureEqn}) during the calculation of the stress.
+
+%A segregated solution procedure is employed, where the displacement vector components are solved for separately and sequentially in the $x, y$ and $z$ directions.
+As noted in Section \ref{sec:solDomDiscret}, a segregated solution algorithm is employed where the governing vector momentum equation is temporarily decoupled and three scalar equations are solved; outer Picard iterations at each time stpe provide the inter-equation coupling.
+
+%A simple predictor step based on the response of a linear elastic material strained in one dimension is employed (the first term on the RHS of equation \ref{eqn:MomentumImplicitExplicit}).
+%In contrast, typical finite element approaches use a Newton-Raphson loop to account for nonlinearities and thus employ the consistent tangent matrix to achieve quadratic convergence \cite{bathe_finite_1996}.
+%However, a full, consistent tangent matrix is not easily used in the segregated approach.
+%However, a consistent tangent matrix can also be difficult to calculate in the damage and fracture models, and convergence difficulties can be encountered.
+%The current method employs Picard/FixedPoint iterations to account for the nonlinearities and hence does not require a consistent tangent matrix.
+%Outer iterations are performed to account for the inter-equation coupling and the linearized nonlinear terms.
+The \emph{inner} linear sparse system is iteratively solved using an incomplete Cholesky pre-conditioned conjugate gradient method \cite{jacobs_generalization_1986}.
+%In non-linear problems, this system of equations is solved multiple times with updated coefficients in a fixed-point iteration scheme. 
+As noted in previous articles on segregated methods, the inner system need not be solved to a tight tolerance as coefficients and source terms are approximated from the previous increment; a reduction in the residuals of one order of magnitude is typically sufficient. The outer iterations are performed until the predefined tolerance, typically $1 \times 10^{-6}$, has been achieved \cite{cardiff_lagrangian_2017}. 
+
+In the current updated Lagrangian approach, the mesh is moved to the deformed configuration at the end of each time step.
+Given that the displacements are calculated at the cell centres, interpolation must be performed to calculate the displacements at the vertices to update the mesh. A linear least-squared method is employed here \cite{cardiff_lagrangian_2017}.
+%In this method, a linear least squares plane is fit through a vertex and its immediately adjacent cell centres. For boundary vertices, boundary face-centre values are also included in the fitting.
+
+The procedures have been implemented and publicly shared within the solids4foam toolbox \citep{Cardiff2018, Tukovic2018} of the open-source OpenFOAM software.
+
+An overview of the solution algorithm is shown in Algorithm \ref{alg:solAlg}.
+ 
+\begin{algorithm}[htb] \label{alg:solAlg}
+\SetAlgoLined
+\text{\textbf{for all} time steps \textbf{do}} \\
+\ \ \text{       \textbf{while} convergence not reached \textbf{do}} 
+\ \text{       - Discrete governing system (Equation 4) for each cell, using Equations 5-10, in terms of $\Delta\mathbf{u}$}
+\ \text{       - Assemble the discretised  equations for all cells into three scalar linear systems (Equation 14)}
+\ \text{       - Solve the three scalar linear systems in terms of cell-centred displacement increments $\Delta\mathbf{u}$}
+\  \text{      - Update/reconstruct the kinematics: $\bb{\nabla}(\bb{\Delta} \bb{u})$, $\bb{F}$, $J$, $\bb{f}$, $j$ } \\
+\  \text{      - Update the stress ($\bb{\sigma}$) at the cell-centres using the chosen material law} \\
+\  \text{      - Update the Rhie-Chow stabilisation: $\hat{\mathcal{D}}_{\text{Rhie-Chow}}$ } \\
+\ \ \text{       \textbf{end while}}
+\ \ \text{      - Interpolate cell-centre displacement increments to the vertices}
+\ \ \text{      - Move mesh to the deformed configuration using the vertex displacements, incorporating}
+\ \ \text{        layer addition/removal (Section 2.4)}
+ \caption{Solution Procedure}
+\text{\textbf{end for}}
+\end{algorithm}
 
 
-As noted in the literature review of \citet{garrison_ductile_1987}, ductile fracture in metals occurs in three stages (Figures 4.1 and 4.2). First voids are nucleated at material defects (usually inclusions). In some materials, these voids may also preexist in the material. Large plastic deformations then cause these voids to grow. When large enough, these voids then coalesce to form micro-cracks and then macro-cracks. The recent literature reviews of \citet{cao_models_2017} and \citet{tekkaya_damage_2020} characterise coupled models used to describe fracture in metal forming processes into two categories, continuum damage mechanics (CDM) models and micro-mechanical models. 
+\subsection{Eulerian-Type Layer Addition and Removal Boundaries} \label{sec:euler_BCs}
 
-In the field of continuum damage mechanics, an internal damage variable is used to describe the accumulation of microstructural degradation within a material due to various types of loading. This degradation is typically reflected in an increase in the density of internal defects, such as microcracks, dislocations, or voids. The internal damage variable is continuous, meaning it can take on any value within a given range. The micro-mechanical approach is also continuous in nature and describes the material behaviour by positing the existence of micro-voids in the material. The density of the voids in the material is described by a variable denoted as porosity. The material degradation is characterized by the porosity increasing due to the nucleation, growth and coalescence of these voids. As noted in the literature reviews of \citet{besson_continuum_2010, cao_models_2017} and \citet{tekkaya_damage_2020}, the canonical frameworks in the CDM and micro-mechanical approaches are the Lemaitre \cite{lemaitre_continuous_1985,lemaitre_engineering_2005} and the Gurson—Tvergaard–Needleman (GTN) \cite{gurson_continuum_1977,tvergaard_analysis_1984} models respectively.
+Steady-state behaviour is typically the primary interest in wire drawing and other continuous forming approaches.
+Eulerian approaches are a natural choice but are not commonly employed when elastic phenomena (e.g. spring back, residual stresses) are important.
+When simulating wire drawing using a Lagrangian approach, a na\"ive approach is to simulate a workpiece segment that is \emph{long enough} to allow steady-state to be reached.
+The disadvantage of this approach is that computational cost is inflated by the portion of the workpiece domain primarily undergoing rigid-body translation, which may be large relative to the region undergoing plastic deformations.
 
-In this chapter, a brief description of the historical development of these models will be provided, and suitable algorithmic implementations of them developed and described. More recent developments in the formulations of these models are also described and implemented. 
+To overcome this disadvantage, the current work proposes Eulerian-type layer addition and removal conditions for the workpiece upstream and downstream boundaries.
+The approach involves fixing the workpiece (e.g., wire) upstream and downstream mesh boundaries in space during the mesh motion at the end of each time step.
+As cells near the upstream boundary become elongated, layers of new cells are added.
+Similarly, cells are removed as they become compressed near the downstream patch.
+In this way, the length of the workpiece domain remains fixed (like an Eulerian approach), but a traditional Lagrangian method is still used to calculate the deformation.
 
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/ductileDamageEvolution.png}
-\caption{Ductile damage evolution \cite{teixeira_ductile_2010}}
-\label{fig:Ductile-damage-evolution}
-\end{center}
+Figure \ref{fig:layerAddition} schematically outlines the step involved in the layer addition and removal mesh motion scheme:
+\begin{enumerate}[label=(\alph*)]
+	\item The workpiece (e.g., wire) mesh is constructed such that it is layered in the streamwise direction;
+	\item Solution of the discretised governing equations provides the cell centres displacement increments $\Delta \bb{u}$;
+	\item The cell-centred displacement increment $\Delta \bb{u}$ are interpolated to the vertices $\Delta \bb{u}_v$;
+	\item If the average width (in the streamwise direction) of the cell layer $d_{av}$ is greater at the upsrteam boundary than a user-prescribed maximum width $d_{max}$, a zero-thickness layer of cells at the upstream boundary. The displacement increments of the newly added layer of vertices are taken from the upstream boundary vertices;
+	\item The vertex displacement increments $\Delta \bb{u}_v$ at the upstream and downstream boundaries are set to zero, except for the newly added vertices part of the zero-thickness layer;
+	\item The mesh is moved by the vertex displacement increment field $\Delta \bb{u}_v$, where it is noted that the vertices on the upstream and downstream points do not move;
+	\item If the average width (in the streamwise direction) of the cell layer $d_{av}$ at the downstream boundary is less than a user-prescribed minimum width $d_{min}$, remove the layer of cells at the downstream boundary. Depending on displacement increment magnitude, multiple cell layers may need to be removed.
+\end{enumerate}
+
+\begin{figure}[tbh]
+	\centering
+	\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/layerAddition/fig1}}
+	\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/layerAddition/fig2}}
+	\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/layerAddition/fig3}}
+	\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/layerAddition/fig4}}
+	\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/layerAddition/fig5}}
+	\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/layerAddition/fig6}}
+	\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/layerAddition/fig7}}
+	\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/layerAddition/fig8}}
+	\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/layerAddition/fig9}}
+	\caption{Layer addition and removal mesh motion algorithm}
+	\label{fig:layerAddition}
 \end{figure}
 
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/f_ngc.png}
-\caption{Illustration of the nucleation, growth and coalescence of voids \cite{archie_damage_2018}}
-\label{fig:Nucleating Voids}
-\end{center}
+Following the layer addition and removal mesh motion algorithm, solution and derived field data at the newly added cell centres are mapped from the field data stored at the upstream boundary.
+This mapping approach assumes field data to have a zero gradient in the upstream direction; this assumption is valid if the upstream and downstream are chosen sufficiently far from the \emph{active} deformation zone.
+
+\textbf{Note on parallelisation}: The proposed solution algorithm has been implemented in the open-source toolbox OpenFOAM, where multi-CPU-core parallelisation on distributed memory systems is achieved through the domain decomposition approach.
+To simplify the implementation of the non-trivial topological mesh changes (addition or removal of cells), domain decomposition approaches have been limited to decomposing the workpiece into streamwise columns of cells (Figure \ref{fig:layerAdditionParallel}).
+In the current approach, modified forms of the METIS \cite{metis} and scotch \cite{scotch} approaches have been used to perform this decomposition.
+\begin{figure}[tbh]
+	\centering
+	\includegraphics[width=0.45\textwidth]{./Figures/layerAddition/parallel}
+	\caption{Example parallel decomposition of a wire and drawing die, where the wire is decomposed into streamwise \emph{columns}, indicated by the different colours. There is no limitation on the die decomposition.}
+	\label{fig:layerAdditionParallel}
 \end{figure}
 
-\section{Preliminaries}
-Before describing these models in more detail, it is necessary to define the stress triaxiality $\eta$ and the lode angle (and related parameters) $\theta$ \cite{bai_new_2008, nahshon_modification_2008}. There exists an extensive literature noting the importance of these two parameters in predicting ductile fracture \cite{besson_continuum_2010,cao_models_2017,tekkaya_damage_2020}. The triaxiality parameter $\eta$ is given by:
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Constitutive damage laws} \label{sec:constitutive_laws}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%- maths details of the three damage laws
+%- proposed modifications
+
+\subsection{Overview}
+
+As noted by \citet{garrison_ductile_1987}, ductile fracture in metals occurs in three stages: (i) voids are nucleated at material defects (usually inclusions), adding to pre-existing voids, if any; (ii) plastic deformations cause these voids to grow; and (iii) when large enough, these voids coalesce to form micro-cracks and macro-cracks.
+Recent reviews of 
+Approaches to model ductile fracture in metal forming can classified into two approaches \citep{cao_models_2017, tekkaya_damage_2020}: continuum damage mechanics models and micro-mechanical models.
+
+In \emph{continuum} damage mechanics, an internal damage variable is used to describe the accumulation of microstructural degradation within a material due to various types of loading.
+This degradation is typically reflected in the increased density of internal defects, such as microcracks, dislocations, or voids.
+The internal damage variable is continuous, meaning it can take on any value within a given range.
+The \emph{micro-mechanical} approach is also continuous in nature and posits the existence of material micro-voids.
+The void density is described by a variable denoted as porosity.
+Material degradation is characterised by increased porosity due to void nucleation, growth, and coalescence.
+As noted by \citet{besson_continuum_2010, cao_models_2017} and \citet{tekkaya_damage_2020}, the canonical frameworks in the continuum damage mechanics and micro-mechanical approaches are the Lemaitre \cite{lemaitre_continuous_1985,lemaitre_engineering_2005} and the Gurson-Tvergaard-Needleman (GTN) \cite{gurson_continuum_1977,tvergaard_analysis_1984} models, respectively.
+
+This section provides an overview of the classic Lemaitre and GTN models and proposes modifications to the Lemaitre model to extend its applicability to high hydrostatic pressure regimes characteristic of wire drawing.
+For comparison, a recent phase field model damage approach is also considered.
+
+The constitutive damage laws described in this section close the system of governing equations (Equation \ref{eqn:MomentumImplicitExplicit}) described in Section \ref{sec:solDomDiscret}, by providing the definition of stress.
+
+%In this chapter, a brief description of the historical development of these models will be provided, and suitable algorithmic implementations of them will be developed and described. More recent developments in the formulations of these models are also described and implemented. 
+
+%\begin{figure}[htb]
+%\begin{center}
+%	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/ductileDamageEvolution.png}
+%\caption{Ductile damage evolution \cite{teixeira_ductile_2010}}
+%\label{fig:Ductile-damage-evolution}
+%\end{center}
+%\end{figure}
+%
+%\begin{figure}[htb]
+%\begin{center}
+%	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/f_ngc.png}
+%\caption{Illustration of the nucleation, growth and coalescence of voids \cite{archie_damage_2018}}
+%\label{fig:Nucleating Voids}
+%\end{center}
+%\end{figure}
+
+\subsection{Preliminaries}
+Before describing these models in more detail, it is necessary to define the stress triaxiality $\eta$ and the Lode angle $\theta$ and related Lode parameters \cite{bai_new_2008, nahshon_modification_2008}.
+Extensive literature has noted the importance of stress triaxiality and Lode angle in predicting ductile fracture \cite{besson_continuum_2010,cao_models_2017,tekkaya_damage_2020}.
+The triaxiality parameter $\eta$ is given by:
 \begin{equation}
-    \eta=\frac{p}{q}
+    \eta = \frac{p}{\sigma_{v}}
+\end{equation}
+where, as noted previously, $p = -\text{tr}(\boldsymbol{\sigma})/3$ is the hydrostatic pressure, and $\sigma_{v} = \sqrt{3 J_2} = \sqrt{\frac{3}{2} \text{dev}(\bb{\sigma}) : \text{dev}(\bb{\sigma}) }$ is the equivalent (von Mises) stress.
+$J_2$ is the second invariant of the deviatoric stress tensor.
+%The trace operator is indicated by $\text{tr}(\bullet)$,
+The deviatoric operator is indicated by $\text{dev}(\bullet)$, and $:$ indicates the double-dot product.
+
+The Lode angle $0 \leq \theta \leq \frac{\pi}{3}$ physical interpretation relates to the degree of shear dominance present in the stress state.
+It can be rewritten as a function of the normalised third invariant of the deviatoric stress tensor:
+\begin{equation}
+    \theta=\frac{1}{3} \arccos\left(\xi\right)
 \end{equation}
 
-where p is the pressure ($p=\tau_h$) and $q$ is the von Mises equivalent stress (equation 3.34).
-
-The lode angle can be physically interpreted as a measure of how shear-dominated the stress state is. It can be rewritten as a function of the normalized third invariant of the deviatoric stress tensor:
+The parameter $0 \leq \xi \leq 1$ is determined as a ratio between the third invariant and the equivalent stress:
 \begin{equation}
-    \theta=\frac{1}{3}arccos\left(\xi\right)
+	\xi = \left(\frac{r}{\sigma_{v}}\right)^3
 \end{equation}
-
-The parameter $\xi$ is determined as a ratio between the third invariant and the von Mises equivalent stress:
+where $r$ is given by:
 \begin{equation}
-	\xi=\left(\frac{r}{q}\right)^3	
+	r  = 3 \left(\frac{3}{2}J_3\right)^{1/3} %= 3 \left(\frac{3}{2}\text{det}\left(\mathbf{s}\right)\right)^{1/3}	
 \end{equation}
-
-Where $r$ is given by:
-\begin{equation}
-	r=\left[\frac{27}{2}J_3\right]^{1/3}=\left[\frac{27}{2}det\left(\mathbf{s}\right)\right]^{1/3}	
-\end{equation}
-
-Where $J_3$ is the third invariant of the deviatoric stress tensor $\mathbf{s}$. The lode angle ranges between $0$ and $\frac{\pi}{3}$. The range of $\xi$ is between $-1$ and $1$. The lode angle has been normalised to create the lode parameter by \citet{bai_new_2008}:
-
+The third invariant of the deviatoric stress tensor is $J_3 = \text{det}[\text{dev}(\mathbf{s})]$.
+% $\mathbf{s}
+%The Lode angle ranges between $0$ and $\frac{\pi}{3}$.
+%The range of $\xi$ is between $-1$ and $1$.
+An alternative normalised Lode angle has been proposed by \citet{bai_new_2008} to be
 \begin{equation}
 	\bar{\theta}=1-\frac{6\theta}{\pi}	
 \end{equation}
-$\bar{\theta}$ has a range between -1 and 1.
+which ranges between -1 and 1.
 
-\section{Lemaitre damage model}
-
-\subsection{Historical development}
-As previously mentioned, at the micro-scale, damage can be viewed as a discontinuous phenomenon, consisting of the decohesion of atomic bonds and the magnification of micro-voids by plasticity. \citet{kachanov_time_1958} proposed a continuous internal variable to characterize the density of these internal defects leading to a loss of the load-carrying capabilities of the material. \citet{rabotnov_paper_1963} later proposed that this variable be characterised by the reduction in the cross-sectional area of the material due to the development of inclusions and cavities.
-
-In order to illustrate this concept, a macroscale volume (or representative volume element) is isolated from a damaged body in Figure \ref{fig:RVEDamage}. This volume is large enough such that the randomly distributed microvoids can be characterized by a continuous damage variable.
-
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/damageVolume.png}
-\caption{Representaive volume element isolated from a damaged body \cite{voyiadjis_damage_2005}}
-\label{fig:RVEDamage}
-\end{center}
-\end{figure}
-
-For the representative volume element (RVE), $A_D$ is equal to the area occupied by defects, A is equal to the remaining area of the surface and $A_o$ is the original area of the surface, prior to the development of micro voids and micro-cracks. The damage variable is then given by:
-\begin{equation}
-	D=\frac{A_o\ -\ A}{A_o}=\frac{A_d}{A_o}	
-\end{equation}
+The three Lode parameters ($\theta$, $\xi$, and $\bar{\theta}$) are essentially equivalent but are defined to vary between different limits.
 
 
- When no damage has taken place, the damage variable is, therefore, equal to 0 (virgin material), whereas when the material is equal to 1 this corresponds to the fully damaged material. From a physical point of view, the variable $D$ is the corrected area of cracks and cavities per unit surface cut by a plane perpendicular to $\mathbf{n}$. 
-From this definition of damage follows the concept of the effective stress. Let us consider a uniaxial case where a force $F$ is applied to the RVE. The stress is given by:
-\begin{equation}
-	\sigma=\frac{F}{A_o}	
-\end{equation}
+\subsection{Isotropic elastoplasticity}
 
-After the development of damage, however, the surface area of the macroscale volume which the force $F$ acts upon is reduced. The effective area is given in terms of the original area and the damage variable is as follows:
-\begin{equation}
-	\frac{A_o\ -\ A}{A_o}=D	
-\end{equation}
-\begin{equation}
-	A_o\ -\ A=DA_o	
-\end{equation}
-\begin{equation}
-	\frac{A_o\ -\ A}{A_o}=D	
-\end{equation}
-\begin{equation}
-	A=\left(1-D\right)A_o	
-\end{equation}
- The effective stress is then determined by combining this relation with the equation for the stress (equation 4.7):
- \begin{equation}
-	\bar{\sigma}\ =\frac{F}{{\left(1-D\right)A}_o}=\frac{\sigma}{\left(1-D\right)}	
-\end{equation}
-Based on these macroscopic considerations, Lemaitre \cite{lemaitre_continuous_1985} developed a thermodynamically consistent model.
+%\hl{Introduce the Kirchhoff stress tau and dot gamma and spatially rotated plastic stretch and thermodynamic force chi (x) and elastic rotation tensor}
 
-\subsection{Thermodynamic framework}
-
-The Lemaitre damage model described herein is coupled with the isotropic plasticity model laid out in chapter 3. In the Lemaitre model, a free energy potential $\psi$ is postulated from which the state laws are derived. The free energy is expressed as a function of the elastic strain $\boldsymbol{\varepsilon}^e$, the hardening variable $a$ and the damage variable D in the form:
- \begin{equation}
-	\psi=\psi\left(\boldsymbol{\varepsilon}^e,\alpha,D\right)
-\end{equation}
-The free energy potential can be decomposed into its elastic-damage and plastic contributions:
- \begin{equation}
-	\psi\left(\boldsymbol{\varepsilon}^e,\alpha,D\right)=\psi^{ed}\left(\boldsymbol{\varepsilon}^e,D\right)+\psi^p\left(\alpha\right)
-\end{equation}
-Where $\psi^{ed}$ and $\psi^p$ are the elastic-damage and plastic energy contributions respectively. The elastic-damage potential is assumed to be:
- \begin{equation}
-	\bar{\rho}\psi^{ed}=\frac{1}{2}\boldsymbol{\varepsilon}^e:\mathbf{D}^{e}\left(1-D\right):\boldsymbol{\varepsilon}^e	
-\end{equation}
-
-The Kirchhoff stress tensor is obtained by finding the derivative with respect to the elastic strain (section 3.2.1):
- \begin{equation}
-	\boldsymbol{\tau}=\bar{\rho}\frac{\partial\psi^{ed}}{\partial\boldsymbol{\varepsilon}^e}=\mathbf{D}^{e}\left(1-D\right):\boldsymbol{\varepsilon}^e	
-	\end{equation}
-
-The energy release rate Y, which gives the energy dissipated due to the phenomenon of damage, is given by:
- \begin{equation}
-	Y=\bar{\rho}\frac{\partial\psi^{ed}}{\partial D}=-\frac{1}{2}\boldsymbol{\varepsilon}^e:\mathbf{D}^e:\boldsymbol{\varepsilon}^e
-\end{equation}
-This can equivalently be written as:
- \begin{equation}
-	Y=-\frac{1}{2}\bar{\boldsymbol{\tau}}:{\mathbf{D}^e}^{-1}:\bar{\boldsymbol{\tau}}
-\end{equation}
-With some algebraic manipulation \cite{lemaitre_engineering_2005}:
- \begin{equation}
- \label{eqn:classicY}
-	Y=-\frac{{\bar{\tau}_{eq}}^2}{2E}\left(\frac{2}{3}\left(1+v\right)+3\left(1-2v\right)\left(\frac{\tau_h}{\tau_{eq}}\right)^2\right)	
-\end{equation}
-where $E$ is the Young's modulus and $v$ is Poisson's ratio. The triaxiality dependence of the Lemaitre mode is provided by the term $\frac{\tau_h}{\tau_{eq}}$, which is the definition of stress triaxiality $\eta$. The state potential associated with the isotropic hardening variable is given by: 
- \begin{equation}
-	\chi=\rho\frac{\partial\psi^p}{\partial \alpha}
-	\end{equation}
-
-The hardening variable $\alpha$ is commonly chosen as the equivalent plastic strain denoted by ${\bar{\varepsilon}}^p$. 
-The Clausius-Duhem inequality (equation 3.28) is rewritten to incorporate the damage $D$ and its associated thermodynamic force $Y$ to give:
-\begin{equation}
-\boldsymbol{\tau}:\bar{\mathbf{d}}^p-\chi\dot{\alpha}-Y\dot{D}\geq0
-\end{equation}
-
-\subsection{Constitutive equations}
-
-The dissipation potential $F$ is defined:
- \begin{equation}
-	F=F_p+F_d	
-	\end{equation}
-
-Where $F_p$ and $F_d$ are the dissipation potentials associated with plasticity and damage respectively. The plastic potential is given by the Von Mises yield criterion:
- \begin{equation}
-	F_p=\frac{\tau_{eq}}{\left(1-D\right)}-\sigma_y\left(\alpha\right)	
-\end{equation}
-
-And the damage dissipation potential is given by \citet{lemaitre_continuous_1985}:
- \begin{equation}
-	F_d=\frac{S_0}{\left(b+1\right)\left(1-D\right)}\left[\frac{-Y}{S_0}\right]^{b+1}
-\end{equation}
-
-Where $S_0$ and $b$ are material parameters. Plastic isotropy is assumed and, in order to ensure that dissipation is always
-positive, the Kuhn-Tucker conditions must always hold at every material point:
-\begin{equation}
-\left\{\begin{array}{c}
-\dot{\gamma}=\geq 0 \\
-F\geq 0 \\
-\dot{\gamma}F=0
-\end{array}\right.
-\end{equation}
+In the current work, the damage models are formulated in terms of isotropic $J_2$ (von Mises) elastoplasticity.
+Extension to other forms of elastoplasticity (e.g., kinematic hardening, anisotropic/Hill yielding, distortional hardening) is possible but is outside the scope of this article.
+The adopted large strain elastoplasticity formulation is based on the logarithmic (Hencky) strain, as proposed by \citet{eterovic_hyperelastic-based_1990} and described in detail by \citet{koji_inelastic_2010} and \citet{de_souza_neto_computational_2008}.
+This approach allows an additive split of the elastic and plastic strain tensors, conveniently leading to a return mapping scheme that is similar in form to those used in small-strain deformation models.
+%To this author's eye, this is a formulation for elastoplasticity that is more lucid and relatively simple to implement in codes in comparison to the approach of \citet{simo_computational_1998}, for example.
+%With an eye for future works, there also exists a well-established approach to extending large-strain elastoplasticity using the logarithmic strain to incorporate anisotropic and kinematic plasticity \cite{papadopoulos_formulation_2001,mettler_numerical_2012}.
+In contrast, previous large-strain elastoplastic models \citep{cardiff_lagrangian_2017, clancy_improving_2019} implemented in the OpenFOAM software have adopted the approaches of \citet{caminero_modeling_2011} and \citet{simo_computational_1998}.
+% and  this work represents, to the author's knowledge, the first time that the formulation by \citet{eterovic_hyperelastic-based_1990} for elastoplasticity has been implemented in OpenFOAM.
 
 
-The constitutive equations are therefore given by:
- \begin{equation}
-	\bar{\mathbf{d}}^p=\dot{\gamma}\frac{\partial F}{\partial\boldsymbol{\tau}}=\frac{3}{2}\frac{\dot{\gamma}}{\left(1-D\right)}\frac{\boldsymbol{\tau}_d}{\tau_{eq}}	
-\end{equation}
- \begin{equation}
-	\dot{\alpha}=-\dot{\gamma}\frac{\partial F}{\partial\chi}=\dot{\gamma}
-\end{equation}
- \begin{equation}
-	\dot{D}=-\dot{\gamma}\frac{\partial F}{\partial Y}=\frac{\dot{\gamma}}{\left(1-D\right)}\left[\frac{-Y}{S_0}\right]^\mathbf{b}	
-\end{equation}
+%First a dissipation potential $F$ is defined:
+%\begin{equation}
+%    F=F_p
+%\end{equation}
+%Where $F_{p}$ is the dissipation associated with the plasticity. Given the assumption of plastic isotropy and applying the generalized normality rule:
+%\begin{equation}
+%    \bar{\mathbf{d}}^p=\dot{\gamma}\frac{\partial F}{\partial\boldsymbol{\tau}}
+%\end{equation}
+%And
+%\begin{equation}
+%    \dot{\alpha}=-\dot{\gamma}\frac{\partial F}{\partial\chi}
+%\end{equation}
+%Equation 3.30 can be defined in terms of the multiplicative plastic deformation gradient $\mathbf{F}^{p}$ by combining it with equation \ref{eqn:rotatedPlasticStretch} to give
+%\begin{equation}
+%    \dot{\mathbf{F}^p\mathbf{F}^{p-1}}=\dot{\gamma}\mathbf{R}^{eT}\frac{\partial F}{\partial\boldsymbol{\tau}}\mathbf{R}^e
+%\end{equation}
 
-We can define equation 4.26 in terms of the multiplicative plastic deformation gradient $\mathbf{F}^p$ by combining it with equation 3.11 to give:
- \begin{equation}
-	\dot{\mathbf{F}^p\mathbf{F}^{p-1}}=\frac{\dot{\gamma}}{1-D}\mathbf{R}^{eT}\left(\frac{3}{2}\frac{\boldsymbol{\tau}_d}{\tau_{eq}}\right)\mathbf{R}^e
-\end{equation}
+The employed isotropic $J_2$ elastoplastic constitutive law is defined in terms of the yield criterion
+\begin{eqnarray}
+	%    F_p &=& \tau_{eq} - \sigma_y\left(\alpha\right) \\
+	\Phi &=& \sigma_v \; - \; \sigma_y\left(\bar{\varepsilon}_p \right)
+\end{eqnarray}
+%\end{equation}
+%Where $\tau_{eq}$ is the von Mises equivalent stress:
+%\begin{equation}
+%    \tau_{eq} = \sqrt{\frac{3}{2}\boldsymbol{\tau}_d:\boldsymbol{\tau}_d}
+%\end{equation}
+%Multivariable calculus operations are used to obtain the following constitutive equations
+%\begin{equation}
+and flow rule
+\begin{eqnarray}
+    %\frac{\partial}{\partial t} \left(\mathbf{F}_p \mathbf{F}_p^{-1} \right)
+    \dot{\mathbf{F}}_p \cdot \mathbf{F}_p^{-1}
+    &=&
+	%    \dot{\gamma}\mathbf{R}^{eT}\left(\frac{3}{2}\frac{\boldsymbol{\tau}_d}{\tau_{eq}}\right)\mathbf{R}^e
+    \dot{\bar{\varepsilon}}_p \; \mathbf{R}_e^T \cdot 
+    \left[
+    \frac{3}{2} \frac{\text{dev}\left(\boldsymbol{\sigma} \right)} {\sigma_{v}}
+    \right]
+    \cdot  \mathbf{R}_e
+\end{eqnarray}
+where the yield stress $\sigma_y$ is a function of the hardening variable $\bar{\varepsilon}_p$ coincides with the equivalent plastic strain $\bar{\varepsilon}_p$.
+The deformation gradient is decomposed into elastic and plastic components $\bb{F} = \bb{F}_e \cdot \bb{F}_p$ and polar decomposition of the elastic deformation gradient gives the elastic rotation $\bb{R}_e$ and elastic stretch $\bb{U}_e$ tensors: $\bb{F}_e = \bb{R}_e \cdot \bb{U}_p$.
+
+%\begin{equation}
+%\dot{\alpha}=\dot{\gamma}
+%\end{equation}
+%It's worth noting that the hardening variable $a$ used in this model is the equivalent plastic strain which can be given by $\bar{\varepsilon}^p$.
+The model is closed with the Kuhn-Tucker conditions
+\begin{eqnarray}
+	\Phi \geq 0, \quad\quad
+	\dot{\bar{\varepsilon}}_p \geq 0, \quad\quad
+	\dot{\bar{\varepsilon}}_p \Phi = 0
+\end{eqnarray}
+and the consistency condition
+\begin{eqnarray}
+	\dot{\bar{\varepsilon}}_p \dot{\Phi} &=& 0
+\end{eqnarray}
+
 
 \subsection{Computational procedure}
+%For a displacement-based finite volume procedure, the discretised equilibrium equations are solved for each time step using an iterative method to achieve convergence. The displacement field is solved at each iteration using the stress field calculated from the elasto-plastic return mapping scheme. This displacement field is then used to find a new value for the stress from the elasto-plastic return mapping scheme. This iterative procedure continues until convergence is achieved.
+
+For each cell at every outer (Picard) iteration, the stress $\bb{\sigma}^{[m+1]}$ and history variables ($\alpha^{[m+1]}$, $\bb{F}_p^{[m+1]}$) at time step $t^{[m+1]}$ must be calculated in terms of the current displacement increment gradient $[\bb{\nabla} (\Delta \bb{u})]^{[m+1]}$ and old-time history variables ($\alpha^{[m]}$, $\bb{F}_p^{[m]}$).
+
+%the incremental displacement field $\Delta \mathbf{u}$ for the current time step $t_{n+1}$, at the current (outer) iteration, is provided. The values of the following variables are given from the previous time step:
+%\begin{equation}
+%    \left\{\mathbf{F}_n^p,\ \alpha_n\right\}
+%\end{equation}
+%The goal is then to have an algorithm to obtain the following variables at time $t_{n+1}$
+%\begin{equation}
+%    \left\{\mathbf{F}_{n+1}^p,\ \alpha_{n+1},\boldsymbol{\sigma}_{n+1}\right\}
+%\end{equation}
+%In order to obtain these values, the algorithm must satisfy the set of constitutive equations:
+%\begin{equation}
+%\left\{\begin{array}{c}
+%    \dot{\mathbf{F}^p\mathbf{F}^{p-1}}=\dot{\gamma}\mathbf{R}^{eT}\left(\frac{3}{2}\frac{\boldsymbol{\tau}_d}{\tau_{eq}}\right)\mathbf{R}^e \\
+%\dot{\alpha}=\dot{\gamma}
+%\end{array}\right.
+%\end{equation}
+
+%To begin, equation 3.35 is integrated using the one-step implicit integration operator corresponding to the Euler backward method \cite{andrade_ductile_2011} to get:
+%\begin{equation}
+%    \mathbf{F}_{n+1}^p=exp\left[\frac{3}{2}\Delta\gamma\mathbf{R}_{n+1}^{e^T}\frac{{\bb{\tau}}_{d_{n+1}}}{\tau^{eq}_{n+1}}
+%    \mathbf{R}_{n+1}^e\right]\mathbf{F}_n^p
+%\end{equation}
+%Due to plastic isotropy, this equation can be written as:
+%\begin{equation}
+%    \mathbf{F}_{n+1}^p=\mathbf{R}_{n+1}^{e^T}exp\left[\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{R}_{n+1}^e\mathbf{F}_n^p
+%\end{equation}
+%This represents the update of the plastic deformation gradient. This can in turn be combined with the fact that $\mathbf{F}=\mathbf{F}^{e}\mathbf{F}^{p}$ to give the elastic deformation tensor:
+%\begin{equation}
+%    \mathbf{F}_{n+1}^e={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{R}_{n+1}^e
+%\end{equation}
+%where $\mathbf{F}_{n+1}^{e\ trial}$ is given by:
+%\begin{equation}
+%\mathbf{F}_{n+1}^{e\ trial}=\mathbf{f}_{n+1}\mathbf{F}_{n+1}^{e}
+%\end{equation}
+%$\mathbf{f}_{n+1}$ is the relative deformation gradient (equation 2.45). 
+%Using the fact that $\mathbf{F}^e=\mathbf{V}^{e}\mathbf{R}^{e}$
+%\begin{equation}
+%    \mathbf{V}_{n+1}^e\mathbf{R}_{n+1}^e={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{R}_{n+1}^e
+%\end{equation}
+%Multiplying both sides by $\mathbf{R}^{e^T}_{n+1}$
+%\begin{equation}
+%    \mathbf{V}_{n+1}^e={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]
+%\end{equation}
+%Multiplying by the inversion of the exponential term:
+%\begin{equation}
+%    \mathbf{V}_{n+1}^{e}exp\left[\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}
+%\end{equation}
+%Taking the square of both sides:
+%\begin{equation}
+%    \mathbf{V}_{n+1}^{e}\ exp\left[3\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{V}_{n+1}^{e}={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}{\mathbf{F}_{n+1}^{{e\ trial}^T}\mathbf{R}}_{n+1}^{e}
+%\end{equation}
+%
+%Isolating the RHS of this equation and using the fact that $\mathbf{R}^{e^T}_{n+1}\mathbf{R}^{e}_{n+1}=\textbf{I}$:
+%\begin{equation}
+%    {\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}{\mathbf{F}_{\mathbf{n}+1}^{{e\ trial}^T}\mathbf{R}}_{n+1}^e=\mathbf{F}_{n+1}^{e\ trial}\mathbf{F}_{n+1}^{{e\ trial}^T}=\left(\mathbf{V}_{n+1}^{e\ trial}\right)^\mathbf{2}
+%\end{equation}
+%
+%Subbing this into equation 3.47 we get:
+%\begin{equation}
+%    \mathbf{V}_{n+1}^e exp\left[3\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{V}_{n+1}^e=\left(\mathbf{V}_{n+1}^{e\ trial}\right)^\mathbf{2}
+%\end{equation}
+%
+%By rearranging and taking the square root of both sides, the following can be obtained:
+%\begin{equation}
+%    \mathbf{V}_{n+1}^e=\mathbf{V}_{n+1}^{e\ trial}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]
+%\end{equation}
+%
+%Taking the natural log of both sides:
+%\begin{equation}
+%    ln\left(\mathbf{V}_{n+1}^{e}\right)=ln\left(\mathbf{V}_{n+1}^{e\ trial}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\right)
+%\end{equation}
+%
+%Using the fact that $ln\textbf{V}=\boldsymbol{\varepsilon^e}$ (equation 3.8), the additive split of the elastic and plastic strain tensors is derived:
+%\begin{equation}
+%    \boldsymbol{\varepsilon}_{n+1}^{e}=\boldsymbol{\varepsilon}_{n+1}^{e\ trial}-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}
+%\end{equation}
+%The integration of the other constitutive equations using the backwards Euler scheme is simply given by:
+%\begin{eqnarray}
+%    \alpha_{n+1}-\alpha_n=\Delta\gamma  \notag \\
+%    \alpha_{n+1}=\alpha_n+\Delta\gamma  
+%\end{eqnarray}
+%The final system of equations to be solved when the material is on the plastic domain is given by:
+%\begin{equation}
+%	\left\{\begin{array}{c}
+%	\label{eqn:dicritisedFinalEquationsPLasticity}
+%	F_p = \tau^{eq}_{n+1} - \sigma_{y} \left(\alpha_{n+1}\right)=0 \\
+%	\boldsymbol{\varepsilon}_{n+1}^e = \boldsymbol{\varepsilon}_{n+1}^{e\ trial}
+%		- \frac{3}{2} \Delta \gamma \frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}} \\
+%		\alpha_{n+1}=\alpha_n+\Delta \gamma
+%	\end{array}\right.
+%\end{equation}
+%The above system of equations can be resolved by solving for the plastic increment using an implicit algorithm. It can be shown that the equations in \ref{eqn:dicritisedFinalEquationsPLasticity} can be satisfied by solving the yield equation for the plastic increment $\Delta \gamma$. To begin, the von Mises yield criterion is restated:
+%\begin{equation}
+%    \tau^{eq}_{n+1}-\sigma_y\left(\alpha_{n+1}\right)=0
+%\end{equation}
+%
+%Recalling the definition of the von Mises stress (equation 3.34), the equivalent stress can be expressed in terms of the elastic strain and combined with equation 3.53 to give:
+%\begin{eqnarray}
+%\tau^{eq}_{n+1}&=&\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^e\right)\right\| \\ \notag
+%&=&
+%\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^{e \text { trial }}-\frac{3}{2}\Delta \gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right)\right\|
+%\end{eqnarray}
+%
+%Given that:
+%\begin{equation}
+%\left\|2 \mu \operatorname{dev}\left(\frac{3}{2} \Delta \gamma \frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right)\right\|=3 \mu \Delta \gamma
+%\end{equation}
+%The von Mises equivalent stress can be expressed as:
+%\begin{equation}
+%\tau^{eq}_{n+1}=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^{e \text { trial }}\right)\right\|-3 \mu \Delta \gamma
+%\end{equation}
+%The following relation for the equivalent stress can therefore be obtained:
+%\begin{equation}
+%	\tau^{eq}_{n+1}=\tau^{eq}_{{n+1}^{\text{trial}}} - 3 \mu \Delta \gamma
+%\end{equation}
+%Combining equation 3.60 with 3.56, the yield function can be given in terms of the plastic increment:
+%\begin{equation}
+%\tau^{eq}_{{n+1}^{\text {trial }}}-3 \mu \Delta \gamma-\sigma_y\left(\alpha_n+\Delta \gamma\right)=0
+%\end{equation}
+%This is solved implicitly using the Newton–Raphson method for $\Delta \gamma$ , the stress tensor and the plastic strain tensor are then updated based on this value.
+
+The adopted stress calculation algorithm \citep{de_souza_neto_computational_2008} is summarised in Algorithm \ref{alg:stressAlg}.
+
+\begin{algorithm}[htb] \label{alg:stressAlg}
+\SetAlgoLined
+(i) Update deformation gradients for a given incremental displacement
+
+\begin{equation}
+  \mathbf{f}^{[m+1]} = \mathbf{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
+\end{equation}
+
+\begin{equation}
+  \mathbf{F}^{[m+1]} = \mathbf{f}^{[m+1]} \cdot \mathbf{F}^{[m]}  \nonumber
+\end{equation}
+
+(ii) Compute trial elastic state
+\begin{equation}
+\mathbf{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
+\end{equation}
+\begin{equation}
+\mathbf{B}_{e}^{\text{trial}} = \mathbf{f}^{[m+1]} \cdot \mathbf{B}_{e}^{[m]} \cdot (\mathbf{f}^{[m+1]})^{T}\nonumber
+\end{equation}
+\begin{equation}
+\boldsymbol{\varepsilon}_{e}^{\text{trial}} = \frac{1}{2} \ln(\textbf{B}_{e}^{\text{trial}}) \nonumber
+\end{equation}
+\begin{equation}
+\bar{\varepsilon}^{\text{trial}}_p = \bar{\varepsilon}^{[m]}_p \nonumber
+\end{equation}
+\begin{equation}
+\sigma_{v}^{\text{trial}} = \sqrt{\sfrac{3}{2}} || 2G\ \text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})|| \nonumber
+\end{equation}
+\begin{equation}
+\Phi^{\text{trial}} =  \sigma_{v}^{\text{trial}} - \sigma_{y}(\bar{\varepsilon}^{\text{trial}}_p) \nonumber 
+\end{equation}
+  \eIf{$\Phi^{\text{trial}} > 0$}{
+   go to step (iii) to solve for $\Delta\bar{\varepsilon}_p$
+   }{
+   $\Delta\bar{\varepsilon}_p = 0$ and go to step (iv)
+  }
+
+(iii) Use the Newton-Raphson method to solve the yield function for $\Delta\bar{\varepsilon}_p$:
+\begin{equation}
+	\sigma_{v}^{\text{trial}} 
+	- 3\mu \Delta\bar{\varepsilon}_p
+	-\sigma_{y}(\bar{\varepsilon}^{[m]}_p + \Delta\bar{\varepsilon}_p) = 0 \nonumber
+\end{equation}
+
+(iv) Update constitutive variables and deviatoric stress
+\begin{equation}
+	\boldsymbol{\varepsilon}_{e}^{[m+1]}
+	=
+	\boldsymbol{\varepsilon}_{e}^{\text{trial}}
+	- \sqrt{\sfrac{3}{2}} \; \Delta\bar{\varepsilon}_p
+	\frac{\text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})}{||\boldsymbol{\varepsilon}_{e}^{\text{trial}}||}
+	\nonumber
+\end{equation}
+\begin{equation}
+	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta\bar{\varepsilon}_p \nonumber
+\end{equation}
+
+\begin{equation}
+%	\boldsymbol{\sigma}_{n+1} = \frac{1}{J} \mathbf{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
+	\boldsymbol{s}^{[m+1]}
+	=
+	(\sfrac{1}{J}) 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+\end{equation}
+
+(v) Solve the pressure Poisson's equation (Equation \ref{eq:pressureEqn}) to calculate the hydrostatic pressure $p^{[m+1]}$, where $J^{[m+1]} = -\kappa \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right)$.
+
+(vi) Update the true (Cauchy) stress
+\begin{equation}
+	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
+\end{equation}
+
+\caption{Large strain $J_2$ (von Mises) isotropic elastoplastic stress calculation algorithm \citep{de_souza_neto_computational_2008} }
+\end{algorithm}
+
+
+
+
+
+
+%Simo and Hughes approach vs Bathe vs Michael's approach.
+
+
+%\subsection{Historical development}
+%As previously mentioned, at the micro-scale, damage can be viewed as a discontinuous phenomenon, consisting of the decohesion of atomic bonds and the magnification of micro-voids by plasticity. \citet{kachanov_time_1958} proposed a continuous internal variable to characterize the density of these internal defects leading to a loss of the load-carrying capabilities of the material. \citet{rabotnov_paper_1963} later proposed that this variable be characterised by the reduction in the cross-sectional area of the material due to the development of inclusions and cavities.
+%
+%In order to illustrate this concept, a macroscale volume (or representative volume element) is isolated from a damaged body in Figure \ref{fig:RVEDamage}. This volume is large enough such that the randomly distributed microvoids can be characterized by a continuous damage variable.
+%
+%\begin{figure}[htb]
+%\begin{center}
+%	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/damageVolume.png}
+%\caption{Representaive volume element isolated from a damaged body \cite{voyiadjis_damage_2005}}
+%\label{fig:RVEDamage}
+%\end{center}
+%\end{figure}
+%
+%For the representative volume element (RVE), $A_D$ is equal to the area occupied by defects, A is equal to the remaining area of the surface and $A_o$ is the original area of the surface, prior to the development of micro voids and micro-cracks. The damage variable is then given by:
+%\begin{equation}
+%	D=\frac{A_o\ -\ A}{A_o}=\frac{A_d}{A_o}	
+%\end{equation}
+
+% When no damage has taken place, the damage variable is, therefore, equal to 0 (virgin material), whereas when the material is equal to 1 this corresponds to the fully damaged material. From a physical point of view, the variable $D$ is the corrected area of cracks and cavities per unit surface cut by a plane perpendicular to $\mathbf{n}$. 
+%From this definition of damage follows the concept of the effective stress. Let us consider a uniaxial case where a force $F$ is applied to the RVE. The stress is given by:
+%\begin{equation}
+%	\sigma=\frac{F}{A_o}	
+%\end{equation}
+%
+%After the development of damage, however, the surface area of the macroscale volume which the force $F$ acts upon is reduced. The effective area is given in terms of the original area and the damage variable is as follows:
+%\begin{equation}
+%	\frac{A_o\ -\ A}{A_o}=D	
+%\end{equation}
+%\begin{equation}
+%	A_o\ -\ A=DA_o	
+%\end{equation}
+%\begin{equation}
+%	\frac{A_o\ -\ A}{A_o}=D	
+%\end{equation}
+%\begin{equation}
+%	A=\left(1-D\right)A_o	
+%\end{equation}
+% The effective stress is then determined by combining this relation with the equation for the stress (equation 4.7):
+% \begin{equation}
+%	\bar{\sigma}\ =\frac{F}{{\left(1-D\right)A}_o}=\frac{\sigma}{\left(1-D\right)}	
+%\end{equation}
+%Based on these macroscopic considerations, Lemaitre \cite{lemaitre_continuous_1985} developed a thermodynamically consistent model.
+
+%\subsection{Thermodynamic framework}
+
+%
+%The Lemaitre damage model described herein is coupled with the isotropic plasticity model laid out in chapter 3. In the Lemaitre model, a free energy potential $\psi$ is postulated from which the state laws are derived. The free energy is expressed as a function of the elastic strain $\boldsymbol{\varepsilon}^e$, the hardening variable $a$ and the damage variable D in the form:
+% \begin{equation}
+%	\psi=\psi\left(\boldsymbol{\varepsilon}^e,\alpha,D\right)
+%\end{equation}
+%The free energy potential can be decomposed into its elastic-damage and plastic contributions:
+% \begin{equation}
+%	\psi\left(\boldsymbol{\varepsilon}^e,\alpha,D\right)=\psi^{ed}\left(\boldsymbol{\varepsilon}^e,D\right)+\psi^p\left(\alpha\right)
+%\end{equation}
+%Where $\psi^{ed}$ and $\psi^p$ are the elastic-damage and plastic energy contributions respectively. The elastic-damage potential is assumed to be:
+% \begin{equation}
+%	\bar{\rho}\psi^{ed}=\frac{1}{2}\boldsymbol{\varepsilon}^e:\mathbf{D}^{e}\left(1-D\right):\boldsymbol{\varepsilon}^e	
+%\end{equation}
+%
+%The Kirchhoff stress tensor is obtained by finding the derivative with respect to the elastic strain (section 3.2.1):
+% \begin{equation}
+%	\boldsymbol{\tau}=\bar{\rho}\frac{\partial\psi^{ed}}{\partial\boldsymbol{\varepsilon}^e}=\mathbf{D}^{e}\left(1-D\right):\boldsymbol{\varepsilon}^e	
+%	\end{equation}
+%
+%The energy release rate Y, which gives the energy dissipated due to the phenomenon of damage, is given by:
+% \begin{equation}
+%	Y=\bar{\rho}\frac{\partial\psi^{ed}}{\partial D}=-\frac{1}{2}\boldsymbol{\varepsilon}^e:\mathbf{D}^e:\boldsymbol{\varepsilon}^e
+%\end{equation}
+%This can equivalently be written as:
+% \begin{equation}
+%	Y=-\frac{1}{2}\bar{\boldsymbol{\tau}}:{\mathbf{D}^e}^{-1}:\bar{\boldsymbol{\tau}}
+%\end{equation}
+%With some algebraic manipulation \cite{lemaitre_engineering_2005}:
+% \begin{equation}
+% \label{eqn:classicY}
+%	Y=-\frac{{\bar{\tau}_{eq}}^2}{2E}\left(\frac{2}{3}\left(1+v\right)+3\left(1-2v\right)\left(\frac{\tau_h}{\tau_{eq}}\right)^2\right)	
+%\end{equation}
+%where $E$ is the Young's modulus and $v$ is Poisson's ratio. The triaxiality dependence of the Lemaitre mode is provided by the term $\frac{\tau_h}{\tau_{eq}}$, which is the definition of stress triaxiality $\eta$. The state potential associated with the isotropic hardening variable is given by: 
+% \begin{equation}
+%	\chi=\rho\frac{\partial\psi^p}{\partial \alpha}
+%	\end{equation}
+%
+%The hardening variable $\alpha$ is commonly chosen as the equivalent plastic strain denoted by ${\bar{\varepsilon}}^p$. 
+%The Clausius-Duhem inequality (equation 3.28) is rewritten to incorporate the damage $D$ and its associated thermodynamic force $Y$ to give:
+%\begin{equation}
+%\boldsymbol{\tau}:\bar{\mathbf{d}}^p-\chi\dot{\alpha}-Y\dot{D}\geq0
+%\end{equation}
+
+%%%%%%%%%%%%%%%%%%%
+\subsection{Lemaitre damage model}
+%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Model Formulation}
+
+The Lemaitre model describes damage using a scalar field variable $D$.
+When no damage has occurred, the damage variable $D$ equals 0 (virgin material), whereas when the material is fully damaged, the damage variable equals 1.
+From a physical point of view, $D$ can be interpreted as the area of cracks and cavities per unit surface cut by an arbitrary plane.
+% perpendicular to $\mathbf{n}$. 
+
+The Lemaitre model is formulated by assuming a dissipation potential $F$:
+ \begin{equation}
+	F = F_p + F_d	
+\end{equation}
+where $F_p$ and $F_d$ are the dissipation potentials associated with plasticity and damage, respectively. The plastic potential is given by the $J_2$ (von Mises) yield criterion:
+ \begin{equation}
+	F_p = \frac{\sigma_{v}}{1 - D} \; - \; \sigma_y\left(\alpha\right)	
+\end{equation}
+The yield stress $\sigma_y$ is a function of the hardening variable $\alpha$, taken here to represent the equivalent plastic strain.
+
+The damage dissipation potential is given by \citet{lemaitre_continuous_1985}:
+ \begin{equation}
+	F_d = \frac{S_0}{\left(b + 1\right) \left(1 - D\right)}\left(\frac{-Y}{S_0}\right)^{b+1}
+\end{equation}
+where $S_0$ and $b$ are material parameters governing the onset and rate of damage.
+
+%Plastic isotropy is assumed and, in order to ensure that dissipation is always
+%positive, the Kuhn-Tucker conditions must always hold at every material point:
+%\begin{equation}
+%\left\{\begin{array}{c}
+%\dot{\gamma}=\geq 0 \\
+%F\geq 0 \\
+%\dot{\gamma}F=0
+%\end{array}\right.
+%\end{equation}
+
+
+The constitutive equations for the Lemaitre model can then be given in terms of the spatially rotated plastic stretch $\bar{\mathbf{d}}_p$ (or plastic deformation gradient rate $\dot{\mathbf{F}_p}$), the hardening variable rate $\dot{\alpha}$, and damage variable rate $\dot{D}$:
+ \begin{equation} \label{eq:lemaitre_dp}
+%	\bar{\mathbf{d}}_p = 
+%	\dot{\gamma}\frac{\partial F}{\partial\boldsymbol{\tau}}=\frac{3}{2}\frac{\dot{\gamma}}{\left(1-D\right)}\frac{\text{dev}		
+\bar{\mathbf{d}}_p = 
+	\dot{\mathbf{F}_p} \mathbf{F}_p^{-1} =
+	\frac{3}{2} \frac{\dot{\gamma}}{1 - D} \mathbf{R}_e^{T} \frac{\text{dev}(\boldsymbol{\tau})}{\sigma_{v}} \mathbf{R}_e
+%	\frac{3}{2} \frac{\dot{\gamma}}{1 - D} \mathbf{R}_e^{T} \frac{\text{dev}(\boldsymbol{\tau})}{\sigma_{v}} \mathbf{R}_e
+%(\boldsymbol{\tau})}{\sigma_{v}}	
+\end{equation}
+ \begin{equation}
+	\dot{\alpha} = -\dot{\gamma}\frac{\partial F}{\partial\chi}=\dot{\gamma}
+\end{equation}
+ \begin{equation}
+	\dot{D} = -\dot{\gamma}\frac{\partial F}{\partial Y}=\frac{\dot{\gamma}}{\left(1 - D\right)}\left[\frac{-Y}{S_0}\right]^b
+\end{equation}
+
+%We can equivalently write the rate of plastic strain (Equation \ref{eq:lemaitre_dp}) in terms of the multiplicative plastic deformation gradient $\mathbf{F}_p$ as
+%\begin{equation}
+%	\dot{\mathbf{F}_p} \mathbf{F}_p^{-1} =
+%	\frac{3}{2} \frac{\dot{\gamma}}{1 - D} \mathbf{R}_e^{T} \frac{\text{dev}(\boldsymbol{\tau})}{\sigma_{v}} \mathbf{R}_e
+%\end{equation}
+
+
+\subsubsection{Computational Procedure}
 For each cell, the incremental displacement field $\Delta\boldsymbol{u}$ for the current time step $t_{n+1}$, at the current iteration, is provided. The following variables from the previous time step are also given:
  \begin{equation}
 \left\{F_n^p,\ \alpha_n,D_n\right\}
@@ -517,7 +1194,7 @@ The first three of the equations in the system given in 4.41 can be satisfied by
 First, the von Mises stress is defined in terms of the elastic strain and combined with equation 4.36:
 \begin{equation}
 \begin{aligned}
-%\frac{\tau_{eq}_{\ n+1}}{1-D^{i}_{n+1}}=\bar{\tau}_{{eq}_{n+1}}&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^e\right)\right\|\\
+%\frac{\tau^{eq}_{n+1}}{1-D^{i}_{n+1}}=\bar{\tau}_{{eq}_{n+1}}&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^e\right)\right\|\\
 %&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^{e \text { trial }}-\frac{3}{2} \frac{\Delta \gamma}{\left(1+D^{i}_{n+1}\right)} \frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\right)\right\|
 fix
 \end{aligned}
@@ -608,7 +1285,7 @@ f_{trial}=  \bar{\tau}_{eq}^{trial}-\sigma_{y}(\alpha) \nonumber
 %\end{figure}
 
 
-\subsection{Alternative Lemaitre formulations}
+\subsubsection{Alternative Formulations}
 
 Various alternative formulations of the Lemaitre damage model have been proposed in the literature. Typically, these models entail an alteration of the damage dissipation potential \cite{cao_lode-dependent_2014,chandrakanth_isotropic_1995,wei_hua_tai_new_1986,bouchard_enhanced_2011,bonora_nonlinear_1997,malcher_improved_2014,ferreira_improved_2022,castro_calibration_2018,lian_modified_2014} and therefore, following the procedure described in section 4.2.3, an alternative damage evolution equation is derived. 
 
@@ -635,7 +1312,7 @@ One weakness of this formulation, however, is that it does not distinguish betwe
 
 It is worth noting the benefit of the developed implicit-explicit algorithm when looking at this class of models. The fact that the developed algorithm does not require the solution of the damage implicitly means that incorporating novel damage evolution equations into the existing code is relatively simple, without the need to calculate derivatives that can become quite complex when incorporating shear effects, in particular, \cite{malcher_improved_2014}.
 
-\subsection{Non-local damage}
+\subsubsection{Non-local damage}
 
 One limitation of damage models is that due to the strain softening behaviour, their results may suffer from mesh size and orientation dependency in localized strain zones \cite{peerlings_critical_2001,peerlings_localisation_2002,geers_strongly_2003}. The governing differential equations can lead to multiple possible solutions due to the nonlinearity and softening response. The finite element or volume solution process may converge to one of these possible solutions depending on factors like the mesh, boundary conditions, or solver parameters. This brings the uniqueness of the solution into question. In order to rectify this, an implicit non-local damage variable $\bar{D}$ is introduced as in \citet{peerlings_critical_2001, peerlings_localisation_2002} and \citet{geers_strongly_2003}. This is related to the local damage variable $D$ through the implicit gradient equation:
 \begin{equation}
@@ -725,7 +1402,72 @@ f_{trial}=  \bar{\tau}_{eq}^{trial}-\sigma_{y}(\alpha) \nonumber
 \caption{Non-local Lemaitre damage model}
 \end{algorithm}
 
-\subsection{Crack-closure effects}
+
+
+\subsubsection{Effective non-local damage development}
+
+
+One issue with the classic non-local Lemaitre damage model is that it can lead to a somewhat non-physical response. To illustrate this point, the results for the flat notched bar case with non-local Lemaitre damage (case a) and the notched round bar with non-local Lemaitre damage (case b) from the previous section are analysed. The cases looked at here use a time step of $0.001$ and a Rhie-Chow scale factor of $0.1$. The force-displacement curves and the damage evolution plotted at the cells where fracture first occurs (Figures \ref{axiMesh} and \ref{bordenMesh}) are given in Figures \ref{BordenNonLocalIssue} and \ref{AxiNonLocalIssue}.
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/CNLDispForceBorden.png}}
+		\qquad
+		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/disp_damageNonLocalBorden.png}}
+	\caption{Flat notched bar (case a)}
+	\label{BordenNonLocalIssue}
+\end{figure}
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/CNLDispForceAxi.png}}
+		\qquad
+		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/disp_damageNonLocalAxi.png}}
+	\caption{Notched round bar (case b)}
+	\label{AxiNonLocalIssue}
+\end{figure}
+
+Non-physical issues with the damage evolution can be observed in Figures \ref{BordenNonLocalIssue} and \ref{AxiNonLocalIssue}. The non-local gradient equation has the effect of diffusing the damage such that after a certain point, the rate at which the damage evolves is reduced. In reality, it would be expected for the cell to quickly become fully damaged as it enters the void coalescence stage (Figure \ref{fig:Ductile-damage-evolution}) 
+
+To mitigate these issues, a novel formulation of the non-local Lemaitre model is developed in this work. The nonphysical response is mitigated by introducing the effective non-local damage field $\bar{D}_{eff}$. This field is set such that it is equivalent to the non-local damage field unless for a given cell the non-local damage field exceeds a critical damage value $D_c$. At this critical value, the effective non-local damage is set to be $0.99$. This cell can be viewed as essentially being fully degraded, the effective non-local damage $\bar{D}_{eff}$ is set as $0.99$ as opposed to $1.0$ in order to allow some small residual stresses in these cells to aid convergence.
+
+Further to this, the growth of the local damage for a given cell is prevented if the effective non-local damage of this cell exceeds the critical damage value $D_c$. This prevents the nonphysical behaviour whereby a cell that is set as being fully cracked is contributing to the damage growth in the surrounding cells through the non-local damage field. This scheme is described in Algorithm \ref{effectiveNonLocalDamage}.
+
+\begin{algorithm}[H]
+\label{effectiveNonLocalDamage}
+\SetAlgoLined
+(i) For all cells calculate local damage  \\
+
+  \eIf{$\bar{D}_{eff\ n+1}^{i} <= D_c$}{
+  \begin{equation}
+D^{i+1}_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b \notag
+\end{equation} 
+   }{
+\begin{equation}
+D^{i+1}_{n+1}=D^{i}_{n+1} \notag
+\end{equation}
+  } 
+
+(ii) Calculate global non-local damage field
+\begin{equation}
+	\left(D^{i+1}_{n+1}-\bar{D}^{i+1}_{n+1}\right)+{{l_c}^2\mathrm{\nabla}}^2D^{i+1}_{n+1}=0 \notag	
+\end{equation}
+
+(iii) Set the effective non-local damage field for each cell \\
+\eIf{$\bar{D}_{n+1}^{i+1} <= D_c$}{
+\begin{equation}
+D^{i+1}_{eff\ n+1}=D^{i+1}_{n+1}\notag
+\end{equation} 
+   }{
+\begin{equation}
+D^{i+1}_{eff\ n+1}=0.99 \notag
+\end{equation}
+  } 
+\caption{Damage evolution scheme}
+\end{algorithm}
+
+
+
+\subsubsection{Crack-closure effects}
 
 One of the limitations of the classic Lemaitre damage model is that it does not distinguish between tensile and compressive stress states, whereas it is known from experiments that tensile stresses are considerably more conducive to crack growth than compressive stresses \cite{bao_cut-off_2005}. In order to have a more physically realistic model, some authors use models which consider there to be no crack growth in compressive stress states \cite{chu_void_1980}. However, this does not account for some of the particular aspects of crack closure during compressive stress states. When subjected to compressive stresses, micro-defects in the material may partially close, causing a greater area of the material to bear the load of the compression. As a result, the material may exhibit a partial or complete recovery of its stiffness, depending on the specific conditions \cite{teixeira_ductile_2010}. This approach also does not account for the fact that some crack growth can occur in compressive stages \cite{basic_finite_2005}.
 
@@ -763,9 +1505,14 @@ The energy release rate $Y$ is rewritten to account for the differing contributi
 	&-&\frac{h}{2E\left(1-hD\right)}\left[\left(1+v\right)\boldsymbol{\tau}_-\colon\boldsymbol{\tau}_--v<-\ tr(\boldsymbol{\tau})>^2\right]
 \end{eqnarray}
 
-\section{GTN model}
 
-The framework developed by \citet{gurson_continuum_1977} is the canonical framework used in the micro-mechanical approach to characterising material degradation \cite{besson_continuum_2010,cao_models_2017,tekkaya_damage_2020}. This model posits the existence of micro-voids in the material. The density of these voids is described by a variable denoted as porosity. The material degradation is characterised by the porosity increasing due to the growth of these voids. Defining material degradation merely in terms of the growth of voids is limited, however. Gurson’s framework was developed further by \citet{tvergaard_analysis_1984} who developed mechanisms to account for the nucleation and coalescence of voids. In order to be consistent with how the GTN model is typically described in the literature \cite{bettaieb_numerical_2011,achouri_numerical_2013} and to present the equations in the form that they are implemented in the developed codes, the equivalent stress $\tau_{eq}$ is described using the symbol $q$ and the pressure $\tau_h$ is denoted by the symbol $p$. 
+
+
+%%%%%%%%%%
+\subsection{Gurson-Tvergaard-Needleman Model}
+%%%%%%%%%%
+
+The framework developed by \citet{gurson_continuum_1977} is the canonical framework used in the micro-mechanical approach to characterising material degradation \cite{besson_continuum_2010,cao_models_2017,tekkaya_damage_2020}. This model posits the existence of micro-voids in the material. The density of these voids is described by a variable denoted as porosity. The material degradation is characterised by the increasing porosity due to these voids' growth. Defining material degradation merely in terms of the growth of voids is limited, however. Gurson’s framework was developed further by \citet{tvergaard_analysis_1984} who developed mechanisms to account for the nucleation and coalescence of voids. In order to be consistent with how the GTN model is typically described in the literature \cite{bettaieb_numerical_2011,achouri_numerical_2013} and to present the equations in the form that they are implemented in the developed codes, the equivalent stress $\tau_{eq}$ is described using the symbol $q$ and the pressure $\tau_h$ is denoted by the symbol $p$. 
 \subsection{Evolution of Voids}
 
 The growth and nucleation of voids characterise the evolution of the porosity $f$:
@@ -794,7 +1541,7 @@ A= \begin{cases}\frac{f_n}{S_n \sqrt{2 \pi}} \exp \left[-\frac{1}{2}\left(\frac{
 
 where $f_n$ is the quantity of the voids nucleated per unit volume, $\varepsilon_n$ is the nucleation strain and $S_n$ is the standard deviation. 
 
-\subsection{Yield equation}
+%\subsection{Yield equation}
 
 The variable f is coupled with the plasticity model through the yield equation 
 \begin{equation}
@@ -813,7 +1560,7 @@ f_c+\left(f-f_c\right) \frac{f_u-f_c}{f_f-f_c} & \text { if } f>f_c
 
 Where $f_c$ is the void volume fraction at which the coalescence of voids begins,  $f_u$ is the ultimate volume fraction and $f_f$ represents the void volume fraction at fracture.
 
-\subsection{Plasticity}
+%\subsection{Plasticity}
 
 Plastic isotropy and plastic associativity are assumed as in \citet{bettaieb_numerical_2011}. The following relation can therefore be obtained:
 \begin{equation}
@@ -865,7 +1612,9 @@ and \ref{eqn:4.75} leads to the consistency equation:
 \dot{ \boldsymbol{\varepsilon}}^h \frac{\partial \phi}{\partial q}-\dot{ \boldsymbol{\varepsilon}}^q \frac{\partial \phi}{\partial p}=0
 \end{equation}
 
-\subsection{Equivalent plastic strain}
+
+%\subsection{Equivalent plastic strain}
+
 Assuming the equivalent plastic work principle, there is an equivalence between the rates of macroscopic and matrix plastic work:
 \begin{equation}
 \dot{\overline{\boldsymbol{\varepsilon}}}^p=\frac{\boldsymbol{\sigma}: \dot{\boldsymbol{\varepsilon}}^p}{(1-f) \sigma_y}
@@ -875,7 +1624,9 @@ Substituting in equation \ref{eqn:4.73}, the equation for the equivalent plastic
 \dot{\overline{\boldsymbol{\varepsilon}}}^p=\frac{p \dot{ \boldsymbol{\varepsilon}}^h+q \dot{\boldsymbol{\varepsilon}}^q}{(1-f) \sigma_y}
 \end{equation}
 
-\subsection{Constitutive equations}
+%\subsection{Constitutive equations}
+\subsection{Model formulation}
+
 The following system of equations, therefore, governs the material behaviour:
 \begin{equation}
 \label{eqn:4.79}
@@ -887,7 +1638,9 @@ The following system of equations, therefore, governs the material behaviour:
 \end{array}\right.
 \end{equation}
 
-\subsection{Computational procedure}
+
+\subsubsection{Computational procedure}
+
 For each cell, the incremental displacement field $\Delta\mathbf{u}$ for the current time step, at the current iteration, is given. The values of the following variables from the previous time step are also provided:
 \begin{equation}
 \left\{F_n^p,\ {{\bar{\varepsilon}}^p}_n,f_n\right\}
@@ -1054,7 +1807,8 @@ f_{trial}=  \left(\frac{{q}_{trial}}{\sigma_{y}}\right)^{2}+q_{1}f^{*i}_{n+1}cos
 \caption{GTN model}
 \end{algorithm}
 
-\subsection{Shear effects}
+
+\subsubsection{Shear effects}
 
 In the last 15 years, further developments of the GTN model have been made to better acccount for fracture in stress states where shearing is present \cite{nahshon_modification_2008,malcher_continuum_2012,leclerc_micromechanics-based_2020,achouri_numerical_2013}.
 In order to account for shearing effects, the expression developed by \citet{nahshon_modification_2008} is introduced in this work. This formulation has shown an ability to accurately predict fracture in the blanking metal forming process \cite{achouri_numerical_2013}. It results in the following equation for the evolution of porosity:
@@ -1070,7 +1824,8 @@ where $k_w$ is a material parameter and $w(\boldsymbol{\sigma})$ is given by
 	w\left(\boldsymbol{\sigma}\right)=1-\left(\xi\right)^2	
 \end{equation}
 
-\subsection{Non-local porosity}
+
+\subsubsection{Non-local porosity}
 
 In order to mitigate the mesh dependancy that may occur for the GTN model, non-local gradient approaches have also been incorporated into Gurson-type models \cite{reusch_non-local_2003,leclerc_micromechanics-based_2020}.
 The porosity variable is diffused over the mesh through the non-local gradient equation as in section 4.2.6 
@@ -1087,7 +1842,10 @@ The method was initially proposed by \citet{francfort_revisiting_1998} to descri
 
 This approach has since been extended to ductile fracture by \citet{ambati_phase-field_2015,borden_phase-field_2016} and \citet{miehe_phase_2016}. The approach from \citet{ambati_phase-field_2015} involves incorporating a plastic strain dependency in the elastic degradation function while the approach from \citet{miehe_phase_2016} incorporates the plastic strain energy into the crack driving variable $\mathcal{H}$. \citet{borden_phase-field_2016} uses a similar approach to \citet{miehe_phase_2016} by incorporating the plastic strain into the crack driving variable $\mathcal{H}$ while also introducing a plastic degradation function in order to ensure that fracture is preceded by large plastic strains, as has been shown to be the case experimentally. In this work, the approach form \citet{borden_phase-field_2016} is adopted due to the fact that, by incorporating a plastic degradation function, it displays a more physically realistic fracture behaviour.
 
-\subsection{Phase field approximation of fracture}
+
+%%%%%%%%%%%%%%%%
+\subsection{Phase Field Damage Model}
+%%%%%%%%%%%%%%%%
 
 The original formulation of the potential energy of the body \cite{mumford_optimal_1989} is given in terms of the deformation tensor and the crack surface
 \begin{equation}
@@ -1145,7 +1903,8 @@ The plastic and elastic degradation functions are given by:
 	g_p\left(d\right)=1-d^2	
 \end{equation}
 
-\subsection{Phase field formulation of ductile fracture}
+\subsection{Model Formulation}
+
 Following the work of \citet{borden_phase-field_2016}  the strong form of the phase field equation is given by:
 \begin{equation}
 \label{eqn:phaseFieldEquation}
@@ -1158,9 +1917,10 @@ Following the work of \citet{borden_phase-field_2016}  the strong form of the ph
 where ${\ \psi}_{e_{n+1}}\left(\mathbf{\varepsilon}^e\right)$ is the elastic energy contribution from the current time step, $\psi_{e_H}\left(\mathbf{\varepsilon}^e\right)$ is a history variable which gives the largest value for the elastic energy contribution obtained throughout the simulation, $<\psi_p\left({\bar{\varepsilon}}^p\right)-w_0>$ is a Macaulay bracket where $\psi_p\left({\bar{\varepsilon}}^p\right)$ is the plastic energy contribution and $w_0$ is the plastic work threshold, below which the plastic strain will not contribute to crack growth. 
 A Neumann boundary condition $\nabla d\cdot\mathbf{n}=0$ is used to solve this equation.
 
-\subsection{Mechanical constitutive laws}
 
-\textbf{\subsubsection{Elastic model}}
+%\subsection{Mechanical constitutive laws}
+
+\subsubsection{Elastic model}
 
 The spherical-deviatoric decomposition of the elastic strain energy is employed as in \citet{amor_regularized_2009}. Here the elastic strain energy is decomposed into positive and negative components:
 \begin{equation}
@@ -1183,9 +1943,9 @@ where $\boldsymbol{\varepsilon}_{dev}^{\mathrm{e}}=dev({\boldsymbol{\varepsilon}
 a= \begin{cases}1 & \text { if } \operatorname{tr}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)>0 \\ 0 & \text { else } \end{cases}
 \end{equation}
 
-\pagebreak
 
-\textbf{\subsubsection{Elasto-plastic model}}
+
+\subsubsection{Elasto-plastic model}
 
 The return mapping algorithm which employs the logarithmic (Hencky strain) is employed as laid out in Chapter 3. The standard von Mises yield function is given by
 \begin{equation}
@@ -1208,7 +1968,8 @@ The plastic energy contribution to the crack growth is given by \cite{eldahshan_
 \psi_p({\bar{\varepsilon}}^p)=\int_0^{\bar{\varepsilon}^p} \sigma_y d \bar{\varepsilon}^p
 \end{equation}
 
-\subsection{Computational procedure}
+
+\subsubsection{Computational Procedure}
 
 As has been previously described, the displacement field is solved at each iteration using the stress field calculated from the return mapping scheme. This displacement field is then used to find a new value for the stress from the material model return mapping scheme. This iterative procedure continues until convergence is achieved. For each cell, we are given the incremental displacement field for the current time step $t_{n+1}$, at the current outer iteration, denoted by $\Delta \mathbf{u}_{n+1}^{i+1}$. The values of the following variables from the previous time step $t_{n}$ are also provided:
 \begin{equation}
@@ -1312,715 +2073,19 @@ f_{trial}={q}_{trial}-g_e(d)\sigma_{y}(\varepsilon^{PEq}_{trial}) \nonumber
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Numerical Methods}\label{sec:numerical_methods}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-- domain and time discretisation: time marching
-- summary FVM discretisation
-- details of stabilisation: pressure and Rhie-Chow
-- stress calculation: plasticity/damage procedure
-- numerics of constitutive laws
-- novel Lemaitre
 
-\subsection{Solution domain discretisation}
 
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.3\textwidth]{./figures/controlVolume.png}
-\caption{A polyhedral control volume. Taken from \cite{cardiff2016}}
-\label{fig:finite_volume}
-\end{center}
-\end{figure}
-The solution domain is discretised in space and time using polyhedral cells. The total simulation time is divided up into increments ($\Delta t$), with the discretised governing equations solved in a time-marching manner. The space domain is divided into a finite number of contiguous convex polyhedral cells. A cell or control volume is shown in Figure \ref{fig:finite volume}. It has the following associated values:
-\begin{itemize}
-	\item A computational node $P$ located at the centre of the cell
-	\item The cell volume $\Omega_{p}$
-	\item The centroid of a neighbouring cell $N$
-	\item Face $f$ with area vector $\mathbf{\Gamma}_f$
-    \item The positional vector of $P$ is $\textbf{r}$
-    \item $P$ and $N$ are joined by the vector $\mathbf{d}_{f}$
-\end{itemize}
 
 
 
 
-The surface force in equation \ref{eqn:updatedLagFormulation} is split into implicit and explicit components and is solved for each control volume.
 
-\begin{eqnarray} \label{eqn:MomentumImplicitExplicit}
-\underbrace{\int_{\Omega_u} \frac{\partial}{\partial t}\left(\rho_u \frac{\partial\left(\boldsymbol{u}^{[m-1]}+\Delta \boldsymbol{u}\right)}{\partial t}\right) \mathrm{d} \Omega_u}_{\text {implicit }} &=& \underbrace{\oint_{\mathrm{\Gamma}_u}{K_{imp}\  \mathbf{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \mathbf{u}}\right)}\ d\mathrm{\Gamma}_u}_{\text {implicit }} \notag \\
-    &&+\underbrace{\oint_{\mathrm{\Gamma_u}}(j\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma_u}}_{\text {explicit }} \notag\\
-    &&-\underbrace{\oint_{\mathrm{\Gamma}_u}{K_{imp}\ 
- \mathbf{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \mathbf{u}}\right)}\ d\mathrm{\Gamma}_u}_{\text {explicit }}
-\end{eqnarray}
 
-where the first term on the right-hand side is treated implicitly and the second and third terms on the right-hand side are treated explicitly. The first and third terms on the right-hand side of this equation represent an approximation of the traction field in terms of the displacement field. For this work, the term $K_{imp}$ is chosen following the work of \citet{jasak_application_2000} which found strong convergence for:
-\begin{equation}
-K_{imp}=\frac{4}{3}\mu+K
-\end{equation}
-The primary unknown to be solved for is the displacement increment $\Delta \boldsymbol{u}=\boldsymbol{u}^{[m-1]}-\boldsymbol{u}^{[m]}$ where $[m-1]$ is a superscript indicating the value from the previous time-step and $[m]$ indicates the value for the current time-step. 
 
-Each term of this equation is then discretised as follows (in order):
-\begin{itemize}
-	\item The temporal term is discretised using a first-order accurate in time fully implicit backward Euler finite differencing scheme \cite{jasak_application_2000}. The temporal component containing $\mathbf{u}^{\left[m-1\right]}$ is discretized similarly to what is shown in equation 2.50. However, this term is fully explicit, meaning it only contributes to the source vector in the resulting equation system. While it's easy to discretise this temporal term with a second-order accuracy, as demonstrated in the FV method in \citet{jasak_application_2000}, the current elastoplastic method's temporal accuracy is constrained by the first-order backward Euler integration used for the plastic deformation rate for the constitutive law in the models we will encounter throughout this work.
-\begin{eqnarray}
-	\int_{\mathrm{\Omega}_u}{\frac{\partial}{\partial t}\left(\rho_u\dot{\mathbf{u} }\right)}d\mathrm{\Omega}_u &\approx&\ \frac{1}{\mathrm{\Delta}t^{\left[m\right]}}\left[\left(\rho_u\mathrm{\Omega}_u\right)_p^{\left[m\right]}\left(\frac{\mathrm{\Delta}\mathbf{u}_P^{\left[m\right]}-\mathrm{\Delta}\mathbf{u}_P^{\left[m-1\right]}}{\mathrm{\Delta}t^{\left[m\right]}}\right)\right. \notag \\
- &&-\left(\rho_u\mathrm{\Omega}_u\right)_p^{\left[m-1\right]}\left.\left(\frac{\mathrm{\Delta}\mathbf{u}_P^{\left[m-1\right]}-\mathrm{\Delta}\mathbf{u}_P^{\left[m-2\right]}}{\mathrm{\Delta}t^{\left[m-1\right]}}\right)\right]
-\end{eqnarray}
-	\item The implicit surface diffusion term is discretised using central differencing with over-relaxed non-orthogonal correction \cite{demirdzic_finite_1993,jasak_application_2000,cardiff_development_2014,cardiff_large_2014}
-\begin{eqnarray}
-\oint_{\mathrm{\Gamma}_u}{\left(\frac{4}{3}\mu+K\right)\mathbf{n}_u\cdot\nabla\left(\Delta\mathbf{u}\right)}d\mathrm{\Gamma}_u&&\approx \notag \\
-&&\sum_{F}\left(\frac{4}{3}\mu_f+K_f\right)\left|\Delta_{uf}\right|\left(\frac{\mathbf{u}_N-\mathbf{u}_P}{\left|\mathbf{d}_f\right|}\right)\left|\mathbf{\Gamma}_{uf}\right| \notag \\
-	    +&&\sum_{F}\left(\frac{4}{3}\mu_f+K_f\right)\mathbf{k}_{uf}\cdot\left[\nabla\left(\mathrm{\Delta}\mathbf{u}\right)\right]_f\left|\mathbf{\Gamma}_{uf}\right|
-     \end{eqnarray}
-where $F$ is the number of faces in the cell, $\boldsymbol{\Delta}_{u f}=\frac{\boldsymbol{d}_{u f}}{\boldsymbol{d}_{u f} \cdot \boldsymbol{n}_{u f}}$, $\boldsymbol{k}_{u f}=\boldsymbol{n}_{u f}-\boldsymbol{\Delta}_{u f}$ and $\boldsymbol{n}_{u f}$ is the unit normal to the face of the cell
-	\item The explicit source diffusion terms are discretised by assuming that they vary linearly across the face as follows \cite{noauthor_openfoam_2015}:
-	
-	\begin{equation}
-\oint_{\mathrm{\Gamma_u}}(j\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma_u}=\sum_{F}\int_{\mathrm{\Gamma_{uf}}}(j\mathbf{f}^{-T}\cdot{\mathbf{n}_u)\cdot\boldsymbol{\sigma}}d\Gamma_{uf}\approx\sum_{f}\mathbf{\Gamma_{uf}}\cdot\left(j\boldsymbol{\sigma}\cdot\mathbf{f}^{-T}\right)_f
-	\end{equation}
-	
-	\begin{equation}
-	    \oint_{\mathrm{\Gamma}_u}{\left(\frac{4}{3}\mu+K\right)\mathbf{n}_u\cdot\nabla\left(\Delta\mathbf{u}\right)}\ d\mathrm{\Gamma}_u= 
-	    \sum_{F}\int_{\mathrm{\Gamma}_{uf}}{\left(\frac{4}{3}\mu+K\right)\mathbf{n}_u\cdot\nabla\left(\Delta\mathbf{u}\right)}\ d\mathrm{\Gamma}_{uf}
-	\end{equation}
-	\begin{equation}	
-	\approx\sum_{F}\left(\frac{4}{3}\mu+K\right)_f\mathbf{\Gamma_{uf}}\cdot\left[\nabla\left(\mathrm{\Delta}\mathbf{u}\right)\right]_f
-	\end{equation}
 
-The terms at a face, indicated by the subscript f, are calculated by linearly interpolating from the adjacent cell-centre values. The cell-centre gradients are then determined using a least squares method \cite{noauthor_openfoam_2015}. 
 
-\end{itemize}
 
-
-\subsection{Initial and boundary conditions}
-
-At the initial time step, all dependent variables must be specified and boundary conditions must be applied on the faces that coincide with the boundary of the solution domain. For a Dirichlet boundary condition, the expressions for diffusion fluxes and sources remain valid, but the user-specified boundary value is used in place of the neighbouring cell-centre value. On boundaries where Neumann boundary conditions are specified, the boundary fluxes are added to the source term, and the variable values at the boundary are extrapolated from the internal domain using the specified boundary gradient. This process is explained in more detail in \cite{jasak_application_2000}.
-
-The contact boundary is handled using a penalty method. This method involves measuring the penetration between intersecting cells, calculating penalty forces, and applying them as a Neumann boundary condition. This approach, which was developed for OpenFOAM \cite{cardiff_development_2012}, has also been expanded by the same authors to include the effects of Coulomb friction \cite{cardiff_lagrangian_2017}, which is the friction assumption used in the simulations in this thesis.
-
-\subsection{Final form}
-
-The linear momentum equation is discretised for each control volume $P$, and a linear algebraic equation of the following form is assembled \cite{jasak_application_2000}.
-
-\begin{equation}
-a_p \Delta \mathbf{u}_p+\sum_F a_n \Delta \mathbf{u}_n=\mathbf{b}_p
-\end{equation}
-
-Where $a_{p}$ is the central coefficient, $a_{n}$ are the coefficients associated with the centre of neighbouring cells, $F$ is the number of internal faces of the control volume,  $\mathbf{b}_p$ is the source vector contribution.
-
-These linear algebraic equations are then assembled for all control volumes creating a system of linear algebraic equations:
-\begin{equation}
-    \mathbf{K}\mathbf{u}=\mathbf{f}
-\end{equation}
-
-Where $\mathbf{K}$ is an $M \times M$ coefficient matrix containing the implicit operators where $M$ is the total number of control volumes. The solution vector $\mathbf{u}$ contains the unknown cell-centre displacement increments $\Delta\mathbf{ u}$. $\mathbf{f}$ is the source term containing the explicit operators. 
-
-A segregated solution procedure, where the displacement vector components are solved for separately and sequentially in the $x, y$ and $z$ directions, is employed. A simple predictor step based on the response of a linear elastic material strained in one dimension is employed (the first term on the RHS of equation \ref{eqn:MomentumImplicitExplicit}). It's worth noting that typically FE methods use a Newton-Raphson loop to account for  nonlinearities and thus employ the consistent tangent matrix to achieve quadratic convergence \cite{bathe_finite_1996}. However, a full consistent tangent matrix is not easily used in the segregated approach. The consistent tangent matrix can also be difficult to calculate in the damage and fracture models we will encounter later. The current method employs Picard/FixedPoint iterations to account for the nonlinearities and hence does not require a consistent tangent matrix.
-
-Outer iterations are performed to account for the inter-equation coupling and the linearized nonlinear terms. The inner linear sparse system is iteratively solved, typically using the incomplete Cholesky pre-conditioned conjugate gradient (ICCG) method \cite{jacobs_generalization_1986}. In non-linear problems, this system of equations is solved multiple times with updated coefficients in a fixed-point iteration scheme. 
-
-The inner system need not be solved to a tight tolerance
-as coefficients and source terms are approximated from the previous increment; a reduction in the residuals of one order of magnitude is typically sufficient. The outer iterations are performed until the predefined tolerance, typically $1 \times 10^{-6}$, has been achieved \cite{cardiff_lagrangian_2017}. 
-
-At the end of each time step, the mesh is moved to the deformed configuration. Given that the displacements are calculated at the cell centres, interpolation must be performed to calculate the displacements at the vertices so that the mesh can be updated. A linear least-squared method is employed \cite{cavalcante_generalized_2012}. In this method, a linear least squares plane is fit through a vertex and its immediately adjacent cell centres. For boundary vertices, boundary face-centre values are also included in the fitting.
-
- 
-\begin{algorithm}[H]
-\SetAlgoLined
-\text{\textbf{for all} time steps \textbf{do}} \\
-\ \ \text{       \textbf{while} convergence criteria not met \textbf{do}} 
-\ \text{       - Assemble system of linear equations (equation 2.48), discretising each term}
-\ \text{         using equations 2.50 to 2.54 and and solve for $\Delta\mathbf{u}$}
-\  \text{      - Update kinematics and stress using given constitutive law e.g. Algorithm 2 (Chapter 3)}
-\ \ \text{       \textbf{end while}}
-
-\ \ \text{      - Interpolate cell-centre displacements to the vertices}
-
-\ \ \text{      - Move mesh to the deformed configuration using the vertex displacements}
- \caption{Solution Procedure}
-\text{\textbf{end for}}
-\end{algorithm}
-
-
-
-
-
-\section{Rhie-Chow effects}
-
-One issue encountered with the finite volume method is that the discretisation of the governing conservation of momentum equation (equation \ref{eqn:MomentumImplicitExplicit} can be unstable and is known to suffer from checker-boarding errors \citet{cardiff_thirty_2021}. In order to rectify these issues, the Rhie-Chow stabilisation term \cite{rhie_numerical_1983} as introduced into solid mechanics by \citet{demirdzic_numerical_1995} is added to the discretised divergence of the stress in equation \ref{eqn:MomentumImplicitExplicit}.
-
-\begin{equation}
-\begin{aligned}
-\mathcal{D}_{\text {Rhie-Chow }} &=\sum_{f=1}^{n \text { Faces }}\left\{K_f\left[\left|\boldsymbol{\Delta}_f\right| \frac{\boldsymbol{u}_{N_f}-\boldsymbol{u}_P}{\left|\boldsymbol{d}_f\right|}+\left(\boldsymbol{\Gamma}_f-\boldsymbol{\Delta}_f\right) \cdot(\boldsymbol{\nabla} \boldsymbol{u})_f\right]-\boldsymbol{\Gamma}_f \cdot\left[K_f(\boldsymbol{\nabla} \boldsymbol{u})_f\right]\right\} \\
-&=\sum_{f=1}^{n F a c e s} K_f\left[\left|\boldsymbol{\Delta}_f\right| \frac{\boldsymbol{u}_{N_f}-\boldsymbol{u}_P}{\left|\boldsymbol{d}_f\right|}-\boldsymbol{\Delta}_f \cdot(\boldsymbol{\nabla} \boldsymbol{u})_f\right]
-\end{aligned}
-\end{equation}
-
-
-This stabilisation term is given in equation 6.1. In this work, the coefficient $K_f$ is given by
-
-\begin{equation}
-\label{eqn:scaleEquation}
-K_f=\mathcal{R} \left(2 \mu+\lambda\right)
-\end{equation}
-where $\mathcal{R}$ is the Rhie-Chow scale factor.
-
-A finding presented in this thesis is that this Rhie-Chow stabilisation term has an effect on the localisation behaviour for damage and fracture mechanics models. In this section, this effect will be explored and quantified. A strategy for mitigating the effect that the Rhie-Chow term has on the simulated fracture behaviour is also proposed.
-
-\subsection{Case setup}
-\label{rhieChowExplorationCases}
-
-In order to explore the effect of the Rhie-Chow stabilisation term, various simulations are conducted for different values of the Rhie-Chow scale factor. The values of the Rhie-Chow scale factor used are $0.01,0.02,0.05,0.1,0.15$ and $0.2$. The geometry of the cases are the same as in chapter 5. The cases looked at are as follows:
-
-\begin{enumerate}[label=(\alph*)]
-\item Flat notched bar - non-local Lemaitre
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-		    %Loading Conditions \\ \hline 
-		    Applied total displacement & $u$ & $0.6\ mm$ \\
-		    Time step & $\Delta t$ & $0.015\ s$ \\
-			Displacement increment  & $\Delta u$ & $0.017145\ mm$   \\
-			\hline
-		\end{tabular}
-	\caption{Loading conditions for case a}
-	\label{tab:material_properties}
-\end{table}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $68.9$ GPa \\
-			Poisson's ratio & $v$ & $0.33$   \\
-			Lemaitre damage denominator & $S_0$ & $0.5$ MPa  \\
-			Lemaitre damage exponent & $b$ & 1.0  \\
-			Characteristic length & $l_c$ & $0.6325$ mm  \\
-			Hardening law & $\sigma_y$ & $320+688\times\bar{\varepsilon}^p$ MPa \\
-			\hline
-		\end{tabular}
-	\caption{Material properties for case a}
-	\label{tab:material_properties}
-\end{table}
-
-\item Round notched bar - non-local Lemaitre
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-		    %Loading Conditions \\ \hline 
-		    Applied total displacement & $u$ & $0.8\ mm$ \\
-		    Time step & $\Delta t$ & $0.015\ s$ \\
-			Displacement increment  & $\Delta u$ & $0.015\ mm$   \\
-			\hline
-		\end{tabular}
-	\caption{Loading conditions for case b}
-	\label{tab:material_properties}
-\end{table}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $69.9$ GPa \\
-			Poisson's ratio & $v$ & $0.3$   \\
-			Lemaitre damage denominator & $S_0$ & $1.1$ MPa  \\
-			Lemaitre damage exponent & $b$ & 1.0  \\
-			Characteristic length & $l_c$ & $0.6325$ mm  \\
-			Hardening law & $\sigma_y$ & $589({0.0001+\bar{\varepsilon}}^p)^{0.216}$ MPa \\
-			\hline
-		\end{tabular}
-	\caption{Material properties for case b}
-	\label{tab:material_properties}
-\end{table}
-
-\item Flat notched bar - phase field model
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-		    %Loading Conditions \\ \hline 
-		    Applied total displacement & $u$ & $0.41148\ mm$ \\
-		    Time step & $\Delta t$ & $0.015\ s$ \\
-			Displacement increment  & $\Delta u$ & $0.017145\ mm$   \\
-			\hline
-		\end{tabular}
-	\caption{loading conditions for case c}
-	\label{tab:material_properties}
-\end{table}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $68.8$ GPa \\
-			Poisson's ratio & $v$ & $0.33$   \\
-			Critical fracture energy & $G_c$ & $60\times10^3$ $J/m^2$ \\
-			Plastic threshold & $W_o$ & $1\times10^7$ MPa \\
-			Characteristic length & $l$ & $0.3226mm$    \\
-			Hardening law & $\sigma_y$ & $320+688\times{\bar{\varepsilon}}^p$ MPa  \\
-			\hline
-		\end{tabular}
-	\caption{Material properties for case c}
-	\label{tab:material_properties}
-\end{table}
-\end{enumerate}
-\FloatBarrier
-
-\subsection{Results}
-
-For each of the cases, the following comparisons are made in the figures below
-\begin{itemize}
-    \item The force-displacement curves are plotted together
-    \item  Through the use of an objective function (equation 6.3), the average percentage difference between the resultant force-displacement points for a Rhie-Chow scale factor of $0.01$ are compared with those for Rhie-Chow scale factors $0.02,0.05,0.1,0.15$ and $0.05$
-\end{itemize}
-\begin{equation}
-g_0(\boldsymbol{p})=\frac{1}{N} \sum_{q=1}^N\left(\frac{R_q^{0.01}(\boldsymbol{p})-R_q^{\mathcal{R}}}{R_q^{0.01}}\right)
-\end{equation}
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispBordenNonLocalLemaitre.png}}
-		\qquad
-		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_obj_BordenNonLocalLemaitre.png}}
-	
-	\caption{Case a - flat notched bar w) non-local Lemaitre}
-	\label{label_for_entire_figure}
-\end{figure}
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispNonLocalLemaitreAxi.png}}
-		\qquad
-		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_obj_nonLocalLemaitreAxi.png}}
-	
-	\caption{Case b - notched round bar w) non-local Lemaitre}
-	\label{label_for_entire_figure}
-\end{figure}
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispPhaseBorden.png}}
-		\qquad
-		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_obj_phaseBorden.png}}
-	
-	\caption{Case c - flat notched bar w) phase field fracture}
-	\label{label_for_entire_figure}
-\end{figure}
-
-It can be observed in the force-displacement curves (Figures 6.1a, 6.2a and 6.3a) that the Rhie-Chow term has the effect of slowing down the localisation behaviour of the models. In all cases, it can be seen that the rate at which the force declines with displacement is reduced with increasing Rhie-Chow scale factor. 
-
-\subsubsection{Time step dependancy}
-
-The effects of the Rhie-Cow stabilisation term are reduced with smaller time steps. To illustrate the effect this has on damage and fracture behaviour, the cases described above are conducted with varying time steps, and therefore varying displacement increments.
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-		    Time step ($\Delta t$) & Displacement increment ($\Delta u$) \\
-		    $0.015$ &  $0.017145\ mm$ \\
-		    $0.0125$ &  $0.0142875\ mm$ \\
-		    $0.01$ &  $0.01143 \ mm$ \\
-		    $0.0075$ &  $0.0085725 \ mm$ \\
-		    $0.005$ &  $0.005715 \ mm$ \\
-		    $0.0025$ &  $0.0028575 \ mm$ \\
-			\hline
-		\end{tabular}
-	\caption{Time steps with associated displacement increments for case a}
-	\label{tab:material_properties}
-\end{table}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-		    Time step ($\Delta t$) & Displacement increment ($\Delta u$) \\
-		    $0.015$ &  $0.015\ mm$ \\
-		    $0.0125$ &  $0.0125\ mm$ \\
-		    $0.01$ &  $0.01 \ mm$ \\
-		    $0.0075$ &  $0.0075 \ mm$ \\
-		    $0.005$ &  $0.005 \ mm$ \\
-		    $0.0025$ &  $0.0025 \ mm$ \\
-			\hline
-		\end{tabular}
-	\caption{Time steps with associated displacement increments for case b}
-	\label{tab:material_properties}
-\end{table}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-		    Time step ($\Delta t$) & Displacement increment ($\Delta u$) \\
-		    $0.015$ &  $0.017145\ mm$ \\
-		    $0.0125$ &  $0.0142875\ mm$ \\
-		    $0.01$ &  $0.01143 \ mm$ \\
-		    $0.0075$ &  $0.0085725 \ mm$ \\
-		    $0.005$ &  $0.005715 \ mm$ \\
-		    $0.0025$ &  $0.0028575 \ mm$ \\
-			\hline
-		\end{tabular}
-	\caption{Time steps with associated displacement increments for case c}
-	\label{tab:material_properties}
-\end{table}
-
-In Figures 6.4, 6.5 and 6.6 the force-displacement curves for various Rhie-Chow scale factors and time step $0.001s$ are displayed. Comparing these with those obtained for a time step of $0.015s$ in the previous subsection, it is evident that the Rhie-Chow term is having less of an effect on the solution. 
-
-The reduction of the effects of the Rhie-Chow term with the time-step size is further quantified in Figure 6.7. In these figures, the objective function from equation 6.3 is used to quantify the difference between the force-displacements obtained with Rhie-Chow scale factors 0.01 and 0.1 for each time step given in Tables 6.7, 6.8 and 6.9. 
-
-It is evident that for case a and case b there is a reduction in the effects of the Rhie-Chow term with decreasing time step. This relationship is a little more complicated for case c. This is likely due to the fact that by varying the time steps, we are not just altering the Rhie-Chow effects, but given the time-step dependency inherent in the finite volume method, some aspects of the solution itself are being affected.
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_forceDispBordenNonLocalLemaitre.png}}
-		\qquad
-		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/obj_BordenNonLocalLemaitre.png}}
-	
-	\caption{Case a - flat notched bar w) non-local Lemaitre}
-	\label{label_for_entire_figure}
-\end{figure}
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_forceDispNonLocalLemaitreAxi.png}}
-		\qquad
-		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_obj_nonLocalLemaitreAxi.png}}
-	
-	\caption{Case b - notched round bar w) non-local Lemaitre}
-	\label{label_for_entire_figure}
-\end{figure}
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_forceDispPhaseBorden.png}}
-		\qquad
-		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_obj_phaseBorden.png}}
-	
-	\caption{Case c - flat notched bar w) phase field fracture}
-	\label{label_for_entire_figure}
-\end{figure}
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[\% difference vs. time step - case a] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/timeStep_BordenNonLocal.png}}
-		\qquad
-		\subfigure[\% difference vs. time step - case b] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/timeStep_nonLocalLemaitreAxi.png}}
-				\qquad
-		\subfigure[\% difference vs. time step - case c] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/timeStep_phaseBorden.png}}
-	
-	\caption{Comparison of Rhie-Chow effects with time-step size}
-	\label{label_for_entire_figure}
-\end{figure}
-
-\subsection{Mitigation strategy}
-
-In order to mitigate the effect of the Rhie-Chow term on the material behaviour, a strategy is proposed in this work whereby the Rhie-Chow scale factor $\mathcal{R}$ in equation \ref{eqn:scaleEquation} is replaced with a field $\mathcal{R}_{field}$ that is a function of the damage field $D$ in the case of the Lemaitre model and the crack variable $d$ in the phase field model. 
-\begin{equation}
-   \mathcal{R}_{field}(D)=(1-D)^2\mathcal{R}
-\end{equation}
-\begin{equation}
-   \mathcal{R}_{field}(d)=(1-d)^2\mathcal{R} 
-\end{equation}
-
-In order to illustrate the benefit of this proposed scheme, simulations are conducted for cases a, b and c with a time-step of $0.005\ s$. Rhie-Chow scaling fields of $\mathcal{R}_{field}(D)=(1-D)^2\ 0.1$ and $\mathcal{R}_{field}(d)=(1-d)^2\ 0.1$ are used for the Lemaitre and phase field model simulations respectively. The results from these simulations are compared with those obtained for Rhie-Chow scale factors of $0.1$ and $0.01$ in Figure \ref{Rhie-Chow Compare}.
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[Case a] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeCharacteristics/0.005_forceDispBorden.png}}
-		\qquad
-		\subfigure[Case b] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeCharacteristics/0.005_forceDispAxi.png}}
-				\qquad
-		\subfigure[Case c] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeCharacteristics/0.005_forceDispPhase.png}}
-	
-	\caption{Comparison of Rhie-Chow field approach with different Rhie-Chow scale factors}
-	\label{Rhie-Chow Compare}
-\end{figure}
-
-It can be observed that the proposed strategy reduces the effect that the Rhie-Chow scale factor has on the localisation behaviour when employing the Rhie-Chow scale field $\mathcal{R}_{field}$ approach. The benefits to a higher Rhie-Chow scale factor (improved convergence properties, reduction of "checker-boarding errors") are therefore gained using this scheme up until the point where crack propagation begins to occur. At this point, the Rhie-Chow effects are reduced and therefore, its effect on the fracture behaviour is mitigated.
-
-It is noticeable that the proposed strategy leads to lower reaction force for cases a and c (Figure \ref{Rhie-Chow Compare}). This is due to the fact that by reducing the scale factor below 0.01, these residual forces that exist after the crack propagation stage are reduced. These residual forces are somewhat non-physical in any case, as will be discussed in the next section.
-
-\section{Effective non-local damage development}
-
-One issue with the classic non-local Lemaitre damage model is that it can lead to a somewhat non-physical response. To illustrate this point, the results for the flat notched bar case with non-local Lemaitre damage (case a) and the notched round bar with non-local Lemaitre damage (case b) from the previous section are analysed. The cases looked at here use a time step of $0.001$ and a Rhie-Chow scale factor of $0.1$. The force-displacement curves and the damage evolution plotted at the cells where fracture first occurs (Figures \ref{axiMesh} and \ref{bordenMesh}) are given in Figures \ref{BordenNonLocalIssue} and \ref{AxiNonLocalIssue}.
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/CNLDispForceBorden.png}}
-		\qquad
-		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/disp_damageNonLocalBorden.png}}
-	\caption{Flat notched bar (case a)}
-	\label{BordenNonLocalIssue}
-\end{figure}
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/CNLDispForceAxi.png}}
-		\qquad
-		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/disp_damageNonLocalAxi.png}}
-	\caption{Notched round bar (case b)}
-	\label{AxiNonLocalIssue}
-\end{figure}
-
-Non-physical issues with the damage evolution can be observed in Figures \ref{BordenNonLocalIssue} and \ref{AxiNonLocalIssue}. The non-local gradient equation has the effect of diffusing the damage such that after a certain point, the rate at which the damage evolves is reduced. In reality, it would be expected for the cell to quickly become fully damaged as it enters the void coalescence stage (Figure \ref{fig:Ductile-damage-evolution}) 
-
-To mitigate these issues, a novel formulation of the non-local Lemaitre model is developed in this work. The nonphysical response is mitigated by introducing the effective non-local damage field $\bar{D}_{eff}$. This field is set such that it is equivalent to the non-local damage field unless for a given cell the non-local damage field exceeds a critical damage value $D_c$. At this critical value, the effective non-local damage is set to be $0.99$. This cell can be viewed as essentially being fully degraded, the effective non-local damage $\bar{D}_{eff}$ is set as $0.99$ as opposed to $1.0$ in order to allow some small residual stresses in these cells to aid convergence.
-
-Further to this, the growth of the local damage for a given cell is prevented if the effective non-local damage of this cell exceeds the critical damage value $D_c$. This prevents the nonphysical behaviour whereby a cell that is set as being fully cracked is contributing to the damage growth in the surrounding cells through the non-local damage field. This scheme is described in Algorithm \ref{effectiveNonLocalDamage}.
-
-\begin{algorithm}[H]
-\label{effectiveNonLocalDamage}
-\SetAlgoLined
-(i) For all cells calculate local damage  \\
-
-  \eIf{$\bar{D}_{eff\ n+1}^{i} <= D_c$}{
-  \begin{equation}
-D^{i+1}_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b \notag
-\end{equation} 
-   }{
-\begin{equation}
-D^{i+1}_{n+1}=D^{i}_{n+1} \notag
-\end{equation}
-  } 
-
-(ii) Calculate global non-local damage field
-\begin{equation}
-	\left(D^{i+1}_{n+1}-\bar{D}^{i+1}_{n+1}\right)+{{l_c}^2\mathrm{\nabla}}^2D^{i+1}_{n+1}=0 \notag	
-\end{equation}
-
-(iii) Set the effective non-local damage field for each cell \\
-\eIf{$\bar{D}_{n+1}^{i+1} <= D_c$}{
-\begin{equation}
-D^{i+1}_{eff\ n+1}=D^{i+1}_{n+1}\notag
-\end{equation} 
-   }{
-\begin{equation}
-D^{i+1}_{eff\ n+1}=0.99 \notag
-\end{equation}
-  } 
-\caption{Damage evolution scheme}
-\end{algorithm}
-
-
-The benefits of this scheme can be seen in Figures \ref{axiCaseEffNL} and \ref{bordenCaseEffNL}. These figures show the results obtained with the novel formulation. For these simulations, the material parameter $D_c$ is set as $0.55$. A more physically realistic damage evolution can be observed as well as the rapid crack propagation being evident in the force-displacement curve. Such a rapid loss of load-carrying capacity at a certain point for tensile specimens has been observed experimentally \cite{li_ductile_2011,malcher_improved_2014}. It is worth noting that the fact that the damage is set as $0.99$ combined with the diffusive effects of the Rhie-Chow term will still lead to some nonphysical residual force-displacement behaviour of the simulations (e.g. the residual force required for further displacement in Figure \ref{bordenCaseEffNL}).
-
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/effNLDispForceBorden.png}}
-		\qquad
-		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/eff_disp_damageNonLocalBorden.png}}
-	\caption{Flat notched bar (case a)}
-	\label{axiCaseEffNL}
-\end{figure}
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/effNLDispForceAxi.png}}
-		\qquad
-		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/eff_disp_damageNonLocalAxi.png}}
-	\caption{Notched round bar (case b)}
-	\label{bordenCaseEffNL}
-\end{figure}
-
-\FloatBarrier
-
-\subsection{Prediction of chevron cracks}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-		    %Loading Conditions \\ \hline 
-		    Applied total displacement & $u$ & $30\ mm$ \\
-		    Uncoupled displacement & $u$ & $50\ mm$ \\
-		    Time dtep & $\Delta t$ & $0.001\ s$ \\
-			Displacement increment  & $\Delta u$ & $2\ mm$   \\
-			Friction coefficient & $\mu$ & $0.1$ \\
-			\hline
-		\end{tabular}
-	\caption{Loading conditions for wire drawing case}
-	\label{tab:material_properties}
-\end{table}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-		    %Loading Conditions \\ \hline 
-		    Die inlet diameter & $16\ mm$ \\
-		    Die outlet diameter & $11.6276\ mm$ \\
-		    Die outer diameter & $20\ mm$ \\
-		    Die seim-angle & $10^{\circ}$ \\
-		    Wire length & $30\ mm$ \\
-		    Wire diameter & $13\ mm$ \\
-			\hline
-		\end{tabular}
-	\caption{Die and wire geometry}
-	\label{tab:material_properties}
-\end{table}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $200$ GPa \\
-			Poisson's ratio & $v$ & $0.33$   \\
-			Lemaitre damage denominator & $S_0$ & $15$ MPa  \\
-			Lemaitre damage exponent & $b$ & 1.0  \\
-			Critical Damage & $D_c$ & $0.052$\\
-			Characteristic Length & $l_c$ & $0.325$ mm  \\
-			Hardening law & $\sigma_y$ & $600+(1218-600+250\times\bar{\varepsilon}^p)(1-e^{43.44\times\bar{\varepsilon}^p})$ MPa \\
-			\hline
-		\end{tabular}
-	\caption{Wire material properties }
-	\label{tab:material_properties}
-\end{table}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{cccc} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $600000$ GPa \\
-			Poisson's ratio & $v$ & $0.22$   \\
-			\hline
-		\end{tabular}
-	\caption{Die material properties (linear elastic material law)}
-	\label{tab:material_properties}
-\end{table}
-
-A common defect that occurs in wire drawing is the development of chevron cracks (or central burst defects) at the centre of the wire (Figure \ref{fig:chevronCracks}). The ability of the developed scheme is tested in its ability to model their occurrence. The relevant material properties and loading conditions are given in Tables 6.10-13 (further details on these wire drawing simulations are given in the next chapter). 
-
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.65\textwidth]{./Figures/finiteVolumeCharacteristics/chevronCracked.png}
-\caption{Chevron cracks in steel rods, similar to those that can occur in drawn wires \cite{krauss_steels_2015}}
-\label{fig:chevronCracks}
-\end{center}
-\end{figure}
-
-\begin{figure}[htbp]
-	\centering
-		\subfigure[Axisymmetric mesh] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/simulatedChevron.png}}
-		
-		\subfigure[$270^{\circ}$ rotational extrusion] {\label{boeing} \includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/270ChevronCracking.png}}
-		
-		\caption{Chevron cracks in wire drawing}
-	\label{simulatedChevronCrack}
-\end{figure}
-\FloatBarrier
-
-The accurate modelling of chevron cracks, using the developed effective non-local damage scheme, is evident in Figure \ref{simulatedChevronCrack}. By contrast in Figure \ref{simulatedDamageNotLimited}, the results can be seen if the growth of the local damage field $D$ is not restricted when $\bar{D}_{eff}>D_c$ (step (i) in Algorithm \ref{effectiveNonLocalDamage}). The unrestricted growth of the local damage field $D$ leads in turn to the rapid growth of the $\bar{D}$ field, and therefore a large number of cells have a value for $\bar{D}$ which exceeds $D_c$. The results of this are rapid crack propagation and an inability to predict the formation of chevron cracks (Figure \ref{simulatedDamageNotLimited} b). 
-
-\begin{figure}[htbp]
-	\centering
-		\subfigure[$\bar{D}_{eff}$ field prior to reaching $D_c$] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/otherDrawing.png}}
-		
-		\subfigure[$\bar{D}_{eff}$ field after reaching $D_c$] {\label{boeing} \includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/simulatedDrawingGrowth.png}}
-		
-		\caption{Unstable crack propogation}
-	\label{simulatedDamageNotLimited}
-\end{figure}
-\FloatBarrier
-
-\section{Updated-Lagrangian to reference development}
-\label{Updated-Lagrangian to reference development}
-Given that the mesh is moved to the updated configuration after each time step, the non-local equation is solved with respect to this updated mesh configuration. However, sometimes it may be preferred to solve the non-local equation with respect to the initial mesh configuration.
-
-It's worth noting however that the results from the non-local equation will differ if the non-local gradient equation is solved with respect to the initial configuration $\Omega_o$. If the non-local equation is solved with respect to the updated configuration, then in tension the non-local damage will tend towards the local damage as the distance between the cell centres will increase. Conversely, in compressive states, the distances between cell centres will decrease leading to greater diffusion in the region of a damaged cell. In order to illustrate this, simulations on a one-dimensional bar of length $10mm$ were performed. An imperfection is placed at the centre of the bar so that here the local damage $D=1.0$. In all other cells $D=0$. Both 20\% compressive and tensile strains were applied. It can be seen in Figure \ref{fig:compressiveTensileNonLocalDamage} how the distribution of the non-local damage is therefore altered as the bar undergoes tension and compression 
-
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/compressiveTensileDamage.png}
-\caption{Non-local damage along the original bar length}
-\label{fig:compressiveTensileNonLocalDamage}
-\end{center}
-\end{figure}
-
-It remains a matter of debate in the literature as to whether solving this equation with respect to the initial or updated configuration is preferable \cite{geers_strongly_2003}. \citet{steinmann_formulation_nodate} has argued that the fact that the non-local damage will tend towards the local damage (in an object undergoing tensile loading) is an argument for solving with respect to the initial configuration to ensure that the mesh independence of the solution remains strong. However, he also noted that this may not be physically realistic as it is not likely the case that a material's non-local properties are completely independent of its deformation path.
-
-In order to ensure that solving the non-local gradient equation with respect to the initial configuration is possible, within the context of an updated Lagrangian solid model, a mathematical and algorithmic approach was developed in this work. This approach allows for the solving of the non-local gradient equation with respect to the initial configuration within the context of an updated Lagrangian solid model framework.
-
-To begin, the strong integral form of the non-local equation with respect to the initial configuration is stated:
-
-\begin{equation}
-\label{eqn:stronFormNonLocal_URef}
-\int_{\mathrm{\Omega}_o}D\ d\mathrm{\Omega}_o-\int_{\mathrm{\Omega}_o}\bar{D}\ d\mathrm{\Omega}_o+\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \mathbf{n}_o\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_o=0
-\end{equation}
-
-Given the definition of the volume change $J$, the volume in the updated configuration can be related to the initial volume:
-\begin{equation}
-\label{eqn:refVolJac}
-    J^{-1}_nV_u=V_o
-\end{equation}
-where $J_n$ is the volume change from the previous time step.
-Nanson's formula is employed to describe the updated $\Gamma_u$ area vector in terms of the initial area vector $\Gamma_o$:
-\begin{equation}
-%\label{eqn:updatedInitialNanson}
-    \mathbf{\Gamma_u}=J_n\mathbf{F}_n^{-T}\cdot\mathbf{\Gamma}_0
-\end{equation}
-The initial area vector $\Gamma_o$ can then be rewritten in terms of the updated area vector $\Gamma_u$:
-\begin{equation}
-\label{eqn:updatedInitialNanson}
-    J^{-1}_n\mathbf{F}_n^{T}\cdot\mathbf{\Gamma_u}=\mathbf{\Gamma}_0
-\end{equation}
-
-Using equation \ref{eqn:refVolJac}, the first two volume integral terms in equation \ref{eqn:updatedInitialNanson} can be given in terms of the updated configuration as:
-\begin{equation}
-\int_{\mathrm{\Omega}_o}D\ d\mathrm{\Omega}_o=\int_{\mathrm{\Omega}_u}J^{-1}_nD\ d\mathrm{\Omega}_u
-\end{equation}
-\begin{equation}
-\int_{\mathrm{\Omega}_o}\bar{D}\ d\mathrm{\Omega}_o=\int_{\mathrm{\Omega}_u}J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u
-\end{equation}
-
-Gauss' theorem can then be used to reformulate the gradient term within the third term of equation \ref{eqn:stronFormNonLocal_URef}:
-\begin{equation}
-\label{eqn:reformulatedGradientThirdTerm}
-\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \mathbf{n}_o\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_o=\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \mathbf{n}_o\cdot\left(\oint_{\mathrm{\Gamma}_o}\mathbf{n}_o\bar{D}\ d\mathrm{\Gamma}_o\right)}\ d\mathrm{\Gamma}_o
-\end{equation}
-The term on the right-hand side of equation \ref{eqn:reformulatedGradientThirdTerm} can then be reformulated in terms of the updated configuration by combining it with equation \ref{eqn:updatedInitialNanson} to give
-%\begin{equation}
-%	\oint_{\Gamma_o}{{l_c}^2\ \mathbf{n}_o\cdot\left(\oint_{\Gamma_o}\mathbf{n}_o\bar{D}\ d\Gamma_o\right)}\d\Gamma_o
-%	=
-%	\oint_{\Gamma_u}{{l_c}^2 J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\cdot\left(\oint_{\Gamma_u}J^{-1}_n\mathbf{F}_n^{T}\cdot\mathbf{n}_u\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u
-%\end{equation}
-
-The full equation to be solved is therefore 
-%\begin{equation}
-%\label{eqn:fullUpdatedRefNonLocal}
-%\int_{\mathrm{\Omega}_u} J^{-1}_n\D\ d\mathrm{\Omega}_u
-%-
-%\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u
-%+
-%\oint_{\Gamma_u}{{l_c}^2 \left(J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\right)\cdot\left(\oint_{\Gamma_u}\left(J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\right)\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u=0
-%\end{equation}
-
-\textbf{Algorithmic approach}
-
-Equation \ref{eqn:fullUpdatedRefNonLocal} is solved as shown in equation \ref{eqn:fullUpdatedRefNonLocalToBESolved}, with the second and third terms added in to aid with convergence. The divergence, gradient and Laplacian terms are discretised using the Gauss linear scheme \cite{noauthor_openfoam_2015}. A user-defined number of outer iterations are performed around this equation. The code for its implementation is provided in Appendix C.
-
-\begin{eqnarray}
-\label{eqn:fullUpdatedRefNonLocalToBESolved}
-\underbrace{\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u}_{\text {implicit}} &-& \underbrace{\oint_{\mathrm{\Gamma}_u}{\mathbf{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \bar{D}}\right)}\ d\mathrm{\Gamma}_u}_{\text {implicit }} \notag \\
-    &+&\underbrace{\oint_{\mathrm{\Gamma}_u}{\mathbf{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \bar{D}}\right)}\ d\mathrm{\Gamma}_u}_{\text {explicit }} \notag \\
-    &-&\underbrace{\oint_{\Gamma_u}{{l_c}^2 \left(J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\right)\cdot\left(\oint_{\Gamma_u}\left(J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\right)\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u}_{\text {explicit }} \notag \\
-    &=& \underbrace{\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u}_{\text {explicit}}
-\end{eqnarray}
-
-\subsection{Validation of updated-Lagrangian to reference approach}
-
-In this section, the implementation of the approach described in section \ref{Updated-Lagrangian to reference development} is verified. This is done by simulating each of case a and case b (from section \ref{rhieChowExplorationCases}) in the following three ways 
-\begin{itemize}
-    \item With an updated Lagrangian solid model
-    \item With a total Lagrangian solid model
-    \item with an updated Lagrangian solid model and the non-local damage gradient equation solved with respect to the initial configuration 
-\end{itemize}
-
-The force-displacement curves for these simulations are given in Figure \ref{UpdatedToReferenceComaprison}. The results of the UL to reference approach and the total Lagrangian approach line up well. However, in Figure 6.17 a, a slight discrepancy can be observed which given that very fine time-steps and meshes are used for these simulations is unrelated to discritisation error (Appendix A.1). Is unclear why this exists. It may be due to slight differences in the discretisation techniques - in the UL to reference approach the divergence of the gradient of the non-local damage variable $\bar{D}$ is solved for, whereas in the total Lagrangian approach the option in OpenFOAM to solve the Laplacian directly is used. Some differences in the Rhie-Chow effects between the total-Lagrangian and updated-Lagrangian approach may also contribute.
-
-\begin{figure}[htbp]
-	\centering
-		\subfigure[Flat notched bar - case a] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/bordenLagCompare_ForceDisp.png}}
-		
-		\subfigure[Notched round bar - case b] {\label{boeing} \includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/axiLagCompare_ForceDisp.png}}
-		
-		\caption{Comparison of approaches}
-	\label{UpdatedToReferenceComaprison}
-\end{figure}
-\FloatBarrier
 
 
 
@@ -2050,7 +2115,7 @@ For reference, single-cell verifications of the proposed material models are pro
 
 
 %%%%%%%%%%%
-\section{Notched Round Bar}
+\subsection{Notched Round Bar}
 %%%%%%%%%%%
 The geometry of the notched round bar (Figure \ref{fig:notched_bar_geom}) has been widely used in the literature \cite{cesar_de_sa_damage_2006, fincato_return_2018, vaz_aspects_2001} for benchmarking plasticity and damage procedures.
 The geometry consists 40 \si{\milli\meter} long round bar with 18 \si{\milli\meter} diameter including a 4 \si{\milli\meter} notch.
@@ -2093,7 +2158,7 @@ Table \ref{tab:notched_bar_mat} gives the assumed elastoplastic material paramet
 
 
 %%%%%%%%%%%
-\section{Flat Notched Bar}
+\subsection{Flat Notched Bar}
 %%%%%%%%%%%
 The 3-D flat notched tensile specimen (Figure \ref{fig:flat_bar_geom}) is another common test case for assessing damage models, for example, as examined by \citet{borden_phase-field_2016} and \citet{eldahshan_phase_2021}.
 The geometry consists of $152.4 \times 25.4$ \si{\milli\meter} plate with a 4.06 \si{\milli\meter} diamter side notches.
@@ -2674,7 +2739,7 @@ As noted in Malcher et al. \cite{malcher_improved_2014}, the classic Lemaitre da
 	\dot{D}=\frac{\dot{\gamma}}{\left(1-D\right)}\left[\frac{-Y}{S(\eta,\xi)}\right]^b
 \end{equation}
 
-The Lemaitre damage denominator is modified to become a function of the triaxiality $\eta$ and in some cases the lode parameter $\xi$. Various forms of the function $S(\eta,\xi)$ have been proposed to better predict fracture under a range of loading conditions \cite{ferreira_improved_2022,castro_calibration_2018}. 
+The Lemaitre damage denominator is modified to become a function of the triaxiality $\eta$ and in some cases the Lode parameter $\xi$. Various forms of the function $S(\eta,\xi)$ have been proposed to better predict fracture under a range of loading conditions \cite{ferreira_improved_2022,castro_calibration_2018}. 
 
 A function for $S(\eta,\xi)$ is proposed here (equation \ref{eqn:proposedLemaitre}) which incorporates the triaxiality relationship used in the uncoupled damage law known as the Ko criterion \cite{ko_prediction_2007}. The Ko criterion has shown an ability to predict fracture in both wire drawing processes \cite{roh_process_2021} and in the hub-hole expanding process \cite{ko_prediction_2007}.
 
@@ -3171,6 +3236,398 @@ Another important consideration, that to this author's eye has been neglected in
 
 
 
+
+\subsection{Rhie Chow Case setup}
+\label{rhieChowExplorationCases}
+
+In order to explore the effect of the Rhie-Chow stabilisation term, various simulations are conducted for different values of the Rhie-Chow scale factor. The values of the Rhie-Chow scale factor used are $0.01,0.02,0.05,0.1,0.15$ and $0.2$. The geometry of the cases are the same as in chapter 5. The cases looked at are as follows:
+
+\begin{enumerate}[label=(\alph*)]
+\item Flat notched bar - non-local Lemaitre
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+		    %Loading Conditions \\ \hline 
+		    Applied total displacement & $u$ & $0.6\ mm$ \\
+		    Time step & $\Delta t$ & $0.015\ s$ \\
+			Displacement increment  & $\Delta u$ & $0.017145\ mm$   \\
+			\hline
+		\end{tabular}
+	\caption{Loading conditions for case a}
+	\label{tab:material_properties}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+			Property & Symbol & Value  \\ \hline 
+			Young's modulus & $E$ & $68.9$ GPa \\
+			Poisson's ratio & $v$ & $0.33$   \\
+			Lemaitre damage denominator & $S_0$ & $0.5$ MPa  \\
+			Lemaitre damage exponent & $b$ & 1.0  \\
+			Characteristic length & $l_c$ & $0.6325$ mm  \\
+			Hardening law & $\sigma_y$ & $320+688\times\bar{\varepsilon}^p$ MPa \\
+			\hline
+		\end{tabular}
+	\caption{Material properties for case a}
+	\label{tab:material_properties}
+\end{table}
+
+\item Round notched bar - non-local Lemaitre
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+		    %Loading Conditions \\ \hline 
+		    Applied total displacement & $u$ & $0.8\ mm$ \\
+		    Time step & $\Delta t$ & $0.015\ s$ \\
+			Displacement increment  & $\Delta u$ & $0.015\ mm$   \\
+			\hline
+		\end{tabular}
+	\caption{Loading conditions for case b}
+	\label{tab:material_properties}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+			Property & Symbol & Value  \\ \hline 
+			Young's modulus & $E$ & $69.9$ GPa \\
+			Poisson's ratio & $v$ & $0.3$   \\
+			Lemaitre damage denominator & $S_0$ & $1.1$ MPa  \\
+			Lemaitre damage exponent & $b$ & 1.0  \\
+			Characteristic length & $l_c$ & $0.6325$ mm  \\
+			Hardening law & $\sigma_y$ & $589({0.0001+\bar{\varepsilon}}^p)^{0.216}$ MPa \\
+			\hline
+		\end{tabular}
+	\caption{Material properties for case b}
+	\label{tab:material_properties}
+\end{table}
+
+\item Flat notched bar - phase field model
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+		    %Loading Conditions \\ \hline 
+		    Applied total displacement & $u$ & $0.41148\ mm$ \\
+		    Time step & $\Delta t$ & $0.015\ s$ \\
+			Displacement increment  & $\Delta u$ & $0.017145\ mm$   \\
+			\hline
+		\end{tabular}
+	\caption{loading conditions for case c}
+	\label{tab:material_properties}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+			Property & Symbol & Value  \\ \hline 
+			Young's modulus & $E$ & $68.8$ GPa \\
+			Poisson's ratio & $v$ & $0.33$   \\
+			Critical fracture energy & $G_c$ & $60\times10^3$ $J/m^2$ \\
+			Plastic threshold & $W_o$ & $1\times10^7$ MPa \\
+			Characteristic length & $l$ & $0.3226mm$    \\
+			Hardening law & $\sigma_y$ & $320+688\times{\bar{\varepsilon}}^p$ MPa  \\
+			\hline
+		\end{tabular}
+	\caption{Material properties for case c}
+	\label{tab:material_properties}
+\end{table}
+\end{enumerate}
+\FloatBarrier
+
+\subsection{Results}
+
+For each of the cases, the following comparisons are made in the figures below
+\begin{itemize}
+    \item The force-displacement curves are plotted together
+    \item  Through the use of an objective function (equation 6.3), the average percentage difference between the resultant force-displacement points for a Rhie-Chow scale factor of $0.01$ are compared with those for Rhie-Chow scale factors $0.02,0.05,0.1,0.15$ and $0.05$
+\end{itemize}
+\begin{equation}
+g_0(\boldsymbol{p})=\frac{1}{N} \sum_{q=1}^N\left(\frac{R_q^{0.01}(\boldsymbol{p})-R_q^{\mathcal{R}}}{R_q^{0.01}}\right)
+\end{equation}
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispBordenNonLocalLemaitre.png}}
+		\qquad
+		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_obj_BordenNonLocalLemaitre.png}}
+	
+	\caption{Case a - flat notched bar w) non-local Lemaitre}
+	\label{label_for_entire_figure}
+\end{figure}
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispNonLocalLemaitreAxi.png}}
+		\qquad
+		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_obj_nonLocalLemaitreAxi.png}}
+	
+	\caption{Case b - notched round bar w) non-local Lemaitre}
+	\label{label_for_entire_figure}
+\end{figure}
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispPhaseBorden.png}}
+		\qquad
+		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_obj_phaseBorden.png}}
+	
+	\caption{Case c - flat notched bar w) phase field fracture}
+	\label{label_for_entire_figure}
+\end{figure}
+
+It can be observed in the force-displacement curves (Figures 6.1a, 6.2a and 6.3a) that the Rhie-Chow term has the effect of slowing down the localisation behaviour of the models. In all cases, it can be seen that the rate at which the force declines with displacement is reduced with increasing Rhie-Chow scale factor. 
+
+\subsubsection{Time step dependancy}
+
+The effects of the Rhie-Cow stabilisation term are reduced with smaller time steps. To illustrate the effect this has on damage and fracture behaviour, the cases described above are conducted with varying time steps, and therefore varying displacement increments.
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+		    Time step ($\Delta t$) & Displacement increment ($\Delta u$) \\
+		    $0.015$ &  $0.017145\ mm$ \\
+		    $0.0125$ &  $0.0142875\ mm$ \\
+		    $0.01$ &  $0.01143 \ mm$ \\
+		    $0.0075$ &  $0.0085725 \ mm$ \\
+		    $0.005$ &  $0.005715 \ mm$ \\
+		    $0.0025$ &  $0.0028575 \ mm$ \\
+			\hline
+		\end{tabular}
+	\caption{Time steps with associated displacement increments for case a}
+	\label{tab:material_properties}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+		    Time step ($\Delta t$) & Displacement increment ($\Delta u$) \\
+		    $0.015$ &  $0.015\ mm$ \\
+		    $0.0125$ &  $0.0125\ mm$ \\
+		    $0.01$ &  $0.01 \ mm$ \\
+		    $0.0075$ &  $0.0075 \ mm$ \\
+		    $0.005$ &  $0.005 \ mm$ \\
+		    $0.0025$ &  $0.0025 \ mm$ \\
+			\hline
+		\end{tabular}
+	\caption{Time steps with associated displacement increments for case b}
+	\label{tab:material_properties}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+		    Time step ($\Delta t$) & Displacement increment ($\Delta u$) \\
+		    $0.015$ &  $0.017145\ mm$ \\
+		    $0.0125$ &  $0.0142875\ mm$ \\
+		    $0.01$ &  $0.01143 \ mm$ \\
+		    $0.0075$ &  $0.0085725 \ mm$ \\
+		    $0.005$ &  $0.005715 \ mm$ \\
+		    $0.0025$ &  $0.0028575 \ mm$ \\
+			\hline
+		\end{tabular}
+	\caption{Time steps with associated displacement increments for case c}
+	\label{tab:material_properties}
+\end{table}
+
+In Figures 6.4, 6.5 and 6.6 the force-displacement curves for various Rhie-Chow scale factors and time step $0.001s$ are displayed. Comparing these with those obtained for a time step of $0.015s$ in the previous subsection, it is evident that the Rhie-Chow term is having less of an effect on the solution. 
+
+The reduction of the effects of the Rhie-Chow term with the time-step size is further quantified in Figure 6.7. In these figures, the objective function from equation 6.3 is used to quantify the difference between the force-displacements obtained with Rhie-Chow scale factors 0.01 and 0.1 for each time step given in Tables 6.7, 6.8 and 6.9. 
+
+It is evident that for case a and case b there is a reduction in the effects of the Rhie-Chow term with decreasing time step. This relationship is a little more complicated for case c. This is likely due to the fact that by varying the time steps, we are not just altering the Rhie-Chow effects, but given the time-step dependency inherent in the finite volume method, some aspects of the solution itself are being affected.
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_forceDispBordenNonLocalLemaitre.png}}
+		\qquad
+		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/obj_BordenNonLocalLemaitre.png}}
+	
+	\caption{Case a - flat notched bar w) non-local Lemaitre}
+	\label{label_for_entire_figure}
+\end{figure}
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_forceDispNonLocalLemaitreAxi.png}}
+		\qquad
+		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_obj_nonLocalLemaitreAxi.png}}
+	
+	\caption{Case b - notched round bar w) non-local Lemaitre}
+	\label{label_for_entire_figure}
+\end{figure}
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_forceDispPhaseBorden.png}}
+		\qquad
+		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.001_obj_phaseBorden.png}}
+	
+	\caption{Case c - flat notched bar w) phase field fracture}
+	\label{label_for_entire_figure}
+\end{figure}
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[\% difference vs. time step - case a] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/timeStep_BordenNonLocal.png}}
+		\qquad
+		\subfigure[\% difference vs. time step - case b] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/timeStep_nonLocalLemaitreAxi.png}}
+				\qquad
+		\subfigure[\% difference vs. time step - case c] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/timeStep_phaseBorden.png}}
+	
+	\caption{Comparison of Rhie-Chow effects with time-step size}
+	\label{label_for_entire_figure}
+\end{figure}
+
+
+
+In order to illustrate the benefit of this proposed scheme, simulations are conducted for cases a, b and c with a time-step of $0.005\ s$. Rhie-Chow scaling fields of $\mathcal{R}_{field}(D)=(1-D)^2\ 0.1$ and $\mathcal{R}_{field}(d)=(1-d)^2\ 0.1$ are used for the Lemaitre and phase field model simulations respectively. The results from these simulations are compared with those obtained for Rhie-Chow scale factors of $0.1$ and $0.01$ in Figure \ref{Rhie-Chow Compare}.
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[Case a] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeCharacteristics/0.005_forceDispBorden.png}}
+		\qquad
+		\subfigure[Case b] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeCharacteristics/0.005_forceDispAxi.png}}
+				\qquad
+		\subfigure[Case c] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeCharacteristics/0.005_forceDispPhase.png}}
+	
+	\caption{Comparison of Rhie-Chow field approach with different Rhie-Chow scale factors}
+	\label{Rhie-Chow Compare}
+\end{figure}
+
+It can be observed that the proposed strategy reduces the effect that the Rhie-Chow scale factor has on the localisation behaviour when employing the Rhie-Chow scale field $\mathcal{R}_{field}$ approach. The benefits to a higher Rhie-Chow scale factor (improved convergence properties, reduction of "checker-boarding errors") are therefore gained using this scheme up until the point where crack propagation begins to occur. At this point, the Rhie-Chow effects are reduced and therefore, its effect on the fracture behaviour is mitigated.
+
+It is noticeable that the proposed strategy leads to lower reaction force for cases a and c (Figure \ref{Rhie-Chow Compare}). This is due to the fact that by reducing the scale factor below 0.01, these residual forces that exist after the crack propagation stage are reduced. These residual forces are somewhat non-physical in any case, as will be discussed in the next section.
+
+
+
+
+\subsection{Effective non-local test case}
+
+The benefits of this scheme can be seen in Figures \ref{axiCaseEffNL} and \ref{bordenCaseEffNL}. These figures show the results obtained with the novel formulation. For these simulations, the material parameter $D_c$ is set as $0.55$. A more physically realistic damage evolution can be observed as well as the rapid crack propagation being evident in the force-displacement curve. Such a rapid loss of load-carrying capacity at a certain point for tensile specimens has been observed experimentally \cite{li_ductile_2011,malcher_improved_2014}. It is worth noting that the fact that the damage is set as $0.99$ combined with the diffusive effects of the Rhie-Chow term will still lead to some nonphysical residual force-displacement behaviour of the simulations (e.g. the residual force required for further displacement in Figure \ref{bordenCaseEffNL}).
+
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/effNLDispForceBorden.png}}
+		\qquad
+		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/eff_disp_damageNonLocalBorden.png}}
+	\caption{Flat notched bar (case a)}
+	\label{axiCaseEffNL}
+\end{figure}
+\begin{figure}[t!]
+	\centering
+		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/effNLDispForceAxi.png}}
+		\qquad
+		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/eff_disp_damageNonLocalAxi.png}}
+	\caption{Notched round bar (case b)}
+	\label{bordenCaseEffNL}
+\end{figure}
+
+
+
+
+
+
+\subsection{Prediction of chevron cracks}
+
+\hl{This should be moved to the test cases}
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+		    %Loading Conditions \\ \hline 
+		    Applied total displacement & $u$ & $30\ mm$ \\
+		    Uncoupled displacement & $u$ & $50\ mm$ \\
+		    Time dtep & $\Delta t$ & $0.001\ s$ \\
+			Displacement increment  & $\Delta u$ & $2\ mm$   \\
+			Friction coefficient & $\mu$ & $0.1$ \\
+			\hline
+		\end{tabular}
+	\caption{Loading conditions for wire drawing case}
+	\label{tab:material_properties}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+		    %Loading Conditions \\ \hline 
+		    Die inlet diameter & $16\ mm$ \\
+		    Die outlet diameter & $11.6276\ mm$ \\
+		    Die outer diameter & $20\ mm$ \\
+		    Die seim-angle & $10^{\circ}$ \\
+		    Wire length & $30\ mm$ \\
+		    Wire diameter & $13\ mm$ \\
+			\hline
+		\end{tabular}
+	\caption{Die and wire geometry}
+	\label{tab:material_properties}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+			Property & Symbol & Value  \\ \hline 
+			Young's modulus & $E$ & $200$ GPa \\
+			Poisson's ratio & $v$ & $0.33$   \\
+			Lemaitre damage denominator & $S_0$ & $15$ MPa  \\
+			Lemaitre damage exponent & $b$ & 1.0  \\
+			Critical Damage & $D_c$ & $0.052$\\
+			Characteristic Length & $l_c$ & $0.325$ mm  \\
+			Hardening law & $\sigma_y$ & $600+(1218-600+250\times\bar{\varepsilon}^p)(1-e^{43.44\times\bar{\varepsilon}^p})$ MPa \\
+			\hline
+		\end{tabular}
+	\caption{Wire material properties }
+	\label{tab:material_properties}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{cccc} \hline
+			Property & Symbol & Value  \\ \hline 
+			Young's modulus & $E$ & $600000$ GPa \\
+			Poisson's ratio & $v$ & $0.22$   \\
+			\hline
+		\end{tabular}
+	\caption{Die material properties (linear elastic material law)}
+	\label{tab:material_properties}
+\end{table}
+
+A common defect that occurs in wire drawing is the development of chevron cracks (or central burst defects) at the centre of the wire (Figure \ref{fig:chevronCracks}). The ability of the developed scheme is tested in its ability to model their occurrence. The relevant material properties and loading conditions are given in Tables 6.10-13 (further details on these wire drawing simulations are given in the next chapter). 
+
+\begin{figure}[htb]
+\begin{center}
+	\includegraphics[width=0.65\textwidth]{./Figures/finiteVolumeCharacteristics/chevronCracked.png}
+\caption{Chevron cracks in steel rods, similar to those that can occur in drawn wires \cite{krauss_steels_2015}}
+\label{fig:chevronCracks}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+		\subfigure[Axisymmetric mesh] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/simulatedChevron.png}}
+		
+		\subfigure[$270^{\circ}$ rotational extrusion] {\label{boeing} \includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/270ChevronCracking.png}}
+		
+		\caption{Chevron cracks in wire drawing}
+	\label{simulatedChevronCrack}
+\end{figure}
+\FloatBarrier
+
+The accurate modelling of chevron cracks, using the developed effective non-local damage scheme, is evident in Figure \ref{simulatedChevronCrack}. By contrast in Figure \ref{simulatedDamageNotLimited}, the results can be seen if the growth of the local damage field $D$ is not restricted when $\bar{D}_{eff}>D_c$ (step (i) in Algorithm \ref{effectiveNonLocalDamage}). The unrestricted growth of the local damage field $D$ leads in turn to the rapid growth of the $\bar{D}$ field, and therefore a large number of cells have a value for $\bar{D}$ which exceeds $D_c$. The results of this are rapid crack propagation and an inability to predict the formation of chevron cracks (Figure \ref{simulatedDamageNotLimited} b). 
+
+\begin{figure}[htbp]
+	\centering
+		\subfigure[$\bar{D}_{eff}$ field prior to reaching $D_c$] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/otherDrawing.png}}
+		
+		\subfigure[$\bar{D}_{eff}$ field after reaching $D_c$] {\label{boeing} \includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/simulatedDrawingGrowth.png}}
+		
+		\caption{Unstable crack propogation}
+	\label{simulatedDamageNotLimited}
+\end{figure}
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions} \label{sec:conclusion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3382,6 +3839,117 @@ In this test case, the cell undergoes a rapid loss of load-carrying capacity (Fi
 		\caption{Evolution of d and the crack degradation Function}
 	\label{label_for_entire_figure}
 \end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Phase Field Model Updated-to-Total Lagrangian Transformation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Given that the mesh is moved to the updated configuration after each time step, the non-local equation is solved with respect to this updated mesh configuration. However, sometimes it may be preferred to solve the non-local equation with respect to the initial mesh configuration.
+
+It's worth noting however that the results from the non-local equation will differ if the non-local gradient equation is solved with respect to the initial configuration $\Omega_o$. If the non-local equation is solved with respect to the updated configuration, then in tension the non-local damage will tend towards the local damage as the distance between the cell centres will increase. Conversely, in compressive states, the distances between cell centres will decrease leading to greater diffusion in the region of a damaged cell. In order to illustrate this, simulations on a one-dimensional bar of length $10mm$ were performed. An imperfection is placed at the centre of the bar so that here the local damage $D=1.0$. In all other cells $D=0$. Both 20\% compressive and tensile strains were applied. It can be seen in Figure \ref{fig:compressiveTensileNonLocalDamage} how the distribution of the non-local damage is therefore altered as the bar undergoes tension and compression 
+
+\begin{figure}[htb]
+\begin{center}
+	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/compressiveTensileDamage.png}
+\caption{Non-local damage along the original bar length}
+\label{fig:compressiveTensileNonLocalDamage}
+\end{center}
+\end{figure}
+
+It remains a matter of debate in the literature as to whether solving this equation with respect to the initial or updated configuration is preferable \cite{geers_strongly_2003}. \citet{steinmann_formulation_nodate} has argued that the fact that the non-local damage will tend towards the local damage (in an object undergoing tensile loading) is an argument for solving with respect to the initial configuration to ensure that the mesh independence of the solution remains strong. However, he also noted that this may not be physically realistic as it is not likely the case that a material's non-local properties are completely independent of its deformation path.
+
+In order to ensure that solving the non-local gradient equation with respect to the initial configuration is possible, within the context of an updated Lagrangian solid model, a mathematical and algorithmic approach was developed in this work. This approach allows for the solving of the non-local gradient equation with respect to the initial configuration within the context of an updated Lagrangian solid model framework.
+
+To begin, the strong integral form of the non-local equation with respect to the initial configuration is stated:
+
+\begin{equation}
+\label{eqn:stronFormNonLocal_URef}
+\int_{\mathrm{\Omega}_o}D\ d\mathrm{\Omega}_o-\int_{\mathrm{\Omega}_o}\bar{D}\ d\mathrm{\Omega}_o+\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \mathbf{n}_o\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_o=0
+\end{equation}
+
+Given the definition of the volume change $J$, the volume in the updated configuration can be related to the initial volume:
+\begin{equation}
+\label{eqn:refVolJac}
+    J^{-1}_nV_u=V_o
+\end{equation}
+where $J_n$ is the volume change from the previous time step.
+Nanson's formula is employed to describe the updated $\Gamma_u$ area vector in terms of the initial area vector $\Gamma_o$:
+\begin{equation}
+%\label{eqn:updatedInitialNanson}
+    \mathbf{\Gamma_u}=J_n\mathbf{F}_n^{-T}\cdot\mathbf{\Gamma}_0
+\end{equation}
+The initial area vector $\Gamma_o$ can then be rewritten in terms of the updated area vector $\Gamma_u$:
+\begin{equation}
+\label{eqn:updatedInitialNanson}
+    J^{-1}_n\mathbf{F}_n^{T}\cdot\mathbf{\Gamma_u}=\mathbf{\Gamma}_0
+\end{equation}
+
+Using equation \ref{eqn:refVolJac}, the first two volume integral terms in equation \ref{eqn:updatedInitialNanson} can be given in terms of the updated configuration as:
+\begin{equation}
+\int_{\mathrm{\Omega}_o}D\ d\mathrm{\Omega}_o=\int_{\mathrm{\Omega}_u}J^{-1}_nD\ d\mathrm{\Omega}_u
+\end{equation}
+\begin{equation}
+\int_{\mathrm{\Omega}_o}\bar{D}\ d\mathrm{\Omega}_o=\int_{\mathrm{\Omega}_u}J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u
+\end{equation}
+
+Gauss' theorem can then be used to reformulate the gradient term within the third term of equation \ref{eqn:stronFormNonLocal_URef}:
+\begin{equation}
+\label{eqn:reformulatedGradientThirdTerm}
+\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \mathbf{n}_o\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_o=\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \mathbf{n}_o\cdot\left(\oint_{\mathrm{\Gamma}_o}\mathbf{n}_o\bar{D}\ d\mathrm{\Gamma}_o\right)}\ d\mathrm{\Gamma}_o
+\end{equation}
+The term on the right-hand side of equation \ref{eqn:reformulatedGradientThirdTerm} can then be reformulated in terms of the updated configuration by combining it with equation \ref{eqn:updatedInitialNanson} to give
+%\begin{equation}
+%	\oint_{\Gamma_o}{{l_c}^2\ \mathbf{n}_o\cdot\left(\oint_{\Gamma_o}\mathbf{n}_o\bar{D}\ d\Gamma_o\right)}\d\Gamma_o
+%	=
+%	\oint_{\Gamma_u}{{l_c}^2 J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\cdot\left(\oint_{\Gamma_u}J^{-1}_n\mathbf{F}_n^{T}\cdot\mathbf{n}_u\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u
+%\end{equation}
+
+The full equation to be solved is therefore 
+%\begin{equation}
+%\label{eqn:fullUpdatedRefNonLocal}
+%\int_{\mathrm{\Omega}_u} J^{-1}_n\D\ d\mathrm{\Omega}_u
+%-
+%\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u
+%+
+%\oint_{\Gamma_u}{{l_c}^2 \left(J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\right)\cdot\left(\oint_{\Gamma_u}\left(J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\right)\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u=0
+%\end{equation}
+
+\textbf{Algorithmic approach}
+
+Equation \ref{eqn:fullUpdatedRefNonLocal} is solved as shown in equation \ref{eqn:fullUpdatedRefNonLocalToBESolved}, with the second and third terms added in to aid with convergence. The divergence, gradient and Laplacian terms are discretised using the Gauss linear scheme \cite{noauthor_openfoam_2015}. A user-defined number of outer iterations are performed around this equation. The code for its implementation is provided in Appendix C.
+
+\begin{eqnarray}
+\label{eqn:fullUpdatedRefNonLocalToBESolved}
+\underbrace{\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u}_{\text {implicit}} &-& \underbrace{\oint_{\mathrm{\Gamma}_u}{\mathbf{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \bar{D}}\right)}\ d\mathrm{\Gamma}_u}_{\text {implicit }} \notag \\
+    &+&\underbrace{\oint_{\mathrm{\Gamma}_u}{\mathbf{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \bar{D}}\right)}\ d\mathrm{\Gamma}_u}_{\text {explicit }} \notag \\
+    &-&\underbrace{\oint_{\Gamma_u}{{l_c}^2 \left(J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\right)\cdot\left(\oint_{\Gamma_u}\left(J^{-1}_n\mathbf{F}_n^{T}\cdot \mathbf{n}_u\right)\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u}_{\text {explicit }} \notag \\
+    &=& \underbrace{\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u}_{\text {explicit}}
+\end{eqnarray}
+
+\subsection{Validation of updated-Lagrangian to reference approach}
+
+In this section, the implementation of the approach described in section \ref{Updated-Lagrangian to reference development} is verified. This is done by simulating each of case a and case b (from section \ref{rhieChowExplorationCases}) in the following three ways 
+\begin{itemize}
+    \item With an updated Lagrangian solid model
+    \item With a total Lagrangian solid model
+    \item with an updated Lagrangian solid model and the non-local damage gradient equation solved with respect to the initial configuration 
+\end{itemize}
+
+The force-displacement curves for these simulations are given in Figure \ref{UpdatedToReferenceComaprison}. The results of the UL to reference approach and the total Lagrangian approach line up well. However, in Figure 6.17 a, a slight discrepancy can be observed which given that very fine time-steps and meshes are used for these simulations is unrelated to discritisation error (Appendix A.1). Is unclear why this exists. It may be due to slight differences in the discretisation techniques - in the UL to reference approach the divergence of the gradient of the non-local damage variable $\bar{D}$ is solved for, whereas in the total Lagrangian approach the option in OpenFOAM to solve the Laplacian directly is used. Some differences in the Rhie-Chow effects between the total-Lagrangian and updated-Lagrangian approach may also contribute.
+
+\begin{figure}[htbp]
+	\centering
+		\subfigure[Flat notched bar - case a] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/bordenLagCompare_ForceDisp.png}}
+		
+		\subfigure[Notched round bar - case b] {\label{boeing} \includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/axiLagCompare_ForceDisp.png}}
+		
+		\caption{Comparison of approaches}
+	\label{UpdatedToReferenceComaprison}
+\end{figure}
+\FloatBarrier
+
+
 
 
 
