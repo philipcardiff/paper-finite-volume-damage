@@ -648,8 +648,8 @@ The constitutive damage laws described in this section close the system of gover
 Before describing these models in more detail, it is necessary to define the stress triaxiality $\eta$ and the Lode angle $\theta$ and related Lode parameters \cite{bai_new_2008, nahshon_modification_2008}.
 Extensive literature has noted the importance of stress triaxiality and Lode angle in predicting ductile fracture \cite{besson_continuum_2010,cao_models_2017,tekkaya_damage_2020}.
 The triaxiality parameter $\eta$ is given by:
-\begin{equation}
-    \eta = \frac{p}{\sigma_{v}}
+\begin{equation} % note: different pressure convention from Andrew's thesis
+    \eta = -\frac{p}{\sigma_{v}}
 \end{equation}
 where, as noted previously, $p = -\text{tr}(\boldsymbol{\sigma})/3$ is the hydrostatic pressure, and $\sigma_{v} = \sqrt{3 J_2} = \sqrt{\frac{3}{2} \text{dev}(\bb{\sigma}) : \text{dev}(\bb{\sigma}) }$ is the equivalent (von Mises) stress.
 $J_2$ is the second invariant of the deviatoric stress tensor.
@@ -715,7 +715,7 @@ In contrast, previous large-strain elastoplastic models \citep{cardiff_lagrangia
 %\end{equation}
 
 The employed isotropic $J_2$ elastoplastic constitutive law is defined in terms of the yield criterion
-\begin{eqnarray}
+\begin{eqnarray} \label{eq:yieldFunc}
 	%    F_p &=& \tau_{eq} - \sigma_y\left(\alpha\right) \\
 	\Phi &=& \sigma_v \; - \; \sigma_y\left(\bar{\varepsilon}_p \right)
 \end{eqnarray}
@@ -727,7 +727,7 @@ The employed isotropic $J_2$ elastoplastic constitutive law is defined in terms 
 %Multivariable calculus operations are used to obtain the following constitutive equations
 %\begin{equation}
 and flow rule
-\begin{eqnarray}
+\begin{eqnarray} \label{eq:flowRule}
     %\frac{\partial}{\partial t} \left(\mathbf{F}_p \mathbf{F}_p^{-1} \right)
     \dot{\mathbf{F}}_p \cdot \mathbf{F}_p^{-1}
     &=&
@@ -948,7 +948,11 @@ The adopted stress calculation algorithm \citep{de_souza_neto_computational_2008
 	(\sfrac{1}{J}) 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
 \end{equation}
 
-(v) Solve the pressure Poisson's equation (Equation \ref{eq:pressureEqn}) to calculate the hydrostatic pressure $p^{[m+1]}$, where $J^{[m+1]} = -\kappa \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right)$.
+(v) Implicitly solve the pressure Poisson's equation, where $J^{[m+1]} = -\kappa \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right)$.
+\begin{equation}
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = -\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right] - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m]} \right)
+\end{equation}
+
 
 (vi) Update the true (Cauchy) stress
 \begin{equation}
@@ -1065,21 +1069,21 @@ When no damage has occurred, the damage variable $D$ equals 0 (virgin material),
 From a physical point of view, $D$ can be interpreted as the area of cracks and cavities per unit surface cut by an arbitrary plane.
 % perpendicular to $\mathbf{n}$. 
 
-The Lemaitre model is formulated by assuming a dissipation potential $F$:
- \begin{equation}
-	F = F_p + F_d	
-\end{equation}
-where $F_p$ and $F_d$ are the dissipation potentials associated with plasticity and damage, respectively. The plastic potential is given by the $J_2$ (von Mises) yield criterion:
- \begin{equation}
-	F_p = \frac{\sigma_{v}}{1 - D} \; - \; \sigma_y\left(\alpha\right)	
-\end{equation}
-The yield stress $\sigma_y$ is a function of the hardening variable $\alpha$, taken here to represent the equivalent plastic strain.
-
-The damage dissipation potential is given by \citet{lemaitre_continuous_1985}:
- \begin{equation}
-	F_d = \frac{S_0}{\left(b + 1\right) \left(1 - D\right)}\left(\frac{-Y}{S_0}\right)^{b+1}
-\end{equation}
-where $S_0$ and $b$ are material parameters governing the onset and rate of damage.
+%The Lemaitre model is formulated by assuming a dissipation potential $F$:
+% \begin{equation}
+%	F = F_p + F_d	
+%\end{equation}
+%where $F_p$ and $F_d$ are the dissipation potentials associated with plasticity and damage, respectively. The plastic potential is given by the $J_2$ (von Mises) yield criterion:
+% \begin{equation}
+%	F_p = \frac{\sigma_{v}}{1 - D} \; - \; \sigma_y\left(\alpha\right)	
+%\end{equation}
+%The yield stress $\sigma_y$ is a function of the hardening variable $\alpha$, taken here to represent the equivalent plastic strain.
+%
+%The damage dissipation potential is given by \citet{lemaitre_continuous_1985}:
+% \begin{equation}
+%	F_d = \frac{S_0}{\left(b + 1\right) \left(1 - D\right)}\left(\frac{-Y}{S_0}\right)^{b+1}
+%\end{equation}
+%where $S_0$ and $b$ are material parameters governing the onset and rate of damage.
 
 %Plastic isotropy is assumed and, in order to ensure that dissipation is always
 %positive, the Kuhn-Tucker conditions must always hold at every material point:
@@ -1091,190 +1095,416 @@ where $S_0$ and $b$ are material parameters governing the onset and rate of dama
 %\end{array}\right.
 %\end{equation}
 
-
-The constitutive equations for the Lemaitre model can then be given in terms of the spatially rotated plastic stretch $\bar{\mathbf{d}}_p$ (or plastic deformation gradient rate $\dot{\mathbf{F}_p}$), the hardening variable rate $\dot{\alpha}$, and damage variable rate $\dot{D}$:
- \begin{equation} \label{eq:lemaitre_dp}
-%	\bar{\mathbf{d}}_p = 
-%	\dot{\gamma}\frac{\partial F}{\partial\boldsymbol{\tau}}=\frac{3}{2}\frac{\dot{\gamma}}{\left(1-D\right)}\frac{\text{dev}		
-\bar{\mathbf{d}}_p = 
-	\dot{\mathbf{F}_p} \mathbf{F}_p^{-1} =
-	\frac{3}{2} \frac{\dot{\gamma}}{1 - D} \mathbf{R}_e^{T} \frac{\text{dev}(\boldsymbol{\tau})}{\sigma_{v}} \mathbf{R}_e
-%	\frac{3}{2} \frac{\dot{\gamma}}{1 - D} \mathbf{R}_e^{T} \frac{\text{dev}(\boldsymbol{\tau})}{\sigma_{v}} \mathbf{R}_e
-%(\boldsymbol{\tau})}{\sigma_{v}}	
-\end{equation}
- \begin{equation}
-	\dot{\alpha} = -\dot{\gamma}\frac{\partial F}{\partial\chi}=\dot{\gamma}
-\end{equation}
- \begin{equation}
-	\dot{D} = -\dot{\gamma}\frac{\partial F}{\partial Y}=\frac{\dot{\gamma}}{\left(1 - D\right)}\left[\frac{-Y}{S_0}\right]^b
-\end{equation}
-
+The Lemaitre model augments the elastoplasticity constitutive law (Equations \ref{eq:yieldFunc} and \ref{eq:flowRule}) with the inclusion of a damage variable $D$ evolution law, and scaling of the yield function and flow rules by the reciprocal of $(1 - D)$:
+% can then be given in terms of the spatially rotated plastic stretch $\bar{\mathbf{d}}_p$ (or plastic deformation gradient rate $\dot{\mathbf{F}_p}$), the hardening variable rate $\dot{\alpha}$, and damage variable rate $\dot{D}$:
+ \begin{eqnarray} \label{eq:lemaitre_dp}
+	 \Phi &=& \frac{\sigma_v}{1 - D} \; - \; \sigma_y\left(\bar{\varepsilon}_p \right) \\
+    \dot{\mathbf{F}}_p \cdot \mathbf{F}_p^{-1}
+    &=&
+    \frac{\dot{\bar{\varepsilon}}_p}{1 - D} \; \mathbf{R}_e^T \cdot 
+    \left[
+    \frac{3}{2} \frac{\text{dev}\left(\boldsymbol{\sigma} \right)} {\sigma_{v}}
+    \right]
+    \cdot  \mathbf{R}_e \\
+    \dot{D} &=&
+    %-\dot{\gamma}\frac{\partial F}{\partial Y}
+    \frac{\dot{\bar{\varepsilon}}_p}{1 - D}\left(\frac{-Y}{S_0}\right)^b \label{eq:lem_damage}
+\end{eqnarray}
+% \begin{equation}
+%	\dot{\alpha} = -\dot{\gamma}\frac{\partial F}{\partial\chi}=\dot{\gamma}
+%\end{equation}
+% \begin{equation}
+%	\dot{D} = -\dot{\gamma}\frac{\partial F}{\partial Y}=\frac{\dot{\gamma}}{\left(1 - D\right)}\left[\frac{-Y}{S_0}\right]^b
+%\end{equation}
 %We can equivalently write the rate of plastic strain (Equation \ref{eq:lemaitre_dp}) in terms of the multiplicative plastic deformation gradient $\mathbf{F}_p$ as
 %\begin{equation}
 %	\dot{\mathbf{F}_p} \mathbf{F}_p^{-1} =
 %	\frac{3}{2} \frac{\dot{\gamma}}{1 - D} \mathbf{R}_e^{T} \frac{\text{dev}(\boldsymbol{\tau})}{\sigma_{v}} \mathbf{R}_e
 %\end{equation}
+where $S_0$ (dimensions of stress) and $b$ (dimensionless) are material parameters.
+The energy release rate $Y$, which gives the energy dissipated due to the phenomenon of damage, is given by \cite{lemaitre_engineering_2005}
+% \begin{equation}
+%	Y
+%	%= \bar{\rho}\frac{\partial\psi^{ed}}{\partial D}
+%	= -\frac{1}{2} \boldsymbol{\varepsilon}_e : \mathbf{D}_e : \boldsymbol{\varepsilon}_e
+%\end{equation}
+%which can equivalently be written as
+% \begin{equation}
+%	Y=-\frac{1}{2}\bar{\boldsymbol{\tau}}:{\mathbf{D}^e}^{-1}:\bar{\boldsymbol{\tau}}
+%\end{equation}
+%With some algebraic manipulation \cite{lemaitre_engineering_2005}:
+\begin{equation} \label{eqn:classicY}
+	Y
+	=
+%	-\frac{{\bar{\tau}_{eq}}^2}{2E}
+	-\frac{\sigma_v^2}{2E}
+	\left[
+%	\frac{2}{3} (1 + v) + 3 (1 - 2v) \left( \frac{p}{\sigma_v} \right)^2
+	\frac{2}{3} (1 + \nu) + 3 (1 - 2\nu) \eta^2
+	\right]
+\end{equation}
+where $E$ is Young's modulus and $\nu$ is Poisson's ratio, where the dependence on triaxiality ($\eta = \sfrac{p}{\sigma_{v}}$) is explicitly clear.
+%The triaxiality dependence of the Lemaitre mode is provided by the term $\frac{\tau_h}{\tau_{eq}}$, which is the definition of stress triaxiality $\eta$.
+%The state potential associated with the isotropic hardening variable is given by: 
+% \begin{equation}
+%	\chi=\rho\frac{\partial\psi^p}{\partial \alpha}
+%\end{equation}
+
 
 
 \subsubsection{Computational Procedure}
-For each cell, the incremental displacement field $\Delta\boldsymbol{u}$ for the current time step $t_{n+1}$, at the current iteration, is provided. The following variables from the previous time step are also given:
- \begin{equation}
-\left\{F_n^p,\ \alpha_n,D_n\right\}
+%For each cell, the incremental displacement field $\Delta\boldsymbol{u}$ for the current time step $t_{n+1}$, at the current iteration, is provided. The following variables from the previous time step are also given:
+% \begin{equation}
+%\left\{F_n^p,\ \alpha_n,D_n\right\}
+%\end{equation}
+%The goal is then to have a return-mapping algorithm to obtain the following variables at time $t_{n+1}$
+%\begin{equation}
+%\left\{F_{n+1}^p,\ \alpha_{n+1},\boldsymbol{\sigma}_{n+1},D_{n+1}\right\}
+%\end{equation}
+%In order to obtain these values, the algorithm must satisfy the following constitutive behaviour:
+%\begin{equation}
+%\label{eqn:deformationPlasticStrainRelation}
+%	{\dot{\mathbf{F}}}^p\mathbf{F}^{p-1}=\frac{3}{2}\frac{\dot{\gamma}}{\left(1-D\right)}\mathbf{R}^{eT}\frac{\boldsymbol{\tau}_d}{\tau_{eq}}\mathbf{R}^e={\bar{\mathbf{d}}}^p
+%\end{equation}
+%\begin{equation}
+%	\dot{\alpha}=\dot{\gamma}	
+%\end{equation}
+%\begin{equation}
+%	\dot{D}=-\dot{\gamma}\frac{\partial F}{\partial Y}=\frac{\dot{\gamma}}{\left(1-D\right)}\left[\frac{-Y}{S_0}\right]^b
+%\end{equation}
+
+
+
+%Equation \ref{eqn:deformationPlasticStrainRelation} is integrated using the one-step implicit integration operator corresponding to the Euler backward method to get:
+%\begin{equation}
+%	\mathbf{F}_{n+1}^p=exp\left[\frac{3}{2}\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\mathbf{R}_{n+1}^{e^T}\frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\mathbf{R}_{n+1}^e\right]\mathbf{F}_{n}^p
+%\end{equation}
+%Following the procedure laid out in section 3.2.3, the additive split for the elastic and plastic strain is obtained:
+%\begin{equation}
+%	\boldsymbol{\varepsilon}_{n+1}^e=\boldsymbol{\varepsilon}_{n+1}^{e\ trial}-\frac{3}{2}\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}
+%\end{equation}
+%
+%The integration of the other constitutive equations using the backwards Euler scheme is simply given by:
+%\begin{equation}
+%	\alpha_{n+1}-\alpha_n=\Delta\gamma
+%\end{equation}
+%\begin{equation}
+%   \alpha_{n+1}=\alpha_n+\Delta\gamma	
+%\end{equation}
+%\begin{equation}
+%	D_{n+1}-D_n=\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b
+%\end{equation}
+%\begin{equation}
+%D_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b	
+%\end{equation}
+%
+%The final system of equations to be solved when the material is undergoing plastic straining is therefore given by:
+%
+%\begin{equation}
+%\left\{\begin{array}{c}
+%\frac{\tau_{eq\ n+1}}{1-D_{n+1}}-\sigma_y\left(\alpha_{n+1}\right)=0 \\
+%\boldsymbol{\varepsilon}_{n+1}^e=\boldsymbol{\varepsilon}_{n+1}^{e\ trial}-\frac{3}{2} \frac{\Delta \gamma}{1-D_{n+1}} \frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\\
+%\alpha_{n+1}=\alpha_n+\Delta \gamma \\
+%D_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b
+%\end{array}\right. 
+%\end{equation}
+
+
+An implicit-explicit algorithm is developed in this work to solve Equations \ref{eq:lemaitre_dp}-\ref{eq:lem_damage}.
+At every outer iteration, the plastic increment is solved implicitly, with the value for the damage variable fixed from the previous outer iteration.
+The damage rate equation (Equation \ref{eq:lem_damage}) is then solved explicitly also using the damage from the previous iteration.
+This approach avoids the use of a $2 \times 2$ matrix (or an even higher dimension matrix if one was to solve for anisotropic plasticity or plasticity incorporating kinematic hardening) that would be needed if both the damage and the plastic increment were solved for implicitly simultaneously.
+By not requiring the solution of both the plasticity and damage implicitly, the mathematics are simplified when solving for more complex formulations of the Lemaitre damage evolution equation and for the \emph{non-local damage}, which will be described later in this section.
+Note that in this context, explicit means that the construction of a linear system is avoided; however, the overall solution algorithm is still implicit in time.
+
+%The superscript notation laid out in equations \ref{eqn:superscript1} and \ref{eqn:superscript2} is used to indicate whether the damage variable is from the current iteration or from the previous iteration. The superscript $^{i+1}$ means that the variable is from the current outer iteration while the superscript $^{i}$ means that the variable is from the previous outer iteration.
+%
+%\begin{equation}
+%\label{eqn:superscript1}
+%    D^{i+1}_{n+1}
+%\end{equation}
+%\begin{equation}
+%\label{eqn:superscript2}
+%    D^{i}_{n+1}
+%\end{equation}
+
+%The first three of the equations in the system given in 4.41 can be satisfied by solving the yield potential for the plastic increment $\Delta\gamma$, with the damage obtained from the previous iteration frozen. 
+
+%First, the von Mises stress is defined in terms of the elastic strain and combined with equation 4.36:
+%\begin{equation}
+%\begin{aligned}
+%%\frac{\tau^{eq}_{n+1}}{1-D^{i}_{n+1}}=\bar{\tau}_{{eq}_{n+1}}&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^e\right)\right\|\\
+%%&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^{e \text { trial }}-\frac{3}{2} \frac{\Delta \gamma}{\left(1+D^{i}_{n+1}\right)} \frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\right)\right\|
+%fix
+%\end{aligned}
+%\end{equation}
+
+%Following the procedure laid out in Section 3.2.3, the equation for the yield function in terms of the plastic increment can be obtained in terms of the plastic increment:
+%\begin{equation}
+%	\bar{\tau}_{eq\ n+1}^{trial}-3\mu\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}-\sigma_{y\ }\left(\alpha_n+\Delta\gamma\right)=0
+%\end{equation}
+
+%This is solved implicitly using the Newton-Raphson algorithm for $\Delta\gamma$; the stress tensor and the plastic strain tensor are then updated based on this value.  
+%After updating these values, the damage equation can be solved explicitly.
+
+\paragraph{Triaxiality and Lode Angle Dependency}
+
+The classic Lemaitre model does not distinguish between positive and negative triaxiality ($\eta$ is squared in Equation \ref{eqn:classicY}); consequently, it can overpredict damage in wire drawing processes where triaxiality can be highly negative.
+%it tends to predict fracture too early at low triaxialities and too late at high triaxialities. 
+%Physically, highly negative triaxiality (highly positive hydrostatic pressure) is known to suppress damage formation.
+A simple remedy is to employ a triaxiality cut-off \cite{bouchard_enhanced_2011}, which disallows damage evolution for highly negative triaxiality values:
+\begin{equation} \label{eq:triaxCutoff} % note: flip sign from Andrew's thesis, as Andrew assume p = hyd(sigma), whereas we assume p = -hyd(sigma)
+	\dot{D} =
+	\begin{cases}
+		0 & \text { if } \eta \leq -\frac{1}{3}  \\
+		\frac{\dot{\bar{\varepsilon}}_p}{1 - D}\left(\frac{-Y}{S_0}\right)^b 
+		& \text { if } \eta>-\frac{1}{3}
+	\end{cases}
 \end{equation}
-The goal is then to have a return-mapping algorithm to obtain the following variables at time $t_{n+1}$
+
+
+
+ %at which point the cell is assumed to be fully damaged.
+
+% The damage is not set to $1$ to allow for some residual stresses in this cell to aid convergence.
+%\begin{equation}
+%\label{DamageUpdateEquation}
+%D^{i+1}_{n+1}= \begin{cases} D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{r}\right]^s & \text { if } D^{i}_{n+1}<D_c \\ 0.99 & \text { if } D^{i}_{n+1} \geq D_c \end{cases}
+%\end{equation}
+
+
+%Various alternative formulations of the Lemaitre damage model have been proposed in the literature.
+%Typically, these models entail an alteration of the damage dissipation potential \cite{cao_lode-dependent_2014,chandrakanth_isotropic_1995,wei_hua_tai_new_1986,bouchard_enhanced_2011,bonora_nonlinear_1997,malcher_improved_2014,ferreira_improved_2022,castro_calibration_2018,lian_modified_2014} and therefore, following the procedure described in section 4.2.3, an alternative damage evolution equation is derived. 
+
+Rather than use a triaxiality cut-off, Malcher and co-workers \citep{malcher_improved_2014, ferreira_improved_2022, castro_calibration_2018} proposed that the parameter $S_0$ be a function of triaxiality $\eta$ as well as Lode angle $\xi$.
+%Of particular interest in this work is the class of models based on the formulation developed by \citet{malcher_improved_2014}.
+This approach has shown an ability to accurately predict fracture for a range of loading conditions, at both low and high triaxiality values and for various shear stress states.
+The Malcher et al. form of damage evolution is achieved by making $S_0$ in Equation \ref{eq:lem_damage} a function of $\eta$ and $\xi$:
 \begin{equation}
-\left\{F_{n+1}^p,\ \alpha_{n+1},\boldsymbol{\sigma}_{n+1},D_{n+1}\right\}
+S(\eta,\xi)=\frac{S_{0.33}}{3|\eta|+\frac{S_{0.33}}{S_{0.0}}\left(1-\xi^2\right)}
 \end{equation}
-In order to obtain these values, the algorithm must satisfy the following constitutive behaviour:
-\begin{equation}
-\label{eqn:deformationPlasticStrainRelation}
-	{\dot{\mathbf{F}}}^p\mathbf{F}^{p-1}=\frac{3}{2}\frac{\dot{\gamma}}{\left(1-D\right)}\mathbf{R}^{eT}\frac{\boldsymbol{\tau}_d}{\tau_{eq}}\mathbf{R}^e={\bar{\mathbf{d}}}^p
-\end{equation}
-\begin{equation}
-	\dot{\alpha}=\dot{\gamma}	
-\end{equation}
-\begin{equation}
-	\dot{D}=-\dot{\gamma}\frac{\partial F}{\partial Y}=\frac{\dot{\gamma}}{\left(1-D\right)}\left[\frac{-Y}{S_0}\right]^b
-\end{equation}
+where $S_{0.33}$ and $S_{0.0}$ are material parameters, which were determined based on pure tensile loading $S_{0.33}$ and pure shear loading ($S_{0.0}$).
 
+%As noted in \citet{malcher_improved_2014}, 
+%To remedy this, an alternative damage dissipation potential was proposed: 
+%\begin{equation}
+%	F_{D}=\frac{S(\eta,\xi)}{\left(1-D\right)\left(b+1\right)}\left[\frac{-Y}{S(\eta,\xi)}\right]^{b+1}
+%\end{equation}
+% Following the procedure described in section 4.2.3 of this thesis, the damage evolution equation is then given as:
+%
+% \begin{equation}
+%	\dot{D}=\frac{\dot{\gamma}}{\left(1-D\right)}\left[\frac{-Y}{S(\eta,\xi)}\right]^b
+%\end{equation}
+%The Lemaitre damage denominator is modified to become a function of the triaxiality $\eta$ and in some cases the normalised third invariant $\xi$. The damage denominator is given by \citet{malcher_improved_2014} as:
 
-
-Equation \ref{eqn:deformationPlasticStrainRelation} is integrated using the one-step implicit integration operator corresponding to the Euler backward method to get:
-\begin{equation}
-	\mathbf{F}_{n+1}^p=exp\left[\frac{3}{2}\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\mathbf{R}_{n+1}^{e^T}\frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\mathbf{R}_{n+1}^e\right]\mathbf{F}_{n}^p
-\end{equation}
-Following the procedure laid out in section 3.2.3, the additive split for the elastic and plastic strain is obtained:
-\begin{equation}
-	\boldsymbol{\varepsilon}_{n+1}^e=\boldsymbol{\varepsilon}_{n+1}^{e\ trial}-\frac{3}{2}\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}
-\end{equation}
-
-The integration of the other constitutive equations using the backwards Euler scheme is simply given by:
-\begin{equation}
-	\alpha_{n+1}-\alpha_n=\Delta\gamma
-\end{equation}
-\begin{equation}
-   \alpha_{n+1}=\alpha_n+\Delta\gamma	
-\end{equation}
-\begin{equation}
-	D_{n+1}-D_n=\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b
-\end{equation}
-\begin{equation}
-D_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b	
+Despite its success, one weakness of this formulation is that it does not distinguish between positive and negative triaxiality values, which is critical for wire drawing.
+%In Chapter 7, a novel Lemaitre damage model is proposed in this work that is conceptually similar to the above formulation.
+To overcome this limitation, a function for $S(\eta,\xi)$ is proposed here, inspired by the Ko criterion \cite{ko_prediction_2007} uncoupled damage law.
+The Ko criterion has shown an ability to predict fracture in both wire drawing processes \cite{roh_process_2021} and in the hub-hole expanding process \cite{ko_prediction_2007}.
+For the wire drawing, $\xi\approx1.0$ at the wire centre, where fracture originates \cite{roh_process_2021}.
+For this reason, the proposed function does not incorporate a dependency on $\xi$, and final expression for $S$ takes the form
+\begin{equation} \label{eqn:proposedLemaitre}
+	S(\eta) = \frac{2S_0}{\left(1.0+3\eta\right)}
 \end{equation}
 
-The final system of equations to be solved when the material is undergoing plastic straining is therefore given by:
+%For the wire drawing cases to be looked at in this chapter $\xi\approx1.0$ at the centre of the wire (Appendix F.1) where fracture originates \cite{roh_process_2021}. For this reason, the proposed function does not incorporate a dependency on $\xi$. The damage evolution law can be rewritten as:
+%\begin{equation}
+%	\dot{D}=\frac{\dot{\gamma}}{1-D}\left[\frac{-Y}{2S_0}\left(1.0+3\eta\right)\right]^b
+% \end{equation}
 
-\begin{equation}
-\left\{\begin{array}{c}
-\frac{\tau_{eq\ n+1}}{1-D_{n+1}}-\sigma_y\left(\alpha_{n+1}\right)=0 \\
-\boldsymbol{\varepsilon}_{n+1}^e=\boldsymbol{\varepsilon}_{n+1}^{e\ trial}-\frac{3}{2} \frac{\Delta \gamma}{1-D_{n+1}} \frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\\
-\alpha_{n+1}=\alpha_n+\Delta \gamma \\
-D_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b
-\end{array}\right. 
+
+
+\paragraph{Crack Closure Effects}
+
+An additional limitation of the classic Lemaitre damage model is that it does not distinguish between tensile and compressive stress states, whereas it is known from experiments that tensile stresses are considerably more conducive to crack growth than compressive stresses \cite{bao_cut-off_2005}.
+To overcome this shortcoming, some authors assume no crack growth in compressive stress states \cite{chu_void_1980}; however, this does not account for the partial closure of micro-defects under compressive stress states.; this effect causes a greater material area to bear the compressive load.
+As a result, the material may exhibit a partial or complete recovery of its stiffness, depending on the specific conditions \cite{teixeira_ductile_2010}.
+This approach also does not account for the fact that some crack growth can occur in compressive stages \cite{basic_finite_2005}.
+
+Consequently, an \emph{enhanced} Lemaitre model with crack closure effects has been proposed \cite{pires_issues_2005,teixeira_ductile_2010}.
+% can be used to more accurately account for damage development.
+In this approach, the energy release rate $Y$ (Equation \ref{eqn:classicY}) is rewritten to account for the differing contributions of tensile and compressive stresses:
+\begin{eqnarray}
+	Y &=&
+	\frac{-1}{2E\left(1-D\right)}
+	\left[(1 + \nu) \bb{\sigma}^+ : \bb{\sigma}^+ - \nu\ \langle \text{tr}(\boldsymbol{\sigma})\rangle^2\right] \notag \\
+	&&-\frac{h}{2E\left(1-hD\right)}
+	\left[(1 + \nu)\bb{\sigma}^- : \bb{\sigma}^- -\nu \langle -\text{tr}(\boldsymbol{\sigma})\rangle^2\right]
+\end{eqnarray}
+where Macaulay brackets are indicated by $\langle \bullet \rangle$.
+%Under compressive stress, micro-cracks will partially or fully close, leading to an increase in the load-carrying area.
+The parameter $0\le h\le1$ accounts for the crack closure phenomenon; here, we take $h = 0.2$ as is common for steels \cite{desmorat_modeling_2008,lemaitre_course_1996,bouchard_enhanced_2011}). 
+%In this model, an effective stress for compressive stress states is introduced. It differs from that in equation 4.12 through the introduction of the material parameter $h$ (and given here in terms of the Kirchhoff stress):
+%\begin{equation}
+%	\bar{\boldsymbol{\tau}}\ =\frac{\boldsymbol{\tau}}{\left(1-hD\right)}	
+%\end{equation}
+%An eigendecomposition is performed to split the stress tensor into its positive and negative components
+%\begin{equation}
+%	\boldsymbol{\sigma} \;=\; \boldsymbol{\sigma}^+ \;+\; \boldsymbol{\sigma}^-
+%\end{equation}
+The positive and negative stress components are defined as
+\begin{eqnarray}
+	\boldsymbol{\sigma}^+&=&\sum_{i=1}^{3} \langle{\sigma}_i \rangle\mathbf{e}_i\otimes\mathbf{e}_i	\\
+	\boldsymbol{\sigma}^-&=&\sum_{i=1}^{3}\langle{-{\sigma}}_i\rangle\mathbf{e}_i\otimes\mathbf{e}_i
+\end{eqnarray}
+where ${\sigma}_i$ are the principal stresses, $\{\mathbf{e}_1,\mathbf{e}_2,\mathbf{e}_3\}$ are the orthonormal basis vectors, and $\boldsymbol{\sigma} = \boldsymbol{\sigma}^+ + \, \boldsymbol{\sigma}^-$.
+%$\otimes$ is the outer product and $<>$ is a Macauley bracket.
+%The effective stress tensor can then be given by:
+%\begin{equation}
+%	\bar{\boldsymbol{\tau}}\ =\frac{\boldsymbol{\tau}_+}{\left(1-D\right)}+\frac{\boldsymbol{\tau}_-}{\left(1-hD\right)}	
+%\end{equation}
+
+%For the sake of numerical efficiency, 
+A simplified form of the crack-closure model \cite{teixeira_ductile_2010} is employed in this work, whereby this definition of decomposed stress is only used in the damage evolution calculation. 
+
+
+
+
+
+
+\paragraph{Non-local damage}
+
+%It is worth noting the benefit of the developed implicit-explicit algorithm when looking at this class of models. The fact that the developed algorithm does not require the solution of the damage implicitly means that incorporating novel damage evolution equations into the existing code is relatively simple, without the need to calculate derivatives that can become quite complex when incorporating shear effects, in particular, \cite{malcher_improved_2014}.
+
+One limitation of damage models is that due to the strain softening behaviour, prediction may suffer from mesh size and orientation dependency in localised strain zones \cite{peerlings_critical_2001, peerlings_localisation_2002, geers_strongly_2003}.
+%The governing differential equations can lead to multiple possible solutions due to the nonlinearity and softening response.
+%The finite element or volume solution process may converge to one of these possible solutions depending on factors like the mesh, boundary conditions, or solver parameters. This brings the uniqueness of the solution into question.
+To rectify this, an implicit \emph{non-local} damage variable $\bar{D}$ is introduced as in \citet{peerlings_critical_2001, peerlings_localisation_2002} and \citet{geers_strongly_2003}.
+This is related to the local damage variable $D$ through the implicit diffusion equation:
+\begin{equation} \label{eqn:nonLocalEquation}
+	\bar{D} -  l_c^2 \bb{\nabla}^2 \bar{D} = D
 \end{equation}
+where $l_c$ is a characteristic length scale which controls the area over which the local damage is diffused.
+This equation can be viewed as a smoothing equation ($\bar{D}$ is a spatially smoothed version of $D$), which has the effect of mitigating the mesh dependency. This equation is solved with the zero-flux Neumann boundary conditions on all boundaries:  $\bb{n} \cdot \nabla \bar{D} = 0$.
+%\begin{equation}
+%    \nabla \bar{D}\cdot\textbf{n}=0 
+%\end{equation}
+The terms in Equation \ref{eqn:nonLocalEquation} are discretised using the cell-centred finite volume method, similar to the pressure equation (Equation \ref{eq:pressureEqn}).
+
+%The Algorithm for incorporating the non-local damage is provided in Algorithm 4. As can be seen, the procedure is very similar to that in the local Lemaitre damage model. Algorithm 4 is provided to clarify how the non-local damage is coupled with the elasto-plastic model and the steps involved prior to solving the non-local damage gradient equation.
 
 
+\paragraph{Overall Stress Calculation Procedure}
 
-An implicit-explicit algorithm has been developed in this work to solve this set of equations. At every iteration, the plastic increment is solved for implicitly - with the value for the damage fixed from the previous outer iteration, the damage is then solved explicitly also using the damage from the previous iteration. Such an algorithm is highly beneficial as it does not require the use of a $2 \times 2$ matrix (or an even higher dimension matrix if one was to solve for anisotropic plasticity or plasticity incorporating kinematic hardening) that would be needed if both the damage and the plastic increment were solved for implicitly simultaneously. By not requiring the solution of both the plasticity and damage implicitly, the mathematics are simplified when solving for more complex formulations of the Lemaitre damage evolution equation, and for the 'non-local damage' which will be described later in this section.
-
-The superscript notation laid out in equations \ref{eqn:superscript1} and \ref{eqn:superscript2} is used to indicate whether the damage variable is from the current iteration or from the previous iteration. The superscript $^{i+1}$ means that the variable is from the current outer iteration while the superscript $^{i}$ means that the variable is from the previous outer iteration.
-
-\begin{equation}
-\label{eqn:superscript1}
-    D^{i+1}_{n+1}
+This stress calculation procedure for the Lemaitre damage model is summarised in Algorithm \ref{alg:lemaitre}, where $\bar{D}^{[m+1]}_*$ is the latest available non-local damage field at the new time, i.e. its values from the previous outer iteration; at convergence within each time step, $\bar{D}^{[m+1]}_*$ becomes $\bar{D}^{[m+1]}$.
+As shown, to aid numerical convergence, a critical damage parameter $D_c$ is incorporated \cite{lemaitre_continuous_1985}, which limits the maximum value of the damage $D$ to $D_c$, rather than $1$.
+In the current work, $D_c = 0.99$ is assumed.
+Consequently, the damage rate equation (Equation \ref{eqn:classicY}) becomes
+\begin{equation} \label{eq:damageLimit} % note: flip sign from Andrew's thesis, as Andrew assume p = hyd(sigma), whereas we assume p = -hyd(sigma)
+%	D^{i+1}_{n+1}= \begin{cases}D_n & \text { if } \eta\leq-\frac{1}{3}	\\
+%	D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{r}\right]^s & \text { if } \eta>-\frac{1}{3}\end{cases}
+	\dot{D} =
+	\begin{cases}
+		0 & \text { if } \eta \leq -\frac{1}{3} \text{ or } D \geq D_c \\
+		\frac{\dot{\bar{\varepsilon}}_p}{1 - D}\left(\frac{-Y}{S(\eta,\xi)}\right)^b 
+		& \text { if } \eta>-\frac{1}{3} \text{ and }  D < D_c
+	\end{cases}
 \end{equation}
-\begin{equation}
-\label{eqn:superscript2}
-    D^{i}_{n+1}
-\end{equation}
+where $S$ can be a function of $\eta$ and $\xi$ as described above.
+%In addition, $D$ is explicitly bound to be less than of equal to $D_c$.
 
-
-The first three of the equations in the system given in 4.41 can be satisfied by solving the yield potential for the plastic increment $\Delta\gamma$, with the damage obtained from the previous iteration frozen. 
-
-First, the von Mises stress is defined in terms of the elastic strain and combined with equation 4.36:
-\begin{equation}
-\begin{aligned}
-%\frac{\tau^{eq}_{n+1}}{1-D^{i}_{n+1}}=\bar{\tau}_{{eq}_{n+1}}&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^e\right)\right\|\\
-%&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^{e \text { trial }}-\frac{3}{2} \frac{\Delta \gamma}{\left(1+D^{i}_{n+1}\right)} \frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\right)\right\|
-fix
-\end{aligned}
-\end{equation}
-
-Following the procedure laid out in Section 3.2.3, the equation for the yield function in terms of the plastic increment can be obtained in terms of the plastic increment:
-\begin{equation}
-	\bar{\tau}_{eq\ n+1}^{trial}-3\mu\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}-\sigma_{y\ }\left(\alpha_n+\Delta\gamma\right)=0
-\end{equation}
-
-This is solved implicitly using the Newton–Raphson algorithm for $\Delta\gamma$, the stress tensor and the plastic strain tensor are then updated based on this value.  
-After updating these values, the damage equation can then be solved explicitly.
-
-A triaxiality cut-off is employed here \cite{bouchard_enhanced_2011} below which damage does not evolve. An additional parameter, the critical damage $D_c$ is also incorporated \cite{lemaitre_continuous_1985}. This critical damage material parameter gives the maximum value the damage $D$ can evolve to, at which point the cell is assumed to be fully damaged. The fully damaged state is accounted for in this work by setting the damage equal to $0.99$. The damage is not set to $1$ to allow for some residual stresses in this cell to aid convergence.
-\begin{equation}
-D^{i+1}_{n+1}= \begin{cases}D_n & \text { if } \eta\leq-\frac{1}{3} \\ D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{r}\right]^s & \text { if } \eta>-\frac{1}{3}\end{cases}
-\end{equation}
-\begin{equation}
-\label{DamageUpdateEquation}
-D^{i+1}_{n+1}= \begin{cases} D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{r}\right]^s & \text { if } D^{i}_{n+1}<D_c \\ 0.99 & \text { if } D^{i}_{n+1} \geq D_c \end{cases}
-\end{equation}
-
-This overall procedure for the Lemaitre damage model is summarized in Algorithm 3.
-
-\begin{algorithm}[H]
+\begin{algorithm}[htbp] \label{alg:lemaitre} \footnotesize
 \SetAlgoLined
-(i) Update deformation gradients for given incremental displacement
+(i) Update deformation gradients for a given incremental displacement
 
 \begin{equation}
-  \mathbf{f}_{n+1}=\mathbf{I}+\nabla\left[\Delta\textbf{u}\right]\nonumber
+  \mathbf{f}^{[m+1]} = \mathbf{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
 \end{equation}
 
 \begin{equation}
-\mathbf{F}_{n+1}=\mathbf{f}_{n+1}\mathbf{F}_n\nonumber
+  \mathbf{F}^{[m+1]} = \mathbf{f}^{[m+1]} \cdot \mathbf{F}^{[m]}  \nonumber
 \end{equation}
-(ii) Compute trial elasticity
+
+(ii) Compute trial elastic state
 \begin{equation}
-\mathbf{B}^{e}_{n}=exp\left[{2\boldsymbol{\varepsilon}^{e}_{n}}\right]\nonumber
-\end{equation}
-\begin{equation}
-\mathbf{B}^{e}_{trial}=\mathbf{f}_{n+1}\mathbf{B}^{e}_{n}(\mathbf{f}_{n+1})^{T}\nonumber
+\mathbf{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
 \end{equation}
 \begin{equation}
-\boldsymbol{\varepsilon}^{e}_{trial}=\frac{1}{2}ln[\textbf{B}^{e}_{trial}]\nonumber
+\mathbf{B}_{e}^{\text{trial}} = \mathbf{f}^{[m+1]} \cdot \mathbf{B}_{e}^{[m]} \cdot (\mathbf{f}^{[m+1]})^{T}\nonumber
 \end{equation}
 \begin{equation}
-\alpha_{trial}=\alpha_{n}\nonumber\nonumber
+\boldsymbol{\varepsilon}_{e}^{\text{trial}} = \frac{1}{2} \ln(\textbf{B}_{e}^{\text{trial}}) \nonumber
 \end{equation}
 \begin{equation}
-\bar{\tau}_{eq}^{trial}=\sqrt{\frac{3}{2}}\lvert\lvert2\mu\ dev(\boldsymbol{\varepsilon}^{e}_{trial})\rvert\rvert\nonumber\nonumber
+\bar{\varepsilon}^{\text{trial}}_p = \bar{\varepsilon}^{[m]}_p \nonumber
 \end{equation}
 \begin{equation}
-f_{trial}=  \bar{\tau}_{eq}^{trial}-\sigma_{y}(\alpha) \nonumber 
+\sigma_{v}^{\text{trial}} = \sqrt{\sfrac{3}{2}} || 2G\ \text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})|| \nonumber
 \end{equation}
-  \eIf{$f_{trial}>0$}{
-   go to step iii to solve for $\Delta\gamma$
+\hl{Andrew: should the yield function include D old (equation 26)?}
+\begin{equation}
+%\Phi^{\text{trial}} =  \frac{\sigma_{v}^{\text{trial}}}{1 - \bar{D}^{[m]}} - \sigma_{y}(\bar{\varepsilon}^{\text{trial}}_p) \nonumber 
+\Phi^{\text{trial}} =  \sigma_{v}^{\text{trial}} - \sigma_{y}(\bar{\varepsilon}^{\text{trial}}_p) \nonumber 
+\end{equation}
+  \eIf{$\Phi^{\text{trial}} > 0$}{
+   go to step (iii) to solve for $\Delta\bar{\varepsilon}_p$
    }{
-   $\Delta\gamma=0$ and go to step iv
+   $\Delta\bar{\varepsilon}_p = 0$ and go to step (iv)
   }
 
-(iii) Enter small-strain return map and solve for $\Delta\gamma$ using the Newton-Raphson method to solve the equation:
+(iii) Use the Newton-Raphson method to solve the yield function for $\Delta\bar{\varepsilon}_p$:
 \begin{equation}
-\bar{\tau}_{eq}^{trial}-\frac{3\mu\Delta\gamma}{1-D^{i}_{n+1}}-\sigma_{y}(\alpha+\Delta\gamma)=0\nonumber
+	\sigma_{v}^{\text{trial}} 
+	- \frac{ 3\mu \Delta\bar{\varepsilon}_p }{1 - \bar{D}^{[m+1]}_*}
+	-\sigma_{y}(\bar{\varepsilon}^{[m]}_p + \Delta\bar{\varepsilon}_p) = 0 \nonumber
 \end{equation}
-(iv) Update constitutive variables
+
+(iv) Update constitutive variables and deviatoric stress
 \begin{equation}
-\alpha_{n+1}=zalpha_n+\Delta\gamma\nonumber
+	\boldsymbol{\varepsilon}_{e}^{[m+1]}
+	=
+	\boldsymbol{\varepsilon}_{e}^{\text{trial}}
+	- \sqrt{\frac{3}{2}} \; \frac{ \Delta\bar{\varepsilon}_p}{1 - \bar{D}^{[m+1]}_*}
+	\frac{\text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})}{||\boldsymbol{\varepsilon}_{e}^{\text{trial}}||}
+	\nonumber
 \end{equation}
 \begin{equation}
-\boldsymbol{\varepsilon}^{e}_{n+1}=\boldsymbol{\varepsilon}^{e}_{trial}-\sqrt{\frac{3}{2}}\frac{\Delta\gamma}{1-D^{i}_{n+1}}{\frac{dev(\boldsymbol{\varepsilon}^{e}_{trial})}{\lvert\lvert\boldsymbol{\varepsilon}^{e}_{trial}\rvert\rvert}}\nonumber
+	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta\bar{\varepsilon}_p \nonumber
 \end{equation}
+
 \begin{equation}
-\boldsymbol{\tau}_{n+1}=\left(1-D^{i}_{n+1}\right)\mathbf{D}^e:\boldsymbol{\varepsilon}^{e}_{n+1}\nonumber
+%	\boldsymbol{\sigma}_{n+1} = \frac{1}{J} \mathbf{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
+	\boldsymbol{s}^{[m+1]}
+	=
+	\left(1 - \bar{D}^{[m+1]}_*\right) (\sfrac{1}{J}) 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
 \end{equation}
+
+(v) Implicitly solve the pressure Poisson's equation, where $J^{[m+1]} = -(1 - \bar{D}^{[m+1]}_*) \kappa \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right)$.
 \begin{equation}
-\boldsymbol{\sigma}_{n+1}=\frac{1}{J}\boldsymbol{\tau}_{n+1}\nonumber
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = -\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right] - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m]} \right)
 \end{equation}
-(v) Update damage field (equation \ref{DamageUpdateEquation})
-\caption{Lemaitre Damage Model}
+
+
+(vi) Update the true (Cauchy) stress
+\begin{equation}
+	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
+\end{equation}
+
+(vii) Update the local damage (use the modified form for $Y$ if the crack $h > 0$)
+%\ref{eq:triaxCutoff} and \ref{eq:damageLimit}
+\begin{equation} % note: flip sign from Andrew's thesis, as Andrew assume p = hyd(sigma), whereas we assume p = -hyd(sigma)
+	D^{[m+1]} =
+	\begin{cases}
+		D^{[m]} & \text { if } \eta \leq -\frac{1}{3} \text{ or } D^{[m+1]}_* \geq D_c \\
+		\text{max} \left[ D^{[m]} + \frac{\dot{\bar{\varepsilon}}_p}{1 - D^{[m+1]}_*}\left(\frac{-Y}{S(\eta,\xi)}\right)^b, \; D_c \right]
+		& \text { if } \eta>-\frac{1}{3} \text{ and }  D^{[m+1]}_* < D_c
+	\end{cases}
+\end{equation}
+
+
+(vii) Implicitly solve diffusion equation for non-local damage
+\begin{equation}
+	\bar{D}^{[m+1]} -  l_c^2 \bb{\nabla}^2 \bar{D}^{[m+1]} = D^{[m+1]}
+\end{equation}
+
+(viii) Limit the non-local damage
+\begin{equation}
+	\bar{D}^{[m+1]} = \text{max} \left( \bar{D}^{[m+1]} , D_c \right)
+\end{equation}
+
+\caption{Lemaitre damage model stress calculation algorithm}
 \end{algorithm}
+\normalsize
 
 %\begin{figure}[htb]
 %\begin{center}
@@ -1285,225 +1515,147 @@ f_{trial}=  \bar{\tau}_{eq}^{trial}-\sigma_{y}(\alpha) \nonumber
 %\end{figure}
 
 
-\subsubsection{Alternative Formulations}
 
-Various alternative formulations of the Lemaitre damage model have been proposed in the literature. Typically, these models entail an alteration of the damage dissipation potential \cite{cao_lode-dependent_2014,chandrakanth_isotropic_1995,wei_hua_tai_new_1986,bouchard_enhanced_2011,bonora_nonlinear_1997,malcher_improved_2014,ferreira_improved_2022,castro_calibration_2018,lian_modified_2014} and therefore, following the procedure described in section 4.2.3, an alternative damage evolution equation is derived. 
 
-Of particular interest in this work is the class of models \cite{malcher_improved_2014,ferreira_improved_2022,castro_calibration_2018} based on the formulation developed by \citet{malcher_improved_2014}. This class of models have shown an ability to accurately predict fracture for a range of loading conditions - at both low and high triaxiality values and for various shear stress states.
- 
-As noted in \citet{malcher_improved_2014}, the classic Lemaitre damage model has a tendency to predict fracture too early at low triaxialities and too late at high triaxialities values. To remedy this, an alternative damage dissipation potential was proposed: 
-
-\begin{equation}
-	F_{D}=\frac{S(\eta,\xi)}{\left(1-D\right)\left(b+1\right)}\left[\frac{-Y}{S(\eta,\xi)}\right]^{b+1}
-\end{equation}
-
- Following the procedure described in section 4.2.3 of this thesis, the damage evolution equation is then given as:
-
- \begin{equation}
-	\dot{D}=\frac{\dot{\gamma}}{\left(1-D\right)}\left[\frac{-Y}{S(\eta,\xi)}\right]^b
-\end{equation}
-
-The Lemaitre damage denominator is modified to become a function of the triaxiality $\eta$ and in some cases the normalised third invariant $\xi$. The damage denominator is given by \citet{malcher_improved_2014} as:
-\begin{equation}
-S(\eta,\xi)=\frac{S_{0.33}}{3|\eta|+\frac{S_{0.33}}{S_{0.0}}\left(1-\xi^2\right)}
-\end{equation}
-
-One weakness of this formulation, however, is that it does not distinguish between positive and negative triaxiality values. In Chapter 7, a novel Lemaitre damage model is proposed in this work that is conceptually similar to the above formulation. 
-
-It is worth noting the benefit of the developed implicit-explicit algorithm when looking at this class of models. The fact that the developed algorithm does not require the solution of the damage implicitly means that incorporating novel damage evolution equations into the existing code is relatively simple, without the need to calculate derivatives that can become quite complex when incorporating shear effects, in particular, \cite{malcher_improved_2014}.
-
-\subsubsection{Non-local damage}
-
-One limitation of damage models is that due to the strain softening behaviour, their results may suffer from mesh size and orientation dependency in localized strain zones \cite{peerlings_critical_2001,peerlings_localisation_2002,geers_strongly_2003}. The governing differential equations can lead to multiple possible solutions due to the nonlinearity and softening response. The finite element or volume solution process may converge to one of these possible solutions depending on factors like the mesh, boundary conditions, or solver parameters. This brings the uniqueness of the solution into question. In order to rectify this, an implicit non-local damage variable $\bar{D}$ is introduced as in \citet{peerlings_critical_2001, peerlings_localisation_2002} and \citet{geers_strongly_2003}. This is related to the local damage variable $D$ through the implicit gradient equation:
-\begin{equation}
-\label{eqn:nonLocalEquation}
-	\left(D-\bar{D}\right)+{{l_c}^2\mathrm{\nabla}}^2D=0	
-\end{equation}
-Where $l_c$ is a characteristic length scale which controls the area over which the local damage is diffused. This equation can be viewed as a smoothing equation which has the effect of mitigating the mesh dependency of the solution.
-
-This equation is solved with the Neumann boundary equation on the boundary $\Gamma$
-
-\begin{equation}
-    \nabla \bar{D}\cdot\textbf{n}=0 
-\end{equation}
-
-The Algorithm for incorporating the non-local damage is provided in Algorithm 4. As can be seen, the procedure is very similar to that in the local Lemaitre damage model. Algorithm 4 is provided to clarify how the non-local damage is coupled with the elasto-plastic model and the steps involved prior to solving the non-local damage gradient equation.
-
-\textbf{Implementation}
-
-Equation \ref{eqn:nonLocalEquation} is given in its strong integral form, with respect to the updated configuration, as
-
-\begin{equation}
-\int_{\mathrm{\Omega}_u}D\ d\mathrm{\Omega}_u-\int_{\mathrm{\Omega}_u}\bar{D}\ d\mathrm{\Omega}_u+\oint_{\mathrm{\Gamma}_u}{{l_c}^2\ \mathbf{n}_u\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_u=0
-\end{equation}
-
-In the context of the overall algorithm for the non-local Lemaitre damage model, the non-local damage $\bar{D}$ is solved for implicitly at the current iteration and the current time step, using the local damage $D$ at the current time step and current iteration.
-
-\begin{equation}
-\int_{\mathrm{\Omega}_u}D^{i+1}_{n+1}\ d\mathrm{\Omega}_u-\int_{\mathrm{\Omega}_u}\bar{D}^{i+1}_{n+1}\ d\mathrm{\Omega}_u+\oint_{\mathrm{\Gamma}_u}{{l_c}^2\ \mathbf{n}_u\cdot\mathrm{\nabla}\mathrm{ \bar{D}^{i+1}_{n+1}}}\ d\mathrm{\Gamma}_u=0
-\end{equation}
-
-\begin{algorithm}[H]
-\SetAlgoLined
-(i) Update Relative Deformation for given incremental displacement
-
-\begin{equation}
-  \mathbf{f}_{n+1}=\mathbf{I}+\nabla\left[\Delta\textbf{u}\right]\nonumber
-\end{equation}
-
-\begin{equation}
-\mathbf{F}_{n+1}=\mathbf{f}_{n+1}\mathbf{F}_n\nonumber
-\end{equation}
-(ii) Compute trial elasticity
-\begin{equation}
-\mathbf{B}^{e}_{n}=exp\left[{2\boldsymbol{\varepsilon}^{e}_{n}}\right]\nonumber
-\end{equation}
-\begin{equation}
-\mathbf{B}^{e}_{trial}=\mathbf{f}_{n+1}\mathbf{B}^{e}_{n}(\mathbf{f}_{n+1})^{T}\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\varepsilon}^{e}_{trial}=\frac{1}{2}ln[\textbf{B}^{e}_{trial}]\nonumber
-\end{equation}
-\begin{equation}
-\alpha_{trial}=\alpha_{n}\nonumber
-\end{equation}
-\begin{equation}
-\bar{\tau}_{eq}^{trial}=\sqrt{\frac{3}{2}}\lvert\lvert2\mu\ dev(\boldsymbol{\varepsilon}^{e}_{trial})\rvert\rvert\nonumber\nonumber
-\end{equation}
-\begin{equation}
-f_{trial}=  \bar{\tau}_{eq}^{trial}-\sigma_{y}(\alpha) \nonumber 
-\end{equation}
-  \eIf{$f_{trial}>0$}{
-   go to step iii to solve for $\Delta\gamma$
-   }{
-   $\Delta\gamma=0$ and go to step iv
-  }
-
-(iii) Enter small-strain return map and solve for $\Delta\gamma$ using the Newton-Raphson method to solve the equation:
-\begin{equation}
-\bar{\tau}_{eq}^{trial}-\frac{3\mu\Delta\gamma}{1-\bar{D}^{i}_{n+1}}-\sigma_{y}(a+\Delta\gamma)=0\nonumber
-\end{equation}
-(iv) Update Constitutive Variables
-\begin{equation}
-\alpha_{n+1}=\alpha_n+\Delta\gamma\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\varepsilon}^{e}_{n+1}=\boldsymbol{\varepsilon}^{e}_{trial}-\sqrt{\frac{3}{2}}\frac{\Delta\gamma}{\left(1-\bar{D}^{i}_{n+1}\right)}{\frac{dev(\boldsymbol{\varepsilon}^{e}_{trial})}{\lvert\lvert\boldsymbol{\varepsilon}^{e}_{trial}\rvert\rvert}}\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\tau}_{n+1}=\left(1-\bar{D}^{i}_{n+1}\right)\mathbf{D}^e:\boldsymbol{\varepsilon}^{e}_{n+1}\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\sigma}_{n+1}=\frac{1}{J}\boldsymbol{\tau}_{n+1}\nonumber
-\end{equation}
-(v) Update local damage field (equation \ref{DamageUpdateEquation})
-
-\ (vi) Update non-local damage field (equation \ref{eqn:nonLocalEquation})
-\caption{Non-local Lemaitre damage model}
-\end{algorithm}
+%%\textbf{Implementation}
+%%
+%%Equation \ref{eqn:nonLocalEquation} is given in its strong integral form, with respect to the updated configuration, as
+%%
+%%\begin{equation}
+%%\int_{\mathrm{\Omega}_u}D\ d\mathrm{\Omega}_u-\int_{\mathrm{\Omega}_u}\bar{D}\ d\mathrm{\Omega}_u+\oint_{\mathrm{\Gamma}_u}{{l_c}^2\ \mathbf{n}_u\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_u=0
+%%\end{equation}
+%%
+%%In the context of the overall algorithm for the non-local Lemaitre damage model, the non-local damage $\bar{D}$ is solved for implicitly at the current iteration and the current time step, using the local damage $D$ at the current time step and current iteration.
+%%
+%%\begin{equation}
+%%\int_{\mathrm{\Omega}_u}D^{i+1}_{n+1}\ d\mathrm{\Omega}_u-\int_{\mathrm{\Omega}_u}\bar{D}^{i+1}_{n+1}\ d\mathrm{\Omega}_u+\oint_{\mathrm{\Gamma}_u}{{l_c}^2\ \mathbf{n}_u\cdot\mathrm{\nabla}\mathrm{ \bar{D}^{i+1}_{n+1}}}\ d\mathrm{\Gamma}_u=0
+%%\end{equation}
+%
+%\begin{algorithm}[H]
+%\SetAlgoLined
+%(i) Update Relative Deformation for given incremental displacement
+%
+%\begin{equation}
+%  \mathbf{f}_{n+1}=\mathbf{I}+\nabla\left[\Delta\textbf{u}\right]\nonumber
+%\end{equation}
+%
+%\begin{equation}
+%\mathbf{F}_{n+1}=\mathbf{f}_{n+1}\mathbf{F}_n\nonumber
+%\end{equation}
+%(ii) Compute trial elasticity
+%\begin{equation}
+%\mathbf{B}^{e}_{n}=exp\left[{2\boldsymbol{\varepsilon}^{e}_{n}}\right]\nonumber
+%\end{equation}
+%\begin{equation}
+%\mathbf{B}^{e}_{trial}=\mathbf{f}_{n+1}\mathbf{B}^{e}_{n}(\mathbf{f}_{n+1})^{T}\nonumber
+%\end{equation}
+%\begin{equation}
+%\boldsymbol{\varepsilon}^{e}_{trial}=\frac{1}{2}ln[\textbf{B}^{e}_{trial}]\nonumber
+%\end{equation}
+%\begin{equation}
+%\alpha_{trial}=\alpha_{n}\nonumber
+%\end{equation}
+%\begin{equation}
+%\bar{\tau}_{eq}^{trial}=\sqrt{\frac{3}{2}}\lvert\lvert2\mu\ dev(\boldsymbol{\varepsilon}^{e}_{trial})\rvert\rvert\nonumber\nonumber
+%\end{equation}
+%\begin{equation}
+%f_{trial}=  \bar{\tau}_{eq}^{trial}-\sigma_{y}(\alpha) \nonumber 
+%\end{equation}
+%  \eIf{$f_{trial}>0$}{
+%   go to step iii to solve for $\Delta\gamma$
+%   }{
+%   $\Delta\gamma=0$ and go to step iv
+%  }
+%
+%(iii) Enter small-strain return map and solve for $\Delta\gamma$ using the Newton-Raphson method to solve the equation:
+%\begin{equation}
+%\bar{\tau}_{eq}^{trial}-\frac{3\mu\Delta\gamma}{1-\bar{D}^{i}_{n+1}}-\sigma_{y}(a+\Delta\gamma)=0\nonumber
+%\end{equation}
+%(iv) Update Constitutive Variables
+%\begin{equation}
+%\alpha_{n+1}=\alpha_n+\Delta\gamma\nonumber
+%\end{equation}
+%\begin{equation}
+%\boldsymbol{\varepsilon}^{e}_{n+1}=\boldsymbol{\varepsilon}^{e}_{trial}-\sqrt{\frac{3}{2}}\frac{\Delta\gamma}{\left(1-\bar{D}^{i}_{n+1}\right)}{\frac{dev(\boldsymbol{\varepsilon}^{e}_{trial})}{\lvert\lvert\boldsymbol{\varepsilon}^{e}_{trial}\rvert\rvert}}\nonumber
+%\end{equation}
+%\begin{equation}
+%\boldsymbol{\tau}_{n+1}=\left(1-\bar{D}^{i}_{n+1}\right)\mathbf{D}^e:\boldsymbol{\varepsilon}^{e}_{n+1}\nonumber
+%\end{equation}
+%\begin{equation}
+%\boldsymbol{\sigma}_{n+1}=\frac{1}{J}\boldsymbol{\tau}_{n+1}\nonumber
+%\end{equation}
+%(v) Update local damage field (equation \ref{DamageUpdateEquation})
+%
+%\ (vi) Update non-local damage field (equation \ref{eqn:nonLocalEquation})
+%\caption{Non-local Lemaitre damage model}
+%\end{algorithm}
 
 
 
-\subsubsection{Effective non-local damage development}
+%\subsubsection{Effective non-local damage development}
+%
+%
+%One issue with the classic non-local Lemaitre damage model is that it can lead to a somewhat non-physical response. To illustrate this point, the results for the flat notched bar case with non-local Lemaitre damage (case a) and the notched round bar with non-local Lemaitre damage (case b) from the previous section are analysed. The cases looked at here use a time step of $0.001$ and a Rhie-Chow scale factor of $0.1$. The force-displacement curves and the damage evolution plotted at the cells where fracture first occurs (Figures \ref{axiMesh} and \ref{bordenMesh}) are given in Figures \ref{BordenNonLocalIssue} and \ref{AxiNonLocalIssue}.
+%
+%\begin{figure}[t!]
+%	\centering
+%		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/CNLDispForceBorden.png}}
+%		\qquad
+%		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/disp_damageNonLocalBorden.png}}
+%	\caption{Flat notched bar (case a)}
+%	\label{BordenNonLocalIssue}
+%\end{figure}
+%\begin{figure}[t!]
+%	\centering
+%		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/CNLDispForceAxi.png}}
+%		\qquad
+%		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/disp_damageNonLocalAxi.png}}
+%	\caption{Notched round bar (case b)}
+%	\label{AxiNonLocalIssue}
+%\end{figure}
+
+Although subtle, we have found that limiting the value of the non-local damage field $\bar{D}$ (step (viii)) is critical for achieving reliable predictions.
+%Non-physical issues with the damage evolution can be observed in Figures \ref{BordenNonLocalIssue} and \ref{AxiNonLocalIssue}. The non-local gradient equation has the effect of diffusing the damage such that after a certain point, the rate at which the damage evolves is reduced. In reality, it would be expected for the cell to quickly become fully damaged as it enters the void coalescence stage (Figure \ref{fig:Ductile-damage-evolution}) 
+%To mitigate these issues, a novel formulation of the non-local Lemaitre model is developed in this work. The nonphysical response is mitigated by introducing the effective non-local damage field $\bar{D}_{eff}$. This field is set such that it is equivalent to the non-local damage field unless for a given cell the non-local damage field exceeds a critical damage value $D_c$. At this critical value, the effective non-local damage is set to be $0.99$. This cell can be viewed as essentially being fully degraded, the effective non-local damage $\bar{D}_{eff}$ is set as $0.99$ as opposed to $1.0$ in order to allow some small residual stresses in these cells to aid convergence.
+%Further to this, the growth of the local damage for a given cell is prevented if the effective non-local damage of this cell exceeds the critical damage value $D_c$.
+This step prevents nonphysical behaviour whereby a cell that is set as being fully damaged ($D = D_c$) is contributing to the damage growth in the surrounding cells through the non-local damage field.
+%This scheme is described in Algorithm \ref{effectiveNonLocalDamage}.
+
+%\begin{algorithm}[H]
+%\label{effectiveNonLocalDamage}
+%\SetAlgoLined
+%(i) For all cells calculate local damage  \\
+%
+%  \eIf{$\bar{D}_{eff\ n+1}^{i} <= D_c$}{
+%  \begin{equation}
+%D^{i+1}_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b \notag
+%\end{equation} 
+%   }{
+%\begin{equation}
+%D^{i+1}_{n+1}=D^{i}_{n+1} \notag
+%\end{equation}
+%  } 
+%
+%(ii) Calculate global non-local damage field
+%\begin{equation}
+%	\left(D^{i+1}_{n+1}-\bar{D}^{i+1}_{n+1}\right)+{{l_c}^2\mathrm{\nabla}}^2D^{i+1}_{n+1}=0 \notag	
+%\end{equation}
+%
+%(iii) Set the effective non-local damage field for each cell \\
+%\eIf{$\bar{D}_{n+1}^{i+1} <= D_c$}{
+%\begin{equation}
+%D^{i+1}_{eff\ n+1}=D^{i+1}_{n+1}\notag
+%\end{equation} 
+%   }{
+%\begin{equation}
+%D^{i+1}_{eff\ n+1}=0.99 \notag
+%\end{equation}
+%  } 
+%\caption{Damage evolution scheme}
+%\end{algorithm}
 
 
-One issue with the classic non-local Lemaitre damage model is that it can lead to a somewhat non-physical response. To illustrate this point, the results for the flat notched bar case with non-local Lemaitre damage (case a) and the notched round bar with non-local Lemaitre damage (case b) from the previous section are analysed. The cases looked at here use a time step of $0.001$ and a Rhie-Chow scale factor of $0.1$. The force-displacement curves and the damage evolution plotted at the cells where fracture first occurs (Figures \ref{axiMesh} and \ref{bordenMesh}) are given in Figures \ref{BordenNonLocalIssue} and \ref{AxiNonLocalIssue}.
 
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/CNLDispForceBorden.png}}
-		\qquad
-		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/disp_damageNonLocalBorden.png}}
-	\caption{Flat notched bar (case a)}
-	\label{BordenNonLocalIssue}
-\end{figure}
-\begin{figure}[t!]
-	\centering
-		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/CNLDispForceAxi.png}}
-		\qquad
-		\subfigure[non-local Damage vs. displacement] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/effectiveNonLocalDamage/disp_damageNonLocalAxi.png}}
-	\caption{Notched round bar (case b)}
-	\label{AxiNonLocalIssue}
-\end{figure}
-
-Non-physical issues with the damage evolution can be observed in Figures \ref{BordenNonLocalIssue} and \ref{AxiNonLocalIssue}. The non-local gradient equation has the effect of diffusing the damage such that after a certain point, the rate at which the damage evolves is reduced. In reality, it would be expected for the cell to quickly become fully damaged as it enters the void coalescence stage (Figure \ref{fig:Ductile-damage-evolution}) 
-
-To mitigate these issues, a novel formulation of the non-local Lemaitre model is developed in this work. The nonphysical response is mitigated by introducing the effective non-local damage field $\bar{D}_{eff}$. This field is set such that it is equivalent to the non-local damage field unless for a given cell the non-local damage field exceeds a critical damage value $D_c$. At this critical value, the effective non-local damage is set to be $0.99$. This cell can be viewed as essentially being fully degraded, the effective non-local damage $\bar{D}_{eff}$ is set as $0.99$ as opposed to $1.0$ in order to allow some small residual stresses in these cells to aid convergence.
-
-Further to this, the growth of the local damage for a given cell is prevented if the effective non-local damage of this cell exceeds the critical damage value $D_c$. This prevents the nonphysical behaviour whereby a cell that is set as being fully cracked is contributing to the damage growth in the surrounding cells through the non-local damage field. This scheme is described in Algorithm \ref{effectiveNonLocalDamage}.
-
-\begin{algorithm}[H]
-\label{effectiveNonLocalDamage}
-\SetAlgoLined
-(i) For all cells calculate local damage  \\
-
-  \eIf{$\bar{D}_{eff\ n+1}^{i} <= D_c$}{
-  \begin{equation}
-D^{i+1}_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b \notag
-\end{equation} 
-   }{
-\begin{equation}
-D^{i+1}_{n+1}=D^{i}_{n+1} \notag
-\end{equation}
-  } 
-
-(ii) Calculate global non-local damage field
-\begin{equation}
-	\left(D^{i+1}_{n+1}-\bar{D}^{i+1}_{n+1}\right)+{{l_c}^2\mathrm{\nabla}}^2D^{i+1}_{n+1}=0 \notag	
-\end{equation}
-
-(iii) Set the effective non-local damage field for each cell \\
-\eIf{$\bar{D}_{n+1}^{i+1} <= D_c$}{
-\begin{equation}
-D^{i+1}_{eff\ n+1}=D^{i+1}_{n+1}\notag
-\end{equation} 
-   }{
-\begin{equation}
-D^{i+1}_{eff\ n+1}=0.99 \notag
-\end{equation}
-  } 
-\caption{Damage evolution scheme}
-\end{algorithm}
-
-
-
-\subsubsection{Crack-closure effects}
-
-One of the limitations of the classic Lemaitre damage model is that it does not distinguish between tensile and compressive stress states, whereas it is known from experiments that tensile stresses are considerably more conducive to crack growth than compressive stresses \cite{bao_cut-off_2005}. In order to have a more physically realistic model, some authors use models which consider there to be no crack growth in compressive stress states \cite{chu_void_1980}. However, this does not account for some of the particular aspects of crack closure during compressive stress states. When subjected to compressive stresses, micro-defects in the material may partially close, causing a greater area of the material to bear the load of the compression. As a result, the material may exhibit a partial or complete recovery of its stiffness, depending on the specific conditions \cite{teixeira_ductile_2010}. This approach also does not account for the fact that some crack growth can occur in compressive stages \cite{basic_finite_2005}.
-
-The enhanced Lemaitre model with crack-closure effects \cite{pires_issues_2005,teixeira_ductile_2010} is therefore used to give a more accurate account of damage development. In this model, an effective stress for compressive stress states is introduced. It differs from that in equation 4.12 through the introduction of the material parameter $h$ (and given here in terms of the Kirchhoff stress):
-\begin{equation}
-	\bar{\boldsymbol{\tau}}\ =\frac{\boldsymbol{\tau}}{\left(1-hD\right)}	
-\end{equation}
-
-For the sake of numerical efficiency, a simplified form of the crack-closure model \cite{teixeira_ductile_2010} is employed in this work whereby this formulation for the effective stress is only utilised in the damage evolution procedure. 
-
-Under compressive stress, micro-cracks will partially or fully close leading to an increase in the load-carrying area. The parameter h where $0\le h\le1$ accounts for the crack closure phenomenon ($h$ is usually taken to be 0.2 for steels \cite{desmorat_modeling_2008,lemaitre_course_1996,bouchard_enhanced_2011}). 
-An eigen decomposition is performed to split the stress tensor into its positive and negative components
-\begin{equation}
-	\boldsymbol{\tau}=\boldsymbol{\tau}_++\boldsymbol{\tau}_-	
-\end{equation}
-The positive and negative stress contributions are given as:
-\begin{equation}
-	\boldsymbol{\tau}_+=\sum_{i=1}^{3}<{\tau}_i>\mathbf{e}_i\otimes\mathbf{e}_i	
-\end{equation}
-
-\begin{equation}
-	\boldsymbol{\tau}_-=\sum_{i=1}^{3}<{-{\tau}}_i>\mathbf{e}_i\otimes\mathbf{e}_i
-\end{equation}
-
-where ${\tau}_i$ are the principal stresses, $\{\mathbf{e}_1,\mathbf{e}_2,\mathbf{e}_3\}$ are the orthonormal basis vectors, $\otimes$ is the outer product and $<>$ is a Macauley bracket.
-The effective stress tensor can then be given by:
-\begin{equation}
-	\bar{\boldsymbol{\tau}}\ =\frac{\boldsymbol{\tau}_+}{\left(1-D\right)}+\frac{\boldsymbol{\tau}_-}{\left(1-hD\right)}	
-\end{equation}
-
-The energy release rate $Y$ is rewritten to account for the differing contributions of tensile and compressive stresses:
-
-\begin{eqnarray}
-	-Y=&-&\frac{1}{2E\left(1-D\right)}\left[\left(1+v\right)\boldsymbol{\tau}_+\colon\boldsymbol{\tau}_+-v\ <tr(\boldsymbol{\tau})>^2\right] \notag \\
-	&-&\frac{h}{2E\left(1-hD\right)}\left[\left(1+v\right)\boldsymbol{\tau}_-\colon\boldsymbol{\tau}_--v<-\ tr(\boldsymbol{\tau})>^2\right]
-\end{eqnarray}
 
 
 
@@ -1511,6 +1663,8 @@ The energy release rate $Y$ is rewritten to account for the differing contributi
 %%%%%%%%%%
 \subsection{Gurson-Tvergaard-Needleman Model}
 %%%%%%%%%%
+
+\hl{Here: this section has yet to be reformatted}
 
 The framework developed by \citet{gurson_continuum_1977} is the canonical framework used in the micro-mechanical approach to characterising material degradation \cite{besson_continuum_2010,cao_models_2017,tekkaya_damage_2020}. This model posits the existence of micro-voids in the material. The density of these voids is described by a variable denoted as porosity. The material degradation is characterised by the increasing porosity due to these voids' growth. Defining material degradation merely in terms of the growth of voids is limited, however. Gurson’s framework was developed further by \citet{tvergaard_analysis_1984} who developed mechanisms to account for the nucleation and coalescence of voids. In order to be consistent with how the GTN model is typically described in the literature \cite{bettaieb_numerical_2011,achouri_numerical_2013} and to present the equations in the form that they are implemented in the developed codes, the equivalent stress $\tau_{eq}$ is described using the symbol $q$ and the pressure $\tau_h$ is denoted by the symbol $p$. 
 \subsection{Evolution of Voids}
