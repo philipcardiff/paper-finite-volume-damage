@@ -2524,9 +2524,9 @@ Table \ref{tab:notched_bar_mat} gives the assumed elastoplastic material paramet
 %%%%%%%%%%%
 \subsection{Flat Notched Bar}
 %%%%%%%%%%%
-The 3-D flat notched tensile specimen (Figure \ref{fig:flat_bar_geom}) is another common test case for assessing damage models, for example, as examined by \citet{borden_phase-field_2016} and \citet{eldahshan_phase_2021}.
-The geometry consists of $152.4 \times 25.4$ \si{\milli\meter} plate with a 4.06 \si{\milli\meter} diamter side notches.
-The solution domain consists of one-quarter of the specimen by exploiting three symmetry planes.
+The 3-D flat notched tensile specimen (Figure \ref{fig:flat_bar_geom}) is another common test case for assessing damage models \citep{borden_phase-field_2016, eldahshan_phase_2021}.
+The geometry consists of $152.4 \times 25.4$ \si{\milli\meter} plate with 4.06 \si{\milli\meter} diameter side notches.
+The solution domain comprises one-eight of the specimen by exploiting three symmetry planes.
 A structured hexahedral mesh is employed (Figure \ref{fig:flat_bar_mesh}).
 
 \begin{figure}[htb] \label{fig:flat_bar_geom}
@@ -2543,7 +2543,7 @@ A structured hexahedral mesh is employed (Figure \ref{fig:flat_bar_mesh}).
 		\subfigure[Marked cell in pink where results are analysed] {\label{boeing} \includegraphics[width=0.3\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/bordenCell.png}}
 		
 		\caption{Flat notched bar mesh}
-	\label{flat_bar_mesh}
+	\label{fig:flat_bar_mesh}
 \end{figure}
 
 A vertical displacement of 1.143 \si{\milli\meter} is applied to the upper boundary over 100 quasi-static loading steps, corresponding to 0.01143 \si{\milli\meter} increments.
@@ -2566,7 +2566,7 @@ Table \ref{tab:flat_bar_mat} gives the assumed elastoplastic material parameters
 
 %\subsection{Plasticity model} \label{PlasticityTestCases}
 
-Before verifying the damage and fracture models, the implementation of the plasticity model described in chapter 3 is verified by comparing its results to (i) the elasto-plastic model implemented by  \citet{clancy_improving_2019}) in OpenFOAM that uses the logarithmic strain and the Mandel stress \cite{caminero_modeling_2011}, (ii) to the elasto-plastic model implemented in OpenFOAM by \citet{cardiff_lagrangian_2017}, which uses the Green strain tensor and the return mapping algorithm described by \citet{simo_computational_1998} and (iii) to results obtained from simulations conducted in Abaqus.
+Before verifying the damage and fracture models, the implementation of the plasticity model described is verified by comparing its results to (i) the elasto-plastic model implemented by  \citet{clancy_improving_2019}) in OpenFOAM that uses the logarithmic strain and the Mandel stress \cite{caminero_modeling_2011}, (ii) to the elasto-plastic model implemented in OpenFOAM by \citet{cardiff_lagrangian_2017}, which uses the Green strain tensor and the return mapping algorithm described by \citet{simo_computational_1998} and (iii) to results obtained from simulations conducted in Abaqus based on the Jaumann stress rate.
 
 %These simulations are conducted using the material properties described in Tables 5.5 and 5.6.
 
@@ -2577,7 +2577,7 @@ Before verifying the damage and fracture models, the implementation of the plast
 
 \subsubsection{Reaction force vs displacement}
 
-It can be seen in Figure 5.11 that the results align very well, verifying the implementation of this model. It is worth noting that the reaction force for both the \citet{clancy_improving_2019} implementation and the implementation of this work (which both use the logarithmic strain) is slightly less than that given by the \citet{cardiff_lagrangian_2017} implementation and the Abaqus simulation in the latter stages of the deformation. It is unclear exactly why this is, though it could be related to the fact that formulations which employ the logarithmic strain are not exactly mathematically equivalent to those which employ the Green strain tensor.
+It can be seen in Figure 5.11 that the results align well, verifying the implementation of this model. It is worth noting that the reaction force for both the \citet{clancy_improving_2019} implementation and the implementation of this work (which both use the logarithmic strain) is slightly less than that given by the \citet{cardiff_lagrangian_2017} implementation and the Abaqus simulation in the latter stages of the deformation. It is unclear exactly why this is, though it could be related to the fact that formulations which employ the logarithmic strain are not exactly mathematically equivalent to those which employ the Green strain tensor.
 
 \begin{figure}[htbp]
 	\centering
@@ -2658,7 +2658,7 @@ For the FNB, results are shown for the cell that is $6.912\ mm$ to the right of 
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 			Property & Symbol & Value  \\ \hline 
 			Young's modulus & $E$ & $69.9$ GPa \\
 			Poisson's ratio & $v$ & $0.3$   \\
@@ -2716,14 +2716,14 @@ Simulations are also performed on the flat notched bar case. Displacement increm
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 			Property & Symbol & Value  \\ \hline 
 			Young's modulus & $E$ & $68.9$ GPa \\
 			Poisson's ratio & $v$ & $0.33$   \\
 			Lemaitre damage denominator & $S_0$ & $0.5$ MPa  \\
 			Lemaitre damage exponent & $b$ & 1.0  \\
 			Characteristic Length & $l_c$ & $0.6325$ mm  \\
-			Hardening law & $\sigma_y$ & $320+688\times\bar{\varepsilon}^p$ MPa \\
+			Hardening law & $\sigma_y$ & $320+688 \, \bar{\varepsilon}_p$ MPa \\
 			\hline
 		\end{tabular}
 	\caption{Material properties for the FNB}
@@ -2766,7 +2766,7 @@ Further tests were conducted for different values of $S_0$ (Figure 5.21). As the
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 			Property & Symbol & Value  \\ \hline 
 			Young's modulus & $E$ & $69$ GPa \\
 			Poisson's ratio & $v$ & $0.3$   \\
@@ -2811,14 +2811,14 @@ In Figure 5.22, it can be seen that the results align reasonably well. As with t
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 			Property & Symbol & Value  \\ \hline 
 			Young's modulus & $E$ & $68.8$ GPa \\
 			Poisson's ratio & $v$ & $0.33$   \\
 			Critical Fracture Energy & $G_c$ & $60\times10^3$ $J/m^2$ \\
 			Plastic Threshold & $W_o$ & $1\times10^7$ MPa \\
-			Characteristic Length & $l_c$ & $0.3226mm$    \\
-			Hardening law & $\sigma_y$ & $320+688\times{\bar{\varepsilon}}^p$ MPa  \\
+			Characteristic Length & $l_c$ & $0.3226$ mm    \\
+			Hardening law & $\sigma_y$ & $320+688\, {\bar{\varepsilon}}_p$ MPa  \\
 			\hline
 		\end{tabular}
 	\caption{Material properties for phase field fracture FNB}
@@ -2840,7 +2840,9 @@ It can be seen that the results line up well, verifying the implementation of th
 
 
 
-\subsection{Wire drawing simulations}
+%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Wire Drawing Simulations}
+%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[htb]
 \begin{center}
@@ -2906,7 +2908,7 @@ The loading conditions and material parameters used are given in Tables 7.1-7. T
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 		    %Loading Conditions \\ \hline 
 		    Applied total displacement & $u$ & $30\ mm$ \\
 		    Time step & $\Delta t$ & $0.001\ s$ \\
@@ -2920,7 +2922,7 @@ The loading conditions and material parameters used are given in Tables 7.1-7. T
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 		    %Loading Conditions \\ \hline 
 		    Die inlet diameter & $16\ mm$ \\
 		    Die outer diameter & $20\ mm$ \\
@@ -2939,11 +2941,11 @@ The loading conditions and material parameters used are given in Tables 7.1-7. T
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 			Term  & Value  \\ \hline 
             Young's modulus & 200 $GPa$ \\
 			Poisson's ratio & 0.3  \\
-   		Hardening law & $689+(1340-689+250\times\bar{\varepsilon}^p)(1-e^{-32.82\times\bar{\varepsilon}^p})\ MPa$ &  \\
+   		Hardening law & $689+(1340-689+250\,\bar{\varepsilon}_p)(1-e^{-32.82\,\bar{\varepsilon}_p})\ MPa$ &  \\
 			\hline
 		\end{tabular}
 	\caption{Wire elasto-plastic material parameters}
@@ -2952,7 +2954,7 @@ The loading conditions and material parameters used are given in Tables 7.1-7. T
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 			Term  & Value  \\ \hline 
             Young's modulus & 600 $GPa$ \\
 			Poisson's ration & 0.22  \\
@@ -2969,7 +2971,7 @@ The loading conditions and material parameters used are given in Tables 7.1-7. T
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 			Property & Symbol & Value  \\ \hline 
 			Lemaitre damage denominator & $S_0$ & $13.5$ MPa  \\
 			Lemaitre damage exponent & $b$ & 1.0  \\
@@ -3176,7 +3178,7 @@ A tensile test is also conducted by \citet{roh_process_2021} for a round bar of 
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
+		\begin{tabular}{llll} \hline
 			Reduction (\%) & Drawing half-angle $(^{\circ})$ & Fracture  \\ \hline 
              & 2 & O \\
 			 & 4 & O \\
