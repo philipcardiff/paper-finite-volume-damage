@@ -683,9 +683,11 @@ which ranges between -1 and 1.
 The three Lode parameters ($\theta$, $\xi$, and $\bar{\theta}$) are essentially equivalent but are defined to vary between different limits.
 
 
-\subsection{Isotropic elastoplasticity}
+\subsection{Isotropic Elastoplasticity}
 
 %\hl{Introduce the Kirchhoff stress tau and dot gamma and spatially rotated plastic stretch and thermodynamic force chi (x) and elastic rotation tensor}
+
+\subsubsection{Model Formulation}
 
 In the current work, the damage models are formulated in terms of isotropic $J_2$ (von Mises) elastoplasticity.
 Extension to other forms of elastoplasticity (e.g., kinematic hardening, anisotropic/Hill yielding, distortional hardening) is possible but is outside the scope of this article.
@@ -757,7 +759,7 @@ and the consistency condition
 \end{eqnarray}
 
 
-\subsection{Computational procedure}
+\subsubsection{Computational procedure}
 %For a displacement-based finite volume procedure, the discretised equilibrium equations are solved for each time step using an iterative method to achieve convergence. The displacement field is solved at each iteration using the stress field calculated from the elasto-plastic return mapping scheme. This displacement field is then used to find a new value for the stress from the elasto-plastic return mapping scheme. This iterative procedure continues until convergence is achieved.
 
 For each cell at every outer (Picard) iteration, the stress $\bb{\sigma}^{[m+1]}$ and history variables ($\alpha^{[m+1]}$, $\bb{F}_p^{[m+1]}$) at time step $t^{[m+1]}$ must be calculated in terms of the current displacement increment gradient $[\bb{\nabla} (\Delta \bb{u})]^{[m+1]}$ and old-time history variables ($\alpha^{[m]}$, $\bb{F}_p^{[m]}$).
@@ -884,6 +886,7 @@ For each cell at every outer (Picard) iteration, the stress $\bb{\sigma}^{[m+1]}
 
 The adopted stress calculation algorithm \citep{de_souza_neto_computational_2008} is summarised in Algorithm \ref{alg:stressAlg}.
 
+\hl{Andrew: why is J not equal to det(F) in pressure calculation?}\\
 \begin{algorithm}[htb] \label{alg:stressAlg}
 \SetAlgoLined
 (i) Update deformation gradients for a given incremental displacement
@@ -950,7 +953,7 @@ The adopted stress calculation algorithm \citep{de_souza_neto_computational_2008
 
 (v) Implicitly solve the pressure Poisson's equation, where $J^{[m+1]} = -\kappa \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right)$.
 \begin{equation}
-	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = -\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right] - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m]} \right)
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = -\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right] - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right)
 \end{equation}
 
 
@@ -1471,7 +1474,7 @@ where $S$ can be a function of $\eta$ and $\xi$ as described above.
 
 (v) Implicitly solve the pressure Poisson's equation, where $J^{[m+1]} = -(1 - \bar{D}^{[m+1]}_{[i]}) \kappa \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right)$.
 \begin{equation}
-	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = -\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right] - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m]} \right)
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = -\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right] - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right)
 \end{equation}
 
 
@@ -2060,7 +2063,7 @@ Once again, the overall procedure is implicit in time.
 	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} =
 %	-\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right]
 	\frac{1}{J}\left(p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}} \right)
-	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m]} \right) \\
+	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \\
 \end{equation}
 
 
@@ -2079,7 +2082,7 @@ Once again, the overall procedure is implicit in time.
 \begin{equation}
 	f^{*[m+1]} =
 	\left\{
-	\begin{array}{cc}
+	\begin{array}{ll}
 		f^{[m+1]}  & \text { if } f^{[m+1]}  \leq f_c \\
 		f_c + \left(f^{[m+1]} - f_c\right) \frac{f_u - f_c}{f_f - f_c} & \text { if } f^{[m+1]}  > f_c
 	\end{array}\right.
@@ -2099,9 +2102,9 @@ Once again, the overall procedure is implicit in time.
 
 
 
-\section{Phase field fracture model}
+\subsection{Phase field fracture model}
 
-\subsection{Model Formulation}
+\subsubsection{Model Formulation}
 In recent years, phase field approaches have received much attention for the prediction of fracture and failure \cite{borden_phase-field_2012, miehe_phase_2010, ambati_phase-field_2015, borden_phase-field_2016, miehe_phase_2016, dittmann_variational_2018, samaniego_phase-field_2021}, showing an ability to predict complex crack patterns, including branching and merging in both two and three dimensions \cite{borden_phase-field_2012, miehe_phase_2010}.
 In this method, sharp cracks are \emph{regularised} over a continuum, leading to a system of partial differential equations that are relatively simple to implement in finite element, finite volume and related solvers.
 %The method has proven robust with computations being performed on the original mesh without any need to track the interface of the crack such as in the Cohesive-zone model method.
@@ -2186,7 +2189,7 @@ The strong form of the phase field equation is given by:
 %, by incorporating a plastic degradation function, it displays a more physically realistic fracture behaviour.
 %Following the work of \citet{borden_phase-field_2016}  the 
 \begin{equation} \label{eqn:phaseFieldEquation}
-	\frac{G_c}{2l} \left(d - 4 l^2 \bb{\nabla}^2 d \right) = \mathcal{H} \left(\underline{\mathrm{x}},t \right)	
+	\frac{G_c}{2l} \left(d - 4 l^2 \bb{\nabla}^2 d \right) = \mathcal{H} %\left(\underline{\mathrm{x}},t \right)	
 \end{equation}
 where $0 < d \leq 1$ is the damage variable, with $d = 0$ characterising the unbroken state and $d = 1$ characterising the fully broken state. 
 The variable $d$ is conceptually similar to the damage variable $D$ used in the Lemaitre and GTN damage mechanics, with $d$ being a macroscopic variable that characterises the growth of micro-voids and micro-cracks.
@@ -2194,7 +2197,8 @@ The critical fracture energy per unit area is given by $G_c$.
 The parameter $l$ is a length-scale variable that regularises the crack surface. It is typically chosen as a function of the local element/cell size.
 The crack driving variable $\mathcal{H}$ is
 \begin{equation}
-	\mathcal{H}\left(\underline{\mathrm{x}},t\right)=
+	\mathcal{H} %\left(\underline{\mathrm{x}},t\right)
+	=
 %		g_e^\prime(d) \,
 		-2d \,
 		\text{max}
@@ -2214,7 +2218,7 @@ where $\psi_e \left(\mathbf{\varepsilon}^e\right)$ is the current elastic energy
 The elastic energy contribution $\psi_e \left(\mathbf{\varepsilon}^e\right)$ is decomposed into positive and negative components, such that only positive elastic strain energy contributes towards the crack driving energy \citep{amor_regularized_2009}:
 \begin{eqnarray}
 	\psi_e &=&
-	(1 - d^2) \psi_{e}^{+} \left(\bb{\varepsilon}_e \right)
+	(1 - d^2) \, \psi_{e}^{+} \left(\bb{\varepsilon}_e \right)
 	+ \psi_{e}^{-} \left(\bb{\varepsilon}_e \right) \\
 	\psi_e^{+}\left(\bb{\varepsilon}^{e}\right) &=&
 	\frac{\kappa}{2} \langle \text{tr}\left(\bb{\varepsilon}_{e}\right)\rangle^2
@@ -2335,6 +2339,9 @@ The algorithm for the phase field stress calculation procedure is given in Algor
 \begin{equation}
  \textbf{F}^{[m+1]}=\textbf{f}^{[m+1]}\textbf{F}_n\nonumber
 \end{equation}
+\begin{equation}
+ J^{[m+1]}=\text{det} \left(\textbf{F}^{[m+1]} \right)\nonumber
+\end{equation}
 
 (ii) Compute trial elastic state
 \begin{equation}
@@ -2372,22 +2379,45 @@ The algorithm for the phase field stress calculation procedure is given in Algor
 	= 0 \nonumber
 \end{equation}
 
-(iv) Update elastic strain
+
+(iv) Update the constitutive variables
+\begin{equation}
+	\boldsymbol{\varepsilon}_{e}^{[m+1]} =
+		\bb{\varepsilon}_{e}^{\text{trial}}
+		- \sqrt{\sfrac{3}{2}} \, \Delta \bar{\varepsilon}_p 
+		\frac{\text{dev}(\bb{\varepsilon}_{e}^{\text{trial}})}{\||\bb{\varepsilon}_{e}^{\text{trial}}||}
+		\nonumber
+\end{equation}
 %\begin{equation}
-%\boldsymbol{\varepsilon}^{e}^{[m+1]}=\boldsymbol{\varepsilon}^{e}_{trial}-\sqrt{\frac{3}{2}}\Delta\gamma{\frac{dev(\boldsymbol{\varepsilon}^{e}_{trial})}{\lvert\lvert\boldsymbol{\varepsilon}^{e}_{trial}\rvert\rvert}}\nonumber
-%\end{equation}
-%\begin{equation}
-%\boldsymbol{\tau}^{[m+1]}=g_e(d)\mathbf{D}^e:\boldsymbol{\varepsilon}^{e}^{[m+1]}\ 
-%Must incorporate section 4.5.4
+%	\boldsymbol{\tau}^{[m+1]}=g_e(d)\mathbf{D}^e:\boldsymbol{\varepsilon}_{e}^{[m+1]}\ 
+%	%Must incorporate section 4.5.4
 %\nonumber
 %\end{equation}
+
+\begin{equation}
+%	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \mathbf{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
+	\boldsymbol{s}^{[m+1]}
+	=
+	\left[1 - \left(d^{[m+1]}_{[i]}\right)^2 \right] (\sfrac{1}{J}) \, 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+\end{equation}
+
+
+
+
+\begin{equation}
+	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta \bar{\varepsilon}_p \nonumber
+\end{equation}
+%\begin{equation}
+%	\bb{\varepsilon}_p^{[m+1]} = \bb{\varepsilon}_p^{[m]} +\Delta \bb{\varepsilon}_p \nonumber
+%\end{equation}
+
+
 
 (v) Implicitly solve the pressure Poisson's equation:
 \begin{equation}
 	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} =
-%	-\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right]
-	\frac{1}{J}\left(p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}} \right)
-	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m]} \right) \\
+	-\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right]
+	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \\
 \end{equation}
 
 
@@ -2429,9 +2459,9 @@ The algorithm for the phase field stress calculation procedure is given in Algor
 \section{Test Cases} \label{sec:test_cases}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-This section assesses the performance of the proposed procedures on three benchmark test cases: (i) 2-D axisymmetric notched round bar, (ii) 3-D flat notched bar, and (iii) 2-D axisymmetric wire drawing.
-Comparisons are made with predictions for finite element software Abaqus and other results from the literature.
-Linear interpolation functions are used in the finite element simulations (Abaqus element code C3D8T for 3-D and CAX4RT for axisymmetry).
+This section assesses the performance of the developed finite volume procedures on three benchmark test cases: (i) 2-D axisymmetric notched round bar, (ii) 3-D flat notched bar, and (iii) 2-D axisymmetric wire drawing.
+Comparisons are made with predictions from finite element software Abaqus and results from the literature.
+In the Abaqus models, linear interpolation functions are used in the finite element simulations (Abaqus element code C3D8T for 3-D and CAX4RT for axisymmetry).
 For reference, single-cell verifications of the proposed material models are provided in Appendix \ref{app:one_cell}, providing confidence that the constitutive laws are implemented as intended.
 
 %- refer to one element tests in the literature.
@@ -2452,10 +2482,9 @@ For reference, single-cell verifications of the proposed material models are pro
 %%%%%%%%%%%
 \subsection{Notched Round Bar}
 %%%%%%%%%%%
-The geometry of the notched round bar (Figure \ref{fig:notched_bar_geom}) has been widely used in the literature \cite{cesar_de_sa_damage_2006, fincato_return_2018, vaz_aspects_2001} for benchmarking plasticity and damage procedures.
-The geometry consists 40 \si{\milli\meter} long round bar with 18 \si{\milli\meter} diameter including a 4 \si{\milli\meter} notch.
-A 2-D axisymmetric model is created, including a horizontal symmetry plane.
-A structured quadrilateral mesh is employed (Figure \ref{fig:notched_bar_mesh}).
+The notched round bar (Figure \ref{fig:notched_bar_geom}) has been widely used for benchmarking plasticity and damage procedures \cite{cesar_de_sa_damage_2006, fincato_return_2018, vaz_aspects_2001}.
+The geometry consists of a 40 \si{\milli\meter} long round bar of diameter 18 \si{\milli\meter} with a 4 \si{\milli\meter} rounded notch.
+A 2-D axisymmetric model is created, including a horizontal symmetry plane, and a structured quadrilateral mesh is employed (Figure \ref{fig:notched_bar_mesh}).
 
 \begin{figure}[htb] \label{fig:notched_bar_geom}
 \begin{center}
