@@ -762,13 +762,13 @@ and the consistency condition
 
 For each cell at every outer (Picard) iteration, the stress $\bb{\sigma}^{[m+1]}$ and history variables ($\alpha^{[m+1]}$, $\bb{F}_p^{[m+1]}$) at time step $t^{[m+1]}$ must be calculated in terms of the current displacement increment gradient $[\bb{\nabla} (\Delta \bb{u})]^{[m+1]}$ and old-time history variables ($\alpha^{[m]}$, $\bb{F}_p^{[m]}$).
 
-%the incremental displacement field $\Delta \mathbf{u}$ for the current time step $t_{n+1}$, at the current (outer) iteration, is provided. The values of the following variables are given from the previous time step:
+%the incremental displacement field $\Delta \mathbf{u}$ for the current time step $t^{[m+1]}$, at the current (outer) iteration, is provided. The values of the following variables are given from the previous time step:
 %\begin{equation}
 %    \left\{\mathbf{F}_n^p,\ \alpha_n\right\}
 %\end{equation}
-%The goal is then to have an algorithm to obtain the following variables at time $t_{n+1}$
+%The goal is then to have an algorithm to obtain the following variables at time $t^{[m+1]}$
 %\begin{equation}
-%    \left\{\mathbf{F}_{n+1}^p,\ \alpha_{n+1},\boldsymbol{\sigma}_{n+1}\right\}
+%    \left\{\mathbf{F}^{[m+1]}^p,\ \alpha^{[m+1]},\boldsymbol{\sigma}^{[m+1]}\right\}
 %\end{equation}
 %In order to obtain these values, the algorithm must satisfy the set of constitutive equations:
 %\begin{equation}
@@ -780,101 +780,101 @@ For each cell at every outer (Picard) iteration, the stress $\bb{\sigma}^{[m+1]}
 
 %To begin, equation 3.35 is integrated using the one-step implicit integration operator corresponding to the Euler backward method \cite{andrade_ductile_2011} to get:
 %\begin{equation}
-%    \mathbf{F}_{n+1}^p=exp\left[\frac{3}{2}\Delta\gamma\mathbf{R}_{n+1}^{e^T}\frac{{\bb{\tau}}_{d_{n+1}}}{\tau^{eq}_{n+1}}
-%    \mathbf{R}_{n+1}^e\right]\mathbf{F}_n^p
+%    \mathbf{F}^{[m+1]}^p=exp\left[\frac{3}{2}\Delta\gamma\mathbf{R}^{[m+1]}^{e^T}\frac{{\bb{\tau}}_{d^{[m+1]}}}{\tau^{eq}^{[m+1]}}
+%    \mathbf{R}^{[m+1]}^e\right]\mathbf{F}_n^p
 %\end{equation}
 %Due to plastic isotropy, this equation can be written as:
 %\begin{equation}
-%    \mathbf{F}_{n+1}^p=\mathbf{R}_{n+1}^{e^T}exp\left[\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{R}_{n+1}^e\mathbf{F}_n^p
+%    \mathbf{F}^{[m+1]}^p=\mathbf{R}^{[m+1]}^{e^T}exp\left[\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right]\mathbf{R}^{[m+1]}^e\mathbf{F}_n^p
 %\end{equation}
 %This represents the update of the plastic deformation gradient. This can in turn be combined with the fact that $\mathbf{F}=\mathbf{F}^{e}\mathbf{F}^{p}$ to give the elastic deformation tensor:
 %\begin{equation}
-%    \mathbf{F}_{n+1}^e={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{R}_{n+1}^e
+%    \mathbf{F}^{[m+1]}^e={\mathbf{F}^{[m+1]}^{e\ trial}\mathbf{R}}^{[m+1]}^{e^T}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right]\mathbf{R}^{[m+1]}^e
 %\end{equation}
-%where $\mathbf{F}_{n+1}^{e\ trial}$ is given by:
+%where $\mathbf{F}^{[m+1]}^{e\ trial}$ is given by:
 %\begin{equation}
-%\mathbf{F}_{n+1}^{e\ trial}=\mathbf{f}_{n+1}\mathbf{F}_{n+1}^{e}
+%\mathbf{F}^{[m+1]}^{e\ trial}=\mathbf{f}^{[m+1]}\mathbf{F}^{[m+1]}^{e}
 %\end{equation}
-%$\mathbf{f}_{n+1}$ is the relative deformation gradient (equation 2.45). 
+%$\mathbf{f}^{[m+1]}$ is the relative deformation gradient (equation 2.45). 
 %Using the fact that $\mathbf{F}^e=\mathbf{V}^{e}\mathbf{R}^{e}$
 %\begin{equation}
-%    \mathbf{V}_{n+1}^e\mathbf{R}_{n+1}^e={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{R}_{n+1}^e
+%    \mathbf{V}^{[m+1]}^e\mathbf{R}^{[m+1]}^e={\mathbf{F}^{[m+1]}^{e\ trial}\mathbf{R}}^{[m+1]}^{e^T}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right]\mathbf{R}^{[m+1]}^e
 %\end{equation}
-%Multiplying both sides by $\mathbf{R}^{e^T}_{n+1}$
+%Multiplying both sides by $\mathbf{R}^{e^T}^{[m+1]}$
 %\begin{equation}
-%    \mathbf{V}_{n+1}^e={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]
+%    \mathbf{V}^{[m+1]}^e={\mathbf{F}^{[m+1]}^{e\ trial}\mathbf{R}}^{[m+1]}^{e^T}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right]
 %\end{equation}
 %Multiplying by the inversion of the exponential term:
 %\begin{equation}
-%    \mathbf{V}_{n+1}^{e}exp\left[\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}
+%    \mathbf{V}^{[m+1]}^{e}exp\left[\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right]={\mathbf{F}^{[m+1]}^{e\ trial}\mathbf{R}}^{[m+1]}^{e^T}
 %\end{equation}
 %Taking the square of both sides:
 %\begin{equation}
-%    \mathbf{V}_{n+1}^{e}\ exp\left[3\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{V}_{n+1}^{e}={\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}{\mathbf{F}_{n+1}^{{e\ trial}^T}\mathbf{R}}_{n+1}^{e}
+%    \mathbf{V}^{[m+1]}^{e}\ exp\left[3\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right]\mathbf{V}^{[m+1]}^{e}={\mathbf{F}^{[m+1]}^{e\ trial}\mathbf{R}}^{[m+1]}^{e^T}{\mathbf{F}^{[m+1]}^{{e\ trial}^T}\mathbf{R}}^{[m+1]}^{e}
 %\end{equation}
 %
-%Isolating the RHS of this equation and using the fact that $\mathbf{R}^{e^T}_{n+1}\mathbf{R}^{e}_{n+1}=\textbf{I}$:
+%Isolating the RHS of this equation and using the fact that $\mathbf{R}^{e^T}^{[m+1]}\mathbf{R}^{e}^{[m+1]}=\textbf{I}$:
 %\begin{equation}
-%    {\mathbf{F}_{n+1}^{e\ trial}\mathbf{R}}_{n+1}^{e^T}{\mathbf{F}_{\mathbf{n}+1}^{{e\ trial}^T}\mathbf{R}}_{n+1}^e=\mathbf{F}_{n+1}^{e\ trial}\mathbf{F}_{n+1}^{{e\ trial}^T}=\left(\mathbf{V}_{n+1}^{e\ trial}\right)^\mathbf{2}
+%    {\mathbf{F}^{[m+1]}^{e\ trial}\mathbf{R}}^{[m+1]}^{e^T}{\mathbf{F}_{\mathbf{n}+1}^{{e\ trial}^T}\mathbf{R}}^{[m+1]}^e=\mathbf{F}^{[m+1]}^{e\ trial}\mathbf{F}^{[m+1]}^{{e\ trial}^T}=\left(\mathbf{V}^{[m+1]}^{e\ trial}\right)^\mathbf{2}
 %\end{equation}
 %
 %Subbing this into equation 3.47 we get:
 %\begin{equation}
-%    \mathbf{V}_{n+1}^e exp\left[3\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\mathbf{V}_{n+1}^e=\left(\mathbf{V}_{n+1}^{e\ trial}\right)^\mathbf{2}
+%    \mathbf{V}^{[m+1]}^e exp\left[3\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right]\mathbf{V}^{[m+1]}^e=\left(\mathbf{V}^{[m+1]}^{e\ trial}\right)^\mathbf{2}
 %\end{equation}
 %
 %By rearranging and taking the square root of both sides, the following can be obtained:
 %\begin{equation}
-%    \mathbf{V}_{n+1}^e=\mathbf{V}_{n+1}^{e\ trial}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]
+%    \mathbf{V}^{[m+1]}^e=\mathbf{V}^{[m+1]}^{e\ trial}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right]
 %\end{equation}
 %
 %Taking the natural log of both sides:
 %\begin{equation}
-%    ln\left(\mathbf{V}_{n+1}^{e}\right)=ln\left(\mathbf{V}_{n+1}^{e\ trial}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right]\right)
+%    ln\left(\mathbf{V}^{[m+1]}^{e}\right)=ln\left(\mathbf{V}^{[m+1]}^{e\ trial}exp\left[-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right]\right)
 %\end{equation}
 %
 %Using the fact that $ln\textbf{V}=\boldsymbol{\varepsilon^e}$ (equation 3.8), the additive split of the elastic and plastic strain tensors is derived:
 %\begin{equation}
-%    \boldsymbol{\varepsilon}_{n+1}^{e}=\boldsymbol{\varepsilon}_{n+1}^{e\ trial}-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}
+%    \boldsymbol{\varepsilon}^{[m+1]}^{e}=\boldsymbol{\varepsilon}^{[m+1]}^{e\ trial}-\frac{3}{2}\Delta\gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}
 %\end{equation}
 %The integration of the other constitutive equations using the backwards Euler scheme is simply given by:
 %\begin{eqnarray}
-%    \alpha_{n+1}-\alpha_n=\Delta\gamma  \notag \\
-%    \alpha_{n+1}=\alpha_n+\Delta\gamma  
+%    \alpha^{[m+1]}-\alpha_n=\Delta\gamma  \notag \\
+%    \alpha^{[m+1]}=\alpha_n+\Delta\gamma  
 %\end{eqnarray}
 %The final system of equations to be solved when the material is on the plastic domain is given by:
 %\begin{equation}
 %	\left\{\begin{array}{c}
 %	\label{eqn:dicritisedFinalEquationsPLasticity}
-%	F_p = \tau^{eq}_{n+1} - \sigma_{y} \left(\alpha_{n+1}\right)=0 \\
-%	\boldsymbol{\varepsilon}_{n+1}^e = \boldsymbol{\varepsilon}_{n+1}^{e\ trial}
-%		- \frac{3}{2} \Delta \gamma \frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}} \\
-%		\alpha_{n+1}=\alpha_n+\Delta \gamma
+%	F_p = \tau^{eq}^{[m+1]} - \sigma_{y} \left(\alpha^{[m+1]}\right)=0 \\
+%	\boldsymbol{\varepsilon}^{[m+1]}^e = \boldsymbol{\varepsilon}^{[m+1]}^{e\ trial}
+%		- \frac{3}{2} \Delta \gamma \frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}} \\
+%		\alpha^{[m+1]}=\alpha_n+\Delta \gamma
 %	\end{array}\right.
 %\end{equation}
 %The above system of equations can be resolved by solving for the plastic increment using an implicit algorithm. It can be shown that the equations in \ref{eqn:dicritisedFinalEquationsPLasticity} can be satisfied by solving the yield equation for the plastic increment $\Delta \gamma$. To begin, the von Mises yield criterion is restated:
 %\begin{equation}
-%    \tau^{eq}_{n+1}-\sigma_y\left(\alpha_{n+1}\right)=0
+%    \tau^{eq}^{[m+1]}-\sigma_y\left(\alpha^{[m+1]}\right)=0
 %\end{equation}
 %
 %Recalling the definition of the von Mises stress (equation 3.34), the equivalent stress can be expressed in terms of the elastic strain and combined with equation 3.53 to give:
 %\begin{eqnarray}
-%\tau^{eq}_{n+1}&=&\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^e\right)\right\| \\ \notag
+%\tau^{eq}^{[m+1]}&=&\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}^{[m+1]}^e\right)\right\| \\ \notag
 %&=&
-%\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^{e \text { trial }}-\frac{3}{2}\Delta \gamma\frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right)\right\|
+%\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}^{[m+1]}^{e \text { trial }}-\frac{3}{2}\Delta \gamma\frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right)\right\|
 %\end{eqnarray}
 %
 %Given that:
 %\begin{equation}
-%\left\|2 \mu \operatorname{dev}\left(\frac{3}{2} \Delta \gamma \frac{{\boldsymbol{\tau}_d}_{n+1}}{\tau^{eq}_{n+1}}\right)\right\|=3 \mu \Delta \gamma
+%\left\|2 \mu \operatorname{dev}\left(\frac{3}{2} \Delta \gamma \frac{{\boldsymbol{\tau}_d}^{[m+1]}}{\tau^{eq}^{[m+1]}}\right)\right\|=3 \mu \Delta \gamma
 %\end{equation}
 %The von Mises equivalent stress can be expressed as:
 %\begin{equation}
-%\tau^{eq}_{n+1}=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^{e \text { trial }}\right)\right\|-3 \mu \Delta \gamma
+%\tau^{eq}^{[m+1]}=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}^{[m+1]}^{e \text { trial }}\right)\right\|-3 \mu \Delta \gamma
 %\end{equation}
 %The following relation for the equivalent stress can therefore be obtained:
 %\begin{equation}
-%	\tau^{eq}_{n+1}=\tau^{eq}_{{n+1}^{\text{trial}}} - 3 \mu \Delta \gamma
+%	\tau^{eq}^{[m+1]}=\tau^{eq}_{{n+1}^{\text{trial}}} - 3 \mu \Delta \gamma
 %\end{equation}
 %Combining equation 3.60 with 3.56, the yield function can be given in terms of the plastic increment:
 %\begin{equation}
@@ -942,7 +942,7 @@ The adopted stress calculation algorithm \citep{de_souza_neto_computational_2008
 \end{equation}
 
 \begin{equation}
-%	\boldsymbol{\sigma}_{n+1} = \frac{1}{J} \mathbf{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
+%	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \mathbf{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
 	\boldsymbol{s}^{[m+1]}
 	=
 	(\sfrac{1}{J}) 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
@@ -1151,103 +1151,7 @@ where $E$ is Young's modulus and $\nu$ is Poisson's ratio, where the dependence 
 %\end{equation}
 
 
-
-\subsubsection{Computational Procedure}
-%For each cell, the incremental displacement field $\Delta\boldsymbol{u}$ for the current time step $t_{n+1}$, at the current iteration, is provided. The following variables from the previous time step are also given:
-% \begin{equation}
-%\left\{F_n^p,\ \alpha_n,D_n\right\}
-%\end{equation}
-%The goal is then to have a return-mapping algorithm to obtain the following variables at time $t_{n+1}$
-%\begin{equation}
-%\left\{F_{n+1}^p,\ \alpha_{n+1},\boldsymbol{\sigma}_{n+1},D_{n+1}\right\}
-%\end{equation}
-%In order to obtain these values, the algorithm must satisfy the following constitutive behaviour:
-%\begin{equation}
-%\label{eqn:deformationPlasticStrainRelation}
-%	{\dot{\mathbf{F}}}^p\mathbf{F}^{p-1}=\frac{3}{2}\frac{\dot{\gamma}}{\left(1-D\right)}\mathbf{R}^{eT}\frac{\boldsymbol{\tau}_d}{\tau_{eq}}\mathbf{R}^e={\bar{\mathbf{d}}}^p
-%\end{equation}
-%\begin{equation}
-%	\dot{\alpha}=\dot{\gamma}	
-%\end{equation}
-%\begin{equation}
-%	\dot{D}=-\dot{\gamma}\frac{\partial F}{\partial Y}=\frac{\dot{\gamma}}{\left(1-D\right)}\left[\frac{-Y}{S_0}\right]^b
-%\end{equation}
-
-
-
-%Equation \ref{eqn:deformationPlasticStrainRelation} is integrated using the one-step implicit integration operator corresponding to the Euler backward method to get:
-%\begin{equation}
-%	\mathbf{F}_{n+1}^p=exp\left[\frac{3}{2}\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\mathbf{R}_{n+1}^{e^T}\frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\mathbf{R}_{n+1}^e\right]\mathbf{F}_{n}^p
-%\end{equation}
-%Following the procedure laid out in section 3.2.3, the additive split for the elastic and plastic strain is obtained:
-%\begin{equation}
-%	\boldsymbol{\varepsilon}_{n+1}^e=\boldsymbol{\varepsilon}_{n+1}^{e\ trial}-\frac{3}{2}\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}
-%\end{equation}
-%
-%The integration of the other constitutive equations using the backwards Euler scheme is simply given by:
-%\begin{equation}
-%	\alpha_{n+1}-\alpha_n=\Delta\gamma
-%\end{equation}
-%\begin{equation}
-%   \alpha_{n+1}=\alpha_n+\Delta\gamma	
-%\end{equation}
-%\begin{equation}
-%	D_{n+1}-D_n=\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b
-%\end{equation}
-%\begin{equation}
-%D_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b	
-%\end{equation}
-%
-%The final system of equations to be solved when the material is undergoing plastic straining is therefore given by:
-%
-%\begin{equation}
-%\left\{\begin{array}{c}
-%\frac{\tau_{eq\ n+1}}{1-D_{n+1}}-\sigma_y\left(\alpha_{n+1}\right)=0 \\
-%\boldsymbol{\varepsilon}_{n+1}^e=\boldsymbol{\varepsilon}_{n+1}^{e\ trial}-\frac{3}{2} \frac{\Delta \gamma}{1-D_{n+1}} \frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\\
-%\alpha_{n+1}=\alpha_n+\Delta \gamma \\
-%D_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b
-%\end{array}\right. 
-%\end{equation}
-
-
-An implicit-explicit algorithm is developed in this work to solve Equations \ref{eq:lemaitre_dp}-\ref{eq:lem_damage}.
-At every outer iteration, the plastic increment is solved implicitly, with the value for the damage variable fixed from the previous outer iteration.
-The damage rate equation (Equation \ref{eq:lem_damage}) is then solved explicitly also using the damage from the previous iteration.
-This approach avoids the use of a $2 \times 2$ matrix (or an even higher dimension matrix if one was to solve for anisotropic plasticity or plasticity incorporating kinematic hardening) that would be needed if both the damage and the plastic increment were solved for implicitly simultaneously.
-By not requiring the solution of both the plasticity and damage implicitly, the mathematics are simplified when solving for more complex formulations of the Lemaitre damage evolution equation and for the \emph{non-local damage}, which will be described later in this section.
-Note that in this context, explicit means that the construction of a linear system is avoided; however, the overall solution algorithm is still implicit in time.
-
-%The superscript notation laid out in equations \ref{eqn:superscript1} and \ref{eqn:superscript2} is used to indicate whether the damage variable is from the current iteration or from the previous iteration. The superscript $^{i+1}$ means that the variable is from the current outer iteration while the superscript $^{i}$ means that the variable is from the previous outer iteration.
-%
-%\begin{equation}
-%\label{eqn:superscript1}
-%    D^{i+1}_{n+1}
-%\end{equation}
-%\begin{equation}
-%\label{eqn:superscript2}
-%    D^{i}_{n+1}
-%\end{equation}
-
-%The first three of the equations in the system given in 4.41 can be satisfied by solving the yield potential for the plastic increment $\Delta\gamma$, with the damage obtained from the previous iteration frozen. 
-
-%First, the von Mises stress is defined in terms of the elastic strain and combined with equation 4.36:
-%\begin{equation}
-%\begin{aligned}
-%%\frac{\tau^{eq}_{n+1}}{1-D^{i}_{n+1}}=\bar{\tau}_{{eq}_{n+1}}&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^e\right)\right\|\\
-%%&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}_{n+1}^{e \text { trial }}-\frac{3}{2} \frac{\Delta \gamma}{\left(1+D^{i}_{n+1}\right)} \frac{\boldsymbol{\tau}_{d_{n+1}}}{\tau_{eq\ n+1}}\right)\right\|
-%fix
-%\end{aligned}
-%\end{equation}
-
-%Following the procedure laid out in Section 3.2.3, the equation for the yield function in terms of the plastic increment can be obtained in terms of the plastic increment:
-%\begin{equation}
-%	\bar{\tau}_{eq\ n+1}^{trial}-3\mu\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}-\sigma_{y\ }\left(\alpha_n+\Delta\gamma\right)=0
-%\end{equation}
-
-%This is solved implicitly using the Newton-Raphson algorithm for $\Delta\gamma$; the stress tensor and the plastic strain tensor are then updated based on this value.  
-%After updating these values, the damage equation can be solved explicitly.
-
-\paragraph{Triaxiality and Lode Angle Dependency}
+\paragraph{Triaxiality and Lode Angle Dependence}
 
 The classic Lemaitre model does not distinguish between positive and negative triaxiality ($\eta$ is squared in Equation \ref{eqn:classicY}); consequently, it can overpredict damage in wire drawing processes where triaxiality can be highly negative.
 %it tends to predict fracture too early at low triaxialities and too late at high triaxialities. 
@@ -1269,7 +1173,7 @@ A simple remedy is to employ a triaxiality cut-off \cite{bouchard_enhanced_2011}
 % The damage is not set to $1$ to allow for some residual stresses in this cell to aid convergence.
 %\begin{equation}
 %\label{DamageUpdateEquation}
-%D^{i+1}_{n+1}= \begin{cases} D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{r}\right]^s & \text { if } D^{i}_{n+1}<D_c \\ 0.99 & \text { if } D^{i}_{n+1} \geq D_c \end{cases}
+%D^{i+1}^{[m+1]}= \begin{cases} D_n+\frac{\Delta\gamma}{\left(1-D^{i}^{[m+1]}\right)}\left[\frac{-Y^{[m+1]}}{r}\right]^s & \text { if } D^{i}^{[m+1]}<D_c \\ 0.99 & \text { if } D^{i}^{[m+1]} \geq D_c \end{cases}
 %\end{equation}
 
 
@@ -1362,7 +1266,7 @@ A simplified form of the crack-closure model \cite{teixeira_ductile_2010} is emp
 
 
 
-\paragraph{Non-local damage}
+\paragraph{Non-Local Damage}
 
 %It is worth noting the benefit of the developed implicit-explicit algorithm when looking at this class of models. The fact that the developed algorithm does not require the solution of the damage implicitly means that incorporating novel damage evolution equations into the existing code is relatively simple, without the need to calculate derivatives that can become quite complex when incorporating shear effects, in particular, \cite{malcher_improved_2014}.
 
@@ -1384,15 +1288,111 @@ The terms in Equation \ref{eqn:nonLocalEquation} are discretised using the cell-
 %The Algorithm for incorporating the non-local damage is provided in Algorithm 4. As can be seen, the procedure is very similar to that in the local Lemaitre damage model. Algorithm 4 is provided to clarify how the non-local damage is coupled with the elasto-plastic model and the steps involved prior to solving the non-local damage gradient equation.
 
 
-\paragraph{Overall Stress Calculation Procedure}
+\subsubsection{Computational Procedure}
+%For each cell, the incremental displacement field $\Delta\boldsymbol{u}$ for the current time step $t^{[m+1]}$, at the current iteration, is provided. The following variables from the previous time step are also given:
+% \begin{equation}
+%\left\{F_n^p,\ \alpha_n,D_n\right\}
+%\end{equation}
+%The goal is then to have a return-mapping algorithm to obtain the following variables at time $t^{[m+1]}$
+%\begin{equation}
+%\left\{F^{[m+1]}^p,\ \alpha^{[m+1]},\boldsymbol{\sigma}^{[m+1]},D^{[m+1]}\right\}
+%\end{equation}
+%In order to obtain these values, the algorithm must satisfy the following constitutive behaviour:
+%\begin{equation}
+%\label{eqn:deformationPlasticStrainRelation}
+%	{\dot{\mathbf{F}}}^p\mathbf{F}^{p-1}=\frac{3}{2}\frac{\dot{\gamma}}{\left(1-D\right)}\mathbf{R}^{eT}\frac{\boldsymbol{\tau}_d}{\tau_{eq}}\mathbf{R}^e={\bar{\mathbf{d}}}^p
+%\end{equation}
+%\begin{equation}
+%	\dot{\alpha}=\dot{\gamma}	
+%\end{equation}
+%\begin{equation}
+%	\dot{D}=-\dot{\gamma}\frac{\partial F}{\partial Y}=\frac{\dot{\gamma}}{\left(1-D\right)}\left[\frac{-Y}{S_0}\right]^b
+%\end{equation}
 
-This stress calculation procedure for the Lemaitre damage model is summarised in Algorithm \ref{alg:lemaitre}, where $\bar{D}^{[m+1]}_*$ is the latest available non-local damage field at the new time, i.e. its values from the previous outer iteration; at convergence within each time step, $\bar{D}^{[m+1]}_*$ becomes $\bar{D}^{[m+1]}$.
+
+
+%Equation \ref{eqn:deformationPlasticStrainRelation} is integrated using the one-step implicit integration operator corresponding to the Euler backward method to get:
+%\begin{equation}
+%	\mathbf{F}^{[m+1]}^p=exp\left[\frac{3}{2}\frac{\Delta\gamma}{\left(1-D^{[m+1]}\right)}\mathbf{R}^{[m+1]}^{e^T}\frac{\boldsymbol{\tau}_{d^{[m+1]}}}{\tau_{eq\ n+1}}\mathbf{R}^{[m+1]}^e\right]\mathbf{F}^{[m]}^p
+%\end{equation}
+%Following the procedure laid out in section 3.2.3, the additive split for the elastic and plastic strain is obtained:
+%\begin{equation}
+%	\boldsymbol{\varepsilon}^{[m+1]}^e=\boldsymbol{\varepsilon}^{[m+1]}^{e\ trial}-\frac{3}{2}\frac{\Delta\gamma}{\left(1-D^{[m+1]}\right)}\frac{\boldsymbol{\tau}_{d^{[m+1]}}}{\tau_{eq\ n+1}}
+%\end{equation}
+%
+%The integration of the other constitutive equations using the backwards Euler scheme is simply given by:
+%\begin{equation}
+%	\alpha^{[m+1]}-\alpha_n=\Delta\gamma
+%\end{equation}
+%\begin{equation}
+%   \alpha^{[m+1]}=\alpha_n+\Delta\gamma	
+%\end{equation}
+%\begin{equation}
+%	D^{[m+1]}-D_n=\frac{\Delta\gamma}{\left(1-D^{[m+1]}\right)}\left[\frac{-Y^{[m+1]}}{S_0}\right]^b
+%\end{equation}
+%\begin{equation}
+%D^{[m+1]}=D_n+\frac{\Delta\gamma}{\left(1-D^{[m+1]}\right)}\left[\frac{-Y^{[m+1]}}{S_0}\right]^b	
+%\end{equation}
+%
+%The final system of equations to be solved when the material is undergoing plastic straining is therefore given by:
+%
+%\begin{equation}
+%\left\{\begin{array}{c}
+%\frac{\tau_{eq\ n+1}}{1-D^{[m+1]}}-\sigma_y\left(\alpha^{[m+1]}\right)=0 \\
+%\boldsymbol{\varepsilon}^{[m+1]}^e=\boldsymbol{\varepsilon}^{[m+1]}^{e\ trial}-\frac{3}{2} \frac{\Delta \gamma}{1-D^{[m+1]}} \frac{\boldsymbol{\tau}_{d^{[m+1]}}}{\tau_{eq\ n+1}}\\
+%\alpha^{[m+1]}=\alpha_n+\Delta \gamma \\
+%D^{[m+1]}=D_n+\frac{\Delta\gamma}{\left(1-D^{[m+1]}\right)}\left[\frac{-Y^{[m+1]}}{S_0}\right]^b
+%\end{array}\right. 
+%\end{equation}
+
+
+An implicit-explicit algorithm is developed in this work to solve Equations \ref{eq:lemaitre_dp}-\ref{eq:lem_damage}.
+At every outer iteration, the plastic increment is solved implicitly, with the value for the damage variable fixed from the previous outer iteration.
+The damage rate equation (Equation \ref{eq:lem_damage}) is then solved in a \emph{deferred-correction} manner using the damage from the previous iteration ($\bar{D}_{[i]}$, where $[i]$ indicate a value from a previous outer iteration).
+This approach avoids the use of a $2 \times 2$ matrix (or an even higher dimension matrix if one was to solve for anisotropic plasticity or plasticity incorporating kinematic hardening) that would be needed if both the damage and the plastic increment were solved for implicitly simultaneously.
+By not requiring the solution of both the plasticity and damage simultaneously, the mathematics are simplified when solving for more complex formulations of the Lemaitre damage evolution equation and for the \emph{non-local damage}, which will be described later in this section.
+Note that the overall solution algorithm is still implicit in time.
+
+%The superscript notation laid out in equations \ref{eqn:superscript1} and \ref{eqn:superscript2} is used to indicate whether the damage variable is from the current iteration or from the previous iteration. The superscript $^{i+1}$ means that the variable is from the current outer iteration while the superscript $^{i}$ means that the variable is from the previous outer iteration.
+%
+%\begin{equation}
+%\label{eqn:superscript1}
+%    D^{i+1}^{[m+1]}
+%\end{equation}
+%\begin{equation}
+%\label{eqn:superscript2}
+%    D^{i}^{[m+1]}
+%\end{equation}
+
+%The first three of the equations in the system given in 4.41 can be satisfied by solving the yield potential for the plastic increment $\Delta\gamma$, with the damage obtained from the previous iteration frozen. 
+
+%First, the von Mises stress is defined in terms of the elastic strain and combined with equation 4.36:
+%\begin{equation}
+%\begin{aligned}
+%%\frac{\tau^{eq}^{[m+1]}}{1-D^{i}^{[m+1]}}=\bar{\tau}_{{eq}^{[m+1]}}&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}^{[m+1]}^e\right)\right\|\\
+%%&=\sqrt{\frac{3}{2}}\left\|2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}^{[m+1]}^{e \text { trial }}-\frac{3}{2} \frac{\Delta \gamma}{\left(1+D^{i}^{[m+1]}\right)} \frac{\boldsymbol{\tau}_{d^{[m+1]}}}{\tau_{eq\ n+1}}\right)\right\|
+%fix
+%\end{aligned}
+%\end{equation}
+
+%Following the procedure laid out in Section 3.2.3, the equation for the yield function in terms of the plastic increment can be obtained in terms of the plastic increment:
+%\begin{equation}
+%	\bar{\tau}_{eq\ n+1}^{trial}-3\mu\frac{\Delta\gamma}{\left(1-D^{i}^{[m+1]}\right)}-\sigma_{y\ }\left(\alpha_n+\Delta\gamma\right)=0
+%\end{equation}
+
+%This is solved implicitly using the Newton-Raphson algorithm for $\Delta\gamma$; the stress tensor and the plastic strain tensor are then updated based on this value.  
+%After updating these values, the damage equation can be solved explicitly.
+
+
+%\paragraph{Overall Stress Calculation Procedure}
+
+This stress calculation procedure for the Lemaitre damage model is summarised in Algorithm \ref{alg:lemaitre}, where $\bar{D}^{[m+1]}_{[i]}$ is the latest available non-local damage field at the new time, i.e. its values from the previous outer iteration; at convergence within each time step, $\bar{D}^{[m+1]}_{[i]}$ becomes $\bar{D}^{[m+1]}_{[i+1]} \equiv \bar{D}^{[m+1]}$.
 As shown, to aid numerical convergence, a critical damage parameter $D_c$ is incorporated \cite{lemaitre_continuous_1985}, which limits the maximum value of the damage $D$ to $D_c$, rather than $1$.
 In the current work, $D_c = 0.99$ is assumed.
 Consequently, the damage rate equation (Equation \ref{eqn:classicY}) becomes
 \begin{equation} \label{eq:damageLimit} % note: flip sign from Andrew's thesis, as Andrew assume p = hyd(sigma), whereas we assume p = -hyd(sigma)
-%	D^{i+1}_{n+1}= \begin{cases}D_n & \text { if } \eta\leq-\frac{1}{3}	\\
-%	D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{r}\right]^s & \text { if } \eta>-\frac{1}{3}\end{cases}
+%	D^{i+1}^{[m+1]}= \begin{cases}D_n & \text { if } \eta\leq-\frac{1}{3}	\\
+%	D_n+\frac{\Delta\gamma}{\left(1-D^{i}^{[m+1]}\right)}\left[\frac{-Y^{[m+1]}}{r}\right]^s & \text { if } \eta>-\frac{1}{3}\end{cases}
 	\dot{D} =
 	\begin{cases}
 		0 & \text { if } \eta \leq -\frac{1}{3} \text{ or } D \geq D_c \\
@@ -1445,7 +1445,7 @@ where $S$ can be a function of $\eta$ and $\xi$ as described above.
 (iii) Use the Newton-Raphson method to solve the yield function for $\Delta\bar{\varepsilon}_p$:
 \begin{equation}
 	\sigma_{v}^{\text{trial}} 
-	- \frac{ 3\mu \Delta\bar{\varepsilon}_p }{1 - \bar{D}^{[m+1]}_*}
+	- \frac{ 3\mu \Delta\bar{\varepsilon}_p }{1 - \bar{D}^{[m+1]}_{[i]}}
 	-\sigma_{y}(\bar{\varepsilon}^{[m]}_p + \Delta\bar{\varepsilon}_p) = 0 \nonumber
 \end{equation}
 
@@ -1454,7 +1454,7 @@ where $S$ can be a function of $\eta$ and $\xi$ as described above.
 	\boldsymbol{\varepsilon}_{e}^{[m+1]}
 	=
 	\boldsymbol{\varepsilon}_{e}^{\text{trial}}
-	- \sqrt{\frac{3}{2}} \; \frac{ \Delta\bar{\varepsilon}_p}{1 - \bar{D}^{[m+1]}_*}
+	- \sqrt{\frac{3}{2}} \; \frac{ \Delta\bar{\varepsilon}_p}{1 - \bar{D}^{[m+1]}_{[i]}}
 	\frac{\text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})}{||\boldsymbol{\varepsilon}_{e}^{\text{trial}}||}
 	\nonumber
 \end{equation}
@@ -1463,13 +1463,13 @@ where $S$ can be a function of $\eta$ and $\xi$ as described above.
 \end{equation}
 
 \begin{equation}
-%	\boldsymbol{\sigma}_{n+1} = \frac{1}{J} \mathbf{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
+%	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \mathbf{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
 	\boldsymbol{s}^{[m+1]}
 	=
-	\left(1 - \bar{D}^{[m+1]}_*\right) (\sfrac{1}{J}) 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+	\left(1 - \bar{D}^{[m+1]}_{[i]}\right) (\sfrac{1}{J}) 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
 \end{equation}
 
-(v) Implicitly solve the pressure Poisson's equation, where $J^{[m+1]} = -(1 - \bar{D}^{[m+1]}_*) \kappa \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right)$.
+(v) Implicitly solve the pressure Poisson's equation, where $J^{[m+1]} = -(1 - \bar{D}^{[m+1]}_{[i]}) \kappa \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right)$.
 \begin{equation}
 	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = -\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right] - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m]} \right)
 \end{equation}
@@ -1485,9 +1485,9 @@ where $S$ can be a function of $\eta$ and $\xi$ as described above.
 \begin{equation} % note: flip sign from Andrew's thesis, as Andrew assume p = hyd(sigma), whereas we assume p = -hyd(sigma)
 	D^{[m+1]} =
 	\begin{cases}
-		D^{[m]} & \text { if } \eta \leq -\frac{1}{3} \text{ or } D^{[m+1]}_* \geq D_c \\
-		\text{max} \left[ D^{[m]} + \frac{\dot{\bar{\varepsilon}}_p}{1 - D^{[m+1]}_*}\left(\frac{-Y}{S(\eta,\xi)}\right)^b, \; D_c \right]
-		& \text { if } \eta>-\frac{1}{3} \text{ and }  D^{[m+1]}_* < D_c
+		D^{[m]} & \text { if } \eta \leq -\frac{1}{3} \text{ or } D^{[m+1]}_{[i]} \geq D_c \\
+		\text{max} \left[ D^{[m]} + \frac{\dot{\bar{\varepsilon}}_p}{1 - D^{[m+1]}_{[i]}}\left(\frac{-Y}{S(\eta,\xi)}\right)^b, \; D_c \right]
+		& \text { if } \eta>-\frac{1}{3} \text{ and }  D^{[m+1]}_{[i]} < D_c
 	\end{cases}
 \end{equation}
 
@@ -1528,7 +1528,7 @@ where $S$ can be a function of $\eta$ and $\xi$ as described above.
 %%In the context of the overall algorithm for the non-local Lemaitre damage model, the non-local damage $\bar{D}$ is solved for implicitly at the current iteration and the current time step, using the local damage $D$ at the current time step and current iteration.
 %%
 %%\begin{equation}
-%%\int_{\mathrm{\Omega}_u}D^{i+1}_{n+1}\ d\mathrm{\Omega}_u-\int_{\mathrm{\Omega}_u}\bar{D}^{i+1}_{n+1}\ d\mathrm{\Omega}_u+\oint_{\mathrm{\Gamma}_u}{{l_c}^2\ \mathbf{n}_u\cdot\mathrm{\nabla}\mathrm{ \bar{D}^{i+1}_{n+1}}}\ d\mathrm{\Gamma}_u=0
+%%\int_{\mathrm{\Omega}_u}D^{i+1}^{[m+1]}\ d\mathrm{\Omega}_u-\int_{\mathrm{\Omega}_u}\bar{D}^{i+1}^{[m+1]}\ d\mathrm{\Omega}_u+\oint_{\mathrm{\Gamma}_u}{{l_c}^2\ \mathbf{n}_u\cdot\mathrm{\nabla}\mathrm{ \bar{D}^{i+1}^{[m+1]}}}\ d\mathrm{\Gamma}_u=0
 %%\end{equation}
 %
 %\begin{algorithm}[H]
@@ -1536,24 +1536,24 @@ where $S$ can be a function of $\eta$ and $\xi$ as described above.
 %(i) Update Relative Deformation for given incremental displacement
 %
 %\begin{equation}
-%  \mathbf{f}_{n+1}=\mathbf{I}+\nabla\left[\Delta\textbf{u}\right]\nonumber
+%  \mathbf{f}^{[m+1]}=\mathbf{I}+\nabla\left[\Delta\textbf{u}\right]\nonumber
 %\end{equation}
 %
 %\begin{equation}
-%\mathbf{F}_{n+1}=\mathbf{f}_{n+1}\mathbf{F}_n\nonumber
+%\mathbf{F}^{[m+1]}=\mathbf{f}^{[m+1]}\mathbf{F}_n\nonumber
 %\end{equation}
 %(ii) Compute trial elasticity
 %\begin{equation}
-%\mathbf{B}^{e}_{n}=exp\left[{2\boldsymbol{\varepsilon}^{e}_{n}}\right]\nonumber
+%\mathbf{B}^{e}^{[m]}=exp\left[{2\boldsymbol{\varepsilon}^{e}^{[m]}}\right]\nonumber
 %\end{equation}
 %\begin{equation}
-%\mathbf{B}^{e}_{trial}=\mathbf{f}_{n+1}\mathbf{B}^{e}_{n}(\mathbf{f}_{n+1})^{T}\nonumber
+%\mathbf{B}^{e}_{trial}=\mathbf{f}^{[m+1]}\mathbf{B}^{e}^{[m]}(\mathbf{f}^{[m+1]})^{T}\nonumber
 %\end{equation}
 %\begin{equation}
 %\boldsymbol{\varepsilon}^{e}_{trial}=\frac{1}{2}ln[\textbf{B}^{e}_{trial}]\nonumber
 %\end{equation}
 %\begin{equation}
-%\alpha_{trial}=\alpha_{n}\nonumber
+%\alpha_{trial}=\alpha^{[m]}\nonumber
 %\end{equation}
 %\begin{equation}
 %\bar{\tau}_{eq}^{trial}=\sqrt{\frac{3}{2}}\lvert\lvert2\mu\ dev(\boldsymbol{\varepsilon}^{e}_{trial})\rvert\rvert\nonumber\nonumber
@@ -1569,20 +1569,20 @@ where $S$ can be a function of $\eta$ and $\xi$ as described above.
 %
 %(iii) Enter small-strain return map and solve for $\Delta\gamma$ using the Newton-Raphson method to solve the equation:
 %\begin{equation}
-%\bar{\tau}_{eq}^{trial}-\frac{3\mu\Delta\gamma}{1-\bar{D}^{i}_{n+1}}-\sigma_{y}(a+\Delta\gamma)=0\nonumber
+%\bar{\tau}_{eq}^{trial}-\frac{3\mu\Delta\gamma}{1-\bar{D}^{i}^{[m+1]}}-\sigma_{y}(a+\Delta\gamma)=0\nonumber
 %\end{equation}
 %(iv) Update Constitutive Variables
 %\begin{equation}
-%\alpha_{n+1}=\alpha_n+\Delta\gamma\nonumber
+%\alpha^{[m+1]}=\alpha_n+\Delta\gamma\nonumber
 %\end{equation}
 %\begin{equation}
-%\boldsymbol{\varepsilon}^{e}_{n+1}=\boldsymbol{\varepsilon}^{e}_{trial}-\sqrt{\frac{3}{2}}\frac{\Delta\gamma}{\left(1-\bar{D}^{i}_{n+1}\right)}{\frac{dev(\boldsymbol{\varepsilon}^{e}_{trial})}{\lvert\lvert\boldsymbol{\varepsilon}^{e}_{trial}\rvert\rvert}}\nonumber
+%\boldsymbol{\varepsilon}^{e}^{[m+1]}=\boldsymbol{\varepsilon}^{e}_{trial}-\sqrt{\frac{3}{2}}\frac{\Delta\gamma}{\left(1-\bar{D}^{i}^{[m+1]}\right)}{\frac{dev(\boldsymbol{\varepsilon}^{e}_{trial})}{\lvert\lvert\boldsymbol{\varepsilon}^{e}_{trial}\rvert\rvert}}\nonumber
 %\end{equation}
 %\begin{equation}
-%\boldsymbol{\tau}_{n+1}=\left(1-\bar{D}^{i}_{n+1}\right)\mathbf{D}^e:\boldsymbol{\varepsilon}^{e}_{n+1}\nonumber
+%\boldsymbol{\tau}^{[m+1]}=\left(1-\bar{D}^{i}^{[m+1]}\right)\mathbf{D}^e:\boldsymbol{\varepsilon}^{e}^{[m+1]}\nonumber
 %\end{equation}
 %\begin{equation}
-%\boldsymbol{\sigma}_{n+1}=\frac{1}{J}\boldsymbol{\tau}_{n+1}\nonumber
+%\boldsymbol{\sigma}^{[m+1]}=\frac{1}{J}\boldsymbol{\tau}^{[m+1]}\nonumber
 %\end{equation}
 %(v) Update local damage field (equation \ref{DamageUpdateEquation})
 %
@@ -1628,23 +1628,23 @@ This step prevents nonphysical behaviour whereby a cell that is set as being ful
 %
 %  \eIf{$\bar{D}_{eff\ n+1}^{i} <= D_c$}{
 %  \begin{equation}
-%D^{i+1}_{n+1}=D_n+\frac{\Delta\gamma}{\left(1-D^{i}_{n+1}\right)}\left[\frac{-Y_{n+1}}{S_0}\right]^b \notag
+%D^{i+1}^{[m+1]}=D_n+\frac{\Delta\gamma}{\left(1-D^{i}^{[m+1]}\right)}\left[\frac{-Y^{[m+1]}}{S_0}\right]^b \notag
 %\end{equation} 
 %   }{
 %\begin{equation}
-%D^{i+1}_{n+1}=D^{i}_{n+1} \notag
+%D^{i+1}^{[m+1]}=D^{i}^{[m+1]} \notag
 %\end{equation}
 %  } 
 %
 %(ii) Calculate global non-local damage field
 %\begin{equation}
-%	\left(D^{i+1}_{n+1}-\bar{D}^{i+1}_{n+1}\right)+{{l_c}^2\mathrm{\nabla}}^2D^{i+1}_{n+1}=0 \notag	
+%	\left(D^{i+1}^{[m+1]}-\bar{D}^{i+1}^{[m+1]}\right)+{{l_c}^2\mathrm{\nabla}}^2D^{i+1}^{[m+1]}=0 \notag	
 %\end{equation}
 %
 %(iii) Set the effective non-local damage field for each cell \\
-%\eIf{$\bar{D}_{n+1}^{i+1} <= D_c$}{
+%\eIf{$\bar{D}^{[m+1]}^{i+1} <= D_c$}{
 %\begin{equation}
-%D^{i+1}_{eff\ n+1}=D^{i+1}_{n+1}\notag
+%D^{i+1}_{eff\ n+1}=D^{i+1}^{[m+1]}\notag
 %\end{equation} 
 %   }{
 %\begin{equation}
@@ -1664,331 +1664,443 @@ This step prevents nonphysical behaviour whereby a cell that is set as being ful
 \subsection{Gurson-Tvergaard-Needleman Model}
 %%%%%%%%%%
 
-\hl{Here: this section has yet to be reformatted}
+\subsubsection{Model Formulation}
 
-The framework developed by \citet{gurson_continuum_1977} is the canonical framework used in the micro-mechanical approach to characterising material degradation \cite{besson_continuum_2010,cao_models_2017,tekkaya_damage_2020}. This model posits the existence of micro-voids in the material. The density of these voids is described by a variable denoted as porosity. The material degradation is characterised by the increasing porosity due to these voids' growth. Defining material degradation merely in terms of the growth of voids is limited, however. Gurson’s framework was developed further by \citet{tvergaard_analysis_1984} who developed mechanisms to account for the nucleation and coalescence of voids. In order to be consistent with how the GTN model is typically described in the literature \cite{bettaieb_numerical_2011,achouri_numerical_2013} and to present the equations in the form that they are implemented in the developed codes, the equivalent stress $\tau_{eq}$ is described using the symbol $q$ and the pressure $\tau_h$ is denoted by the symbol $p$. 
-\subsection{Evolution of Voids}
+ \citet{gurson_continuum_1977} proposed the canonical micro-mechanical framework for ductile damage prediction and provides the basis for various derived models \cite{besson_continuum_2010, bettaieb_numerical_2011, achouri_numerical_2013m cao_models_2017, tekkaya_damage_2020}.
+This model posits the existence of micro-voids in the material.
+The density of these voids is described by a variable denoted as porosity.
+The material degradation is characterised by the increasing porosity due to these voids' growth.
+%Defining material degradation merely in terms of the growth of voids is limited, however.
+Gurson’s framework was further developed by \citet{tvergaard_analysis_1984} to account for the void nucleation and coalescence, leading to the Gurson-Tvergaard-Needleman (GTN) model.
+%To be consistent with how the GTN model is typically described in the literature \cite{bettaieb_numerical_2011,achouri_numerical_2013} and to present the equations in the form that they are implemented in the developed codes, the equivalent stress $\tau_{eq}$ is described using the symbol $q$ and the pressure $\tau_h$ is denoted by the symbol $p$. 
 
-The growth and nucleation of voids characterise the evolution of the porosity $f$:
-\begin{equation}
-	\dot{f}=\dot{f}_{growth}+\dot{f}_{nucleation}	
-\end{equation}	
+%\subsubsection{Evolution of Voids}
 
-The growth of the voids is derived from the principle of mass conservation. It is given as a function of the strain rate:
-\begin{equation}
-	\dot{f}_{growth}=\left(1-f\right)tr\left(\dot{\boldsymbol{\varepsilon}}_p\right)	
+%The growth and nucleation of voids characterise the evolution of the porosity $f$:
+%\begin{equation}
+%	\dot{f}=\dot{f}_{growth}+\dot{f}_{nucleation}	
+%\end{equation}	
+%
+%The growth of the voids is derived from the principle of mass conservation. It is given as a function of the strain rate:
+%\begin{equation}
+%	\dot{f}_{growth}=\left(1-f\right)tr\left(\dot{\boldsymbol{\varepsilon}}_p\right)	
+%\end{equation}
+% Where $\dot{\boldsymbol{\varepsilon}}_p$ is the plastic strain rate. 
+%    
+%The term for the nucleation of new voids is given by:
+%\begin{equation}
+%	{\dot{f}}_{nucleation}=A{\dot{\bar{\varepsilon}}}_p	
+%\end{equation}
+%
+%
+%Where ${\dot{\bar{\varepsilon}}}_p$ is the rate of change of the equivalent plastic strain and A is a dimensionless coefficient.
+%The nucleation of new voids is assumed to be described by a normal distribution \cite{chu_void_1980} giving the following expression for the coefficient $A$:
+%\begin{equation}
+%\label{eqn:nucleatonA}
+%A= \begin{cases}\frac{f_n}{S_n \sqrt{2 \pi}} \exp \left[-\frac{1}{2}\left(\frac{\bar{\varepsilon}_p-\varepsilon_n}{S_n}\right)\right] & \text { if } p>0 \\ 0 & \text { if } p<0\end{cases}
+%\end{equation}
+%
+%where $f_n$ is the quantity of the voids nucleated per unit volume, $\varepsilon_n$ is the nucleation strain and $S_n$ is the standard deviation. 
+%
+%%\subsection{Yield equation}
+%
+%The variable f is coupled with the plasticity model through the yield equation 
+%\begin{equation}
+%	\phi=\left(\frac{q}{\sigma_y}\right)^2+2q_1f^\ast cosh\left(\frac{3q_2p}{2\sigma_y}\right)-\left(1-q_1^2f^{\ast2}\right)
+%\end{equation}
+%
+%Where $q_1$ and $q_2$ are material parameters, $q$ is the von Mises stress, $p$ is the hydrostatic pressure and $\sigma_y$ is the yield stress.
+%Here $f^\ast$ is the effective void fraction and is a function of the porosity variable defined above. It is introduced to account for the effects of void coalescence:
+%\begin{equation}
+%\label{eqn:GTNCoalescence}
+%f^*=\left\{\begin{array}{cc}
+%f & \text { if } f \leq f_c \\
+%f_c+\left(f-f_c\right) \frac{f_u-f_c}{f_f-f_c} & \text { if } f>f_c
+%\end{array}\right.
+%\end{equation}
+%
+%Where $f_c$ is the void volume fraction at which the coalescence of voids begins,  $f_u$ is the ultimate volume fraction and $f_f$ represents the void volume fraction at fracture.
+%
+%%\subsection{Plasticity}
+%
+%Plastic isotropy and plastic associativity are assumed as in \citet{bettaieb_numerical_2011}. The following relation can therefore be obtained:
+%\begin{equation}
+%\label{eqn:4.67}
+%	\dot{\boldsymbol{\varepsilon}}^p=\dot{\gamma}\frac{\partial\phi}{\partial\boldsymbol{\tau}}	
+%\end{equation}
+%
+%This equation is reformulated in terms of the von Mises equivalent stress $q$ and the pressure $p$ to obtain:
+%\begin{equation}
+%	\label{eqn:4.68}
+% \dot{\boldsymbol{\varepsilon}}^p=\dot{\gamma}\frac{\partial\phi}{\partial q}\frac{\partial q}{\partial\boldsymbol{\tau}}+\dot{\gamma}\frac{\partial\phi}{\partial p}\frac{\partial p}{\partial\boldsymbol{\tau}}
+%\end{equation}
+%
+%Using the definitions of $q$ and $p$:
+%\begin{equation}
+%	\frac{\partial q}{\partial\boldsymbol{\tau}}=\mathbf{n}
+% \end{equation}
+% \begin{equation}
+% \frac{\partial p}{\partial\boldsymbol{\tau}}=\frac{1}{3}\mathbf{I}	
+%\end{equation}
+%
+%where $\mathbf{n}$ is given by:
+%\begin{equation}
+%\frac{3}{2q}\mathbf{\tau}_d.
+%\end{equation}
+%
+%Equation \ref{eqn:4.68} can therefore be written as:
+%\begin{equation}
+%	\dot{\boldsymbol{\varepsilon}}^p=\dot{\gamma}\left(\frac{\partial\phi}{\partial q}\mathbf{n}+\frac{1}{3}\frac{\partial\phi}{\partial p}\mathbf{I}\right)	
+%\end{equation}
+%Which is equivalent to:
+%\begin{equation}
+%\label{eqn:4.73}
+%\dot{\boldsymbol{\varepsilon}}^p=\frac{1}{3} \dot{\varepsilon}^h \boldsymbol{I}+\dot{\varepsilon}^q \boldsymbol{n}
+%\end{equation}
+%Where:
+%\begin{equation}
+%\label{eqn:4.74}
+%\dot{ \boldsymbol{\varepsilon}}^h=\dot{\gamma} \frac{\partial \phi}{\partial p} 
+%\end{equation}
+%\begin{equation}
+%\label{eqn:4.75}
+%\dot{ \boldsymbol{\varepsilon}}^q=\dot{\gamma} \frac{\partial \phi}{\partial q}
+%\end{equation}
+%
+%Eliminating $\dot{\gamma}$ from equations \ref{eqn:4.74}
+%and \ref{eqn:4.75} leads to the consistency equation:
+%\begin{equation}
+%\dot{ \boldsymbol{\varepsilon}}^h \frac{\partial \phi}{\partial q}-\dot{ \boldsymbol{\varepsilon}}^q \frac{\partial \phi}{\partial p}=0
+%\end{equation}
+%
+%
+%%\subsection{Equivalent plastic strain}
+%
+%Assuming the equivalent plastic work principle, there is an equivalence between the rates of macroscopic and matrix plastic work:
+%\begin{equation}
+%\dot{\overline{\boldsymbol{\varepsilon}}}^p=\frac{\boldsymbol{\sigma}: \dot{\boldsymbol{\varepsilon}}^p}{(1-f) \sigma_y}
+%\end{equation}
+%Substituting in equation \ref{eqn:4.73}, the equation for the equivalent plastic strain is obtained in its final form:
+%\begin{equation}
+%\dot{\overline{\boldsymbol{\varepsilon}}}^p=\frac{p \dot{ \boldsymbol{\varepsilon}}^h+q \dot{\boldsymbol{\varepsilon}}^q}{(1-f) \sigma_y}
+%\end{equation}
+%
+%%\subsection{Constitutive equations}
+%\subsubsection{Model Formulation}
+
+\hl{Andrew: check signs, assuming $p = -tr(\sigma)/3$}\\
+\hl{Andrew: should $f$ be $f_*$ in the 2nd eqn?}\\
+The GTN model is described by a yield equation, flow rule (deviatoric and volumetric), consistency condition, and porosity evolution equations:
+\begin{eqnarray}
+	&\Phi =
+	\left(\frac{\sigma_v}{\sigma_y}\right)^2 + 2 q_1 f_* \cosh \left(\frac{3 q_2 p}{2 \sigma_y}\right)
+	- \left(1-q_1^2 f^{2}_* \right) \label{eqn:GTN1} \\
+	%= 0 \\
+	&\dot{\bar{\varepsilon}}_p =
+		\frac{1}{(1-f) \sigma_y} (\sigma_v \dot{ \bar{\varepsilon}}_\text{dev} - p \dot{ \bar{\varepsilon}}_\text{vol}) \label{eqn:GTN2} \\
+	&\dot{\bar{\varepsilon}}_\text{vol} \frac{\partial \Phi}{\partial \sigma_v}
+		+ \dot{\bar{\varepsilon}}_\text{dev} \frac{\partial \Phi}{\partial p} = 0 \label{eqn:GTN3} \\
+	&\dot{f} = (1-f) \, \text{tr}\left(\dot{\boldsymbol{\varepsilon}}_p\right)+A \dot{\bar{\varepsilon}}_p \label{eqn:GTN4}
+\end{eqnarray}
+where $q_1$ and $q_2$ are material parameters.
+The effective void fraction $f_*$, which accounts for void coalescence, is
+\begin{equation} \label{eqn:GTNCoalescence}
+	f_*=
+	\left\{
+	\begin{array}{cc}
+		f & \text { if } f \leq f_c \\
+		f_c+\left(f-f_c\right) \frac{f_u-f_c}{f_f-f_c} & \text { if } f>f_c
+	\end{array}\right.
 \end{equation}
- Where $\dot{\boldsymbol{\varepsilon}}_p$ is the plastic strain rate. 
-    
-The term for the nucleation of new voids is given by:
-\begin{equation}
-	{\dot{f}}_{nucleation}=A{\dot{\bar{\varepsilon}}}_p	
+where $f$ is the porosity, $f_c$ is the void volume fraction at which void coalescence begins, $f_u$ is the ultimate volume fraction, and $f_f$ is the volume fraction at fracture.
+
+The rate of volumetric plastic strain and equivalent deviatoric plastic strain are given, respectively, by
+\begin{eqnarray}
+	\dot{ \boldsymbol{\varepsilon}}_\text{vol} &=& \dot{\bar{\varepsilon}}_p \frac{\partial \phi}{\partial p} \\
+	\dot{ \boldsymbol{\varepsilon}}_\text{dev} &=& \dot{\bar{\varepsilon}}_p \frac{\partial \phi}{\partial \sigma_v}
+\end{eqnarray}
+
+
+%Where ${\dot{\bar{\varepsilon}}}_p$ is the rate of change of the equivalent plastic strain and 
+The dimensionless coefficient $A$ is chosen to ensure void nucleation follows a normal distribution \cite{chu_void_1980}:
+\begin{equation} \label{eqn:nucleatonA}
+	A =
+	\begin{cases}
+	\frac{f_n}{S_n \sqrt{2 \pi}} \exp \left[-\frac{1}{2}\left(\frac{\bar{\varepsilon}_p-\varepsilon_n}{S_n}\right)\right] & \text { if } p < 0 \\
+	0 & \text { if } p \geq 0
+	\end{cases}
 \end{equation}
-
-
-Where ${\dot{\bar{\varepsilon}}}_p$ is the rate of change of the equivalent plastic strain and A is a dimensionless coefficient.
-The nucleation of new voids is assumed to be described by a normal distribution \cite{chu_void_1980} giving the following expression for the coefficient $A$:
-\begin{equation}
-\label{eqn:nucleatonA}
-A= \begin{cases}\frac{f_n}{S_n \sqrt{2 \pi}} \exp \left[-\frac{1}{2}\left(\frac{\bar{\varepsilon}_p-\varepsilon_n}{S_n}\right)\right] & \text { if } p>0 \\ 0 & \text { if } p<0\end{cases}
-\end{equation}
-
 where $f_n$ is the quantity of the voids nucleated per unit volume, $\varepsilon_n$ is the nucleation strain and $S_n$ is the standard deviation. 
 
-%\subsection{Yield equation}
-
-The variable f is coupled with the plasticity model through the yield equation 
-\begin{equation}
-	\phi=\left(\frac{q}{\sigma_y}\right)^2+2q_1f^\ast cosh\left(\frac{3q_2p}{2\sigma_y}\right)-\left(1-q_1^2f^{\ast2}\right)
-\end{equation}
-
-Where $q_1$ and $q_2$ are material parameters, $q$ is the von Mises stress, $p$ is the hydrostatic pressure and $\sigma_y$ is the yield stress.
-Here $f^\ast$ is the effective void fraction and is a function of the porosity variable defined above. It is introduced to account for the effects of void coalescence:
-\begin{equation}
-\label{eqn:GTNCoalescence}
-f^*=\left\{\begin{array}{cc}
-f & \text { if } f \leq f_c \\
-f_c+\left(f-f_c\right) \frac{f_u-f_c}{f_f-f_c} & \text { if } f>f_c
-\end{array}\right.
-\end{equation}
-
-Where $f_c$ is the void volume fraction at which the coalescence of voids begins,  $f_u$ is the ultimate volume fraction and $f_f$ represents the void volume fraction at fracture.
-
-%\subsection{Plasticity}
-
-Plastic isotropy and plastic associativity are assumed as in \citet{bettaieb_numerical_2011}. The following relation can therefore be obtained:
-\begin{equation}
-\label{eqn:4.67}
-	\dot{\boldsymbol{\varepsilon}}^p=\dot{\gamma}\frac{\partial\phi}{\partial\boldsymbol{\tau}}	
-\end{equation}
-
-This equation is reformulated in terms of the von Mises equivalent stress $q$ and the pressure $p$ to obtain:
-\begin{equation}
-	\label{eqn:4.68}
- \dot{\boldsymbol{\varepsilon}}^p=\dot{\gamma}\frac{\partial\phi}{\partial q}\frac{\partial q}{\partial\boldsymbol{\tau}}+\dot{\gamma}\frac{\partial\phi}{\partial p}\frac{\partial p}{\partial\boldsymbol{\tau}}
-\end{equation}
-
-Using the definitions of $q$ and $p$:
-\begin{equation}
-	\frac{\partial q}{\partial\boldsymbol{\tau}}=\mathbf{n}
- \end{equation}
- \begin{equation}
- \frac{\partial p}{\partial\boldsymbol{\tau}}=\frac{1}{3}\mathbf{I}	
-\end{equation}
-
-where $\mathbf{n}$ is given by:
-\begin{equation}
-\frac{3}{2q}\mathbf{\tau}_d.
-\end{equation}
-
-Equation \ref{eqn:4.68} can therefore be written as:
-\begin{equation}
-	\dot{\boldsymbol{\varepsilon}}^p=\dot{\gamma}\left(\frac{\partial\phi}{\partial q}\mathbf{n}+\frac{1}{3}\frac{\partial\phi}{\partial p}\mathbf{I}\right)	
-\end{equation}
-Which is equivalent to:
-\begin{equation}
-\label{eqn:4.73}
-\dot{\boldsymbol{\varepsilon}}^p=\frac{1}{3} \dot{\varepsilon}^h \boldsymbol{I}+\dot{\varepsilon}^q \boldsymbol{n}
-\end{equation}
-Where:
-\begin{equation}
-\label{eqn:4.74}
-\dot{ \boldsymbol{\varepsilon}}^h=\dot{\gamma} \frac{\partial \phi}{\partial p} 
-\end{equation}
-\begin{equation}
-\label{eqn:4.75}
-\dot{ \boldsymbol{\varepsilon}}^q=\dot{\gamma} \frac{\partial \phi}{\partial q}
-\end{equation}
-
-Eliminating $\dot{\gamma}$ from equations \ref{eqn:4.74}
-and \ref{eqn:4.75} leads to the consistency equation:
-\begin{equation}
-\dot{ \boldsymbol{\varepsilon}}^h \frac{\partial \phi}{\partial q}-\dot{ \boldsymbol{\varepsilon}}^q \frac{\partial \phi}{\partial p}=0
-\end{equation}
 
 
-%\subsection{Equivalent plastic strain}
+%\paragraph{Shear Effects}
+\paragraph{Lode Angle Dependence}
 
-Assuming the equivalent plastic work principle, there is an equivalence between the rates of macroscopic and matrix plastic work:
-\begin{equation}
-\dot{\overline{\boldsymbol{\varepsilon}}}^p=\frac{\boldsymbol{\sigma}: \dot{\boldsymbol{\varepsilon}}^p}{(1-f) \sigma_y}
-\end{equation}
-Substituting in equation \ref{eqn:4.73}, the equation for the equivalent plastic strain is obtained in its final form:
-\begin{equation}
-\dot{\overline{\boldsymbol{\varepsilon}}}^p=\frac{p \dot{ \boldsymbol{\varepsilon}}^h+q \dot{\boldsymbol{\varepsilon}}^q}{(1-f) \sigma_y}
-\end{equation}
-
-%\subsection{Constitutive equations}
-\subsection{Model formulation}
-
-The following system of equations, therefore, governs the material behaviour:
-\begin{equation}
-\label{eqn:4.79}
-\left\{\begin{array}{c}
-\phi=\left(\frac{q}{\sigma_y}\right)^2+2 q_1 f^* \cosh \left(\frac{3 q_2 p}{2 \sigma_y}\right)-\left(1-q_1^2 f^{* 2}\right)=0 \\
-\dot{\varepsilon}_{n+1}^h \frac{\partial \phi}{\partial q}-\dot{\varepsilon}_{n+1}^q \frac{\partial \phi}{\partial p}=\mathbf{0} \\
-\dot{\bar{\varepsilon}}^p=\frac{p \dot{ \varepsilon}^h+q \dot{ \varepsilon}^q}{(1-f) \sigma_y} \\
-\dot{f}=(1-f) \operatorname{tr}\left(\dot{\boldsymbol{\varepsilon}}_p\right)+A \dot{\bar{\varepsilon}}_p
-\end{array}\right.
-\end{equation}
-
-
-\subsubsection{Computational procedure}
-
-For each cell, the incremental displacement field $\Delta\mathbf{u}$ for the current time step, at the current iteration, is given. The values of the following variables from the previous time step are also provided:
-\begin{equation}
-\left\{F_n^p,\ {{\bar{\varepsilon}}^p}_n,f_n\right\}
-\end{equation}
-The goal is then to have a computational procedure to obtain the following variables at time $t_{n+1}$
-\begin{equation}
-\left\{F_{n+1}^p,\ {{\bar{\varepsilon}}^p}_{n+1},\boldsymbol{\sigma}_{n+1},f_{n+1}\right\}
-\end{equation}
-This is achieved in the material solver by solving the set of equations laid out in equation \ref{eqn:4.79}.
-
-Equation 3.30 is given in terms of the GTN yield equation:
-\begin{equation}
-	{\dot{\mathbf{F}}}^p\mathbf{F}^{p-1}=\Delta\gamma\mathbf{R}^{eT}\frac{\partial\phi}{\partial\boldsymbol{\tau}}\mathbf{R}^e
-\end{equation}
-Employing the exponential map backward scheme for the time-discretisation of the plastic flow rule, one can obtain:
-\begin{equation}
-	\mathbf{F}_{n+1}^p=exp\left[\Delta\gamma\mathbf{R}_{n+1}^{e^T}\frac{\partial\phi}{\partial\boldsymbol{\tau}_{n+1}}\mathbf{R}_{n+1}^e\right]\mathbf{F}_n^p
-\end{equation}
-Due to plastic isotropy this equation can be written as:
-\begin{equation}
-	\mathbf{F}_{n+1}^p=\mathbf{R}_{n+1}^{e^T}exp\left[\Delta\gamma\frac{\partial\phi}{\partial\boldsymbol{\tau}_{n+1}}\right]\mathbf{R}_{n+1}^e\mathbf{F}_n^p
-\end{equation}
-Subbing in equation \ref{eqn:4.67}
-\begin{equation}	\mathbf{F}_{n+1}^p=\mathbf{R}_{n+1}^{e^T}exp\left[\Delta{\boldsymbol{\varepsilon}}^p_{n+1}\right]\mathbf{R}_{n+1}^e\mathbf{F}_n^p	
-\end{equation}
-Using the same procedure laid out in section 3.2.3, the additive split for the elastic and plastic contributions is obtained:
-\begin{equation}
-\boldsymbol{\varepsilon}_{n+1}^e=\boldsymbol{\varepsilon}_{n+1}^{e \text { trial }}-\Delta \varepsilon_{n+1}^p
-\end{equation}
-
-An explicit-implicit algorithm is used to solve the system of equations \ref{eqn:4.79}. The first three equations are solved implicitly for the variables $\Delta \boldsymbol{\varepsilon}_{n+1}^h$, $\Delta \boldsymbol{\varepsilon}_{n+1}^q$ and $\Delta \overline{\boldsymbol{\varepsilon}}^p$
-. The porosity $f_{n+1}$ is then solved for explicitly. 
-Using the fact that:
-\begin{equation}
-p_{n+1}=p_{\text {trial }}-K \Delta \varepsilon_{n+1}^h 
-\end{equation}
-\begin{equation}
-q_{n+1}=q_{\text {trial }}-3 \mu \Delta \varepsilon_{n+1}^q
-\end{equation}
-
-
-The system of equations to be solved, $r_i$, implicitly are given by
-\begin{equation}
-\label{eqn:discritesedGTNSystem}
-\left\{\begin{array}{c}
-r_{\Delta \varepsilon_{n+1}^q}=\left(\frac{q_{\text {trial }}-3 \mu \Delta \varepsilon_{n+1}^q}{\sigma_y\left(\bar{\varepsilon}^p+\Delta \bar{\varepsilon}^p{ }_{n+1}\right)}\right)^2+2 q_1 f^{*i}_{n+1} \cosh \left(\frac{3 q_2\left(p_{\text {trial }}-K \Delta \varepsilon_{n+1}^h\right)}{2 \sigma_y\left(\bar{\varepsilon}^p+\Delta \bar{\varepsilon}^p{ }_{n+1}\right)}\right)-\left(1-q_1^2 {f^{*i}}^2_{n+1}\right)=0 \\
-r_{\Delta \varepsilon_{n+1}^h}=\Delta \varepsilon_{n+1}^h \frac{\partial \phi}{\partial q}-\Delta \varepsilon_{n+1}^q \frac{\partial \phi}{\partial p}=0 \\
-r_{\Delta \bar{\varepsilon}^p{ }_{n+1}}=\Delta \bar{\varepsilon}^p{ }_{n+1}-\frac{p \Delta \varepsilon_{n+1}^h+q \Delta \varepsilon_{n+1}^q}{(1-f^i_{n+1}) \sigma_y\left(\bar{\varepsilon}^p+\Delta \bar{\varepsilon}^p{ }_{n+1}\right)}=0
-\end{array}\right.
-\end{equation}
-The group of unknowns associated with this system of equations is given by $x_i$
-\begin{equation}
-x_i=\left\{\begin{array}{c}
-\Delta \varepsilon_{n+1}^q \\
-\Delta \varepsilon_{n+1}^h \\
-\Delta \bar{\varepsilon}^p
-\end{array}\right\}
-\end{equation}
-The system of equations is solved at the centre of each volume using the Newton-Raphson method
-\begin{equation}
-\boldsymbol{x}_{i n+1}=\boldsymbol{x}_{i n}-\left[\left.\frac{\partial \boldsymbol{r}_i}{\partial \boldsymbol{x}_i}\right|_{\boldsymbol{x}_n}\right]^{-1} \boldsymbol{r}_i\left(\boldsymbol{x}_n\right)
-\end{equation}
-$\frac{\partial r_i}{\partial x_i}$ is the Jacobian of the equations $r_i$ with respect to the variables $x_i$ given by:
-\begin{equation}
-\frac{\partial \boldsymbol{r}_i}{\partial \boldsymbol{x}_i}=\left[\begin{array}{ccc}
-\frac{\partial r_{\Delta \varepsilon_{n+1}^q}^q}{\partial \Delta \boldsymbol{\varepsilon}_{n+1}^q} & \frac{\partial r_{\Delta \varepsilon_{n+1}^q}^q}{\partial \Delta \boldsymbol{\varepsilon}_{n+1}^h} & \frac{\partial r_{\Delta \varepsilon_{n+1}^q}^q}{\partial \Delta \overline{\boldsymbol{\varepsilon}}^p_{n+1}} \\
-\frac{\partial r_{\Delta \varepsilon_{n+1}^h}}{\partial \Delta \boldsymbol{\varepsilon}_{n+1}^q} & \frac{\partial r_{\Delta \varepsilon_{n+1}^h}}{\partial \Delta \boldsymbol{\varepsilon}_{n+1}^h} & \frac{\partial r_{\Delta \varepsilon_{n+1}^h}}{\partial \Delta \overline{\boldsymbol{\varepsilon}}^p{ }_{n+1}} \\
-\frac{\partial r_{\Delta \overline{\boldsymbol{\varepsilon}}^p{ }_{n+1}}}{\partial \Delta \boldsymbol{\varepsilon}_{n+1}^q} & \frac{\partial r_{\Delta \overline{\boldsymbol{\varepsilon}}^p{ }_{n+1}}}{\partial \Delta \boldsymbol{\varepsilon}_{n+1}^h} & \frac{\partial r_{\Delta \overline{\boldsymbol{\varepsilon}}^p{ }_{n+1}}}{\partial \Delta \overline{\boldsymbol{\varepsilon}}^p{ }_{n+1}}
-\end{array}\right]
-\end{equation}
-Using simple multivariable calculus operations these constituent partial derivatives of the Jacobian can then be derived. These derivatives are provided in Appendix C **. 
-After solving for these variables
-($\Delta {\varepsilon}_{n+1}^h$, $\Delta {\varepsilon}_{n+1}^q$ and $\Delta \overline{{\varepsilon}}^p$) the equivalent plastic strain, elastic strain, pressure, von Mises stress and stress can then be updated:
-\begin{equation}
-\vec{\varepsilon}^p{ }_{n+1}=\vec{\varepsilon}^p{ }_n+\Delta \vec{\varepsilon}^p{ }_{n+1} 
-\end{equation}
-\begin{equation}
-\boldsymbol{\varepsilon}^{e}_{n+1}=\boldsymbol{\varepsilon}^{e}_{trial}-\frac{1}{3}\Delta {\varepsilon}_{n+1}^h\ \mathbf{I}-\Delta {\varepsilon}_{n+1}^q\ \mathbf{n}
-\end{equation}
-\begin{equation}
-p_{n+1}=p_{\text {trial }}-K \Delta \varepsilon_{n+1}^h 
-\end{equation}
-\begin{equation}
-q_{n+1}=q_{\text {trial }}-3 \mu \Delta \varepsilon_{n+1}^q 
-\end{equation}
-\begin{equation}
-\boldsymbol{\tau}_{n+1}=p_{n+1} \boldsymbol{I}+\frac{2q_{n+1}}{3} \boldsymbol{n} 
-\end{equation}
-The porosity can then be determined:
-\begin{equation}
-f_{\mathrm{n}+1}^{\mathrm{i}+1}=f_{\mathrm{n}}+\left(1-f_{\mathrm{n}+1}^{\mathrm{i}}\right) \operatorname{tr}\left(\Delta \varepsilon_{n+1}^p\right)+A \Delta \bar{\varepsilon}^p{ }_{n+1}
-\end{equation}
-
-Where ${f}_{n+1}^{i+1}$ is the porosity for the current iteration and $f_{n+1}^i$ is the porosity from the previous iteration. The effective porosity $f^{*i+1}_{n+1}$ is then calculated according to equation \ref{eqn:GTNCoalescence}.
-This procedure is provided in Algorithm 5.
-
-\begin{algorithm}[H]
-\SetAlgoLined
-(i) Update relative deformation for given incremental displacement
-
-\begin{equation}
-  \textbf{f}_{n+1}=\textbf{I}+\nabla\left[\Delta\textbf{u}\right]\nonumber
-\end{equation}
-\begin{equation}
- \textbf{F}_{n+1}=\textbf{f}_{n+1}\textbf{F}_n\nonumber
-\end{equation}
-
-(ii) Compute trial elasticity
-\begin{equation}
-\mathbf{B}^{e}_{n}=exp\left[{2\boldsymbol{\varepsilon}^{e}_{n}}\right]\nonumber
-\end{equation}
-\begin{equation}
-\mathbf{B}^{e}_{trial}=\mathbf{f}_{n+1}\mathbf{B}^{e}_{n}(\mathbf{f}_{n+1})^{T}\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\varepsilon}^{e}_{trial}=\frac{1}{2}ln[\textbf{B}^{e}_{trial}]\nonumber
-\end{equation}
-\begin{equation}
-\bar{\varepsilon}^{p}_{trial}=\bar{\varepsilon}^{p}_{n}\nonumber
-\end{equation}
-\begin{equation}
-p_{trial}=K\ tr(\boldsymbol{\varepsilon}^{e}_{trial})\nonumber
-\end{equation}
-\begin{equation}
-\mathbf{s}_{trial}=2G\ dev(\boldsymbol{\varepsilon}^{e}_{trial})\nonumber
-\end{equation}
-\begin{equation}
-q_{trial}=\sqrt{\frac{3}{2}}\lvert\lvert2G\ dev(\boldsymbol{\varepsilon}^{e}_{trial})\rvert\rvert\nonumber
-\end{equation}
-\begin{equation}
-    \mathbf{n}=\frac{3}{2}\frac{\mathbf{s}_{trial}}{q_{trial}}\nonumber
-\end{equation}
-\begin{equation}
-f_{trial}=  \left(\frac{{q}_{trial}}{\sigma_{y}}\right)^{2}+q_{1}f^{*i}_{n+1}cosh\left(\frac{3q_{2}p_{trial}}{2\sigma_{y}}\right)-\left(1-q_{1}^{2}{f^{*i}_{n+1}}^2\right)\nonumber
-\end{equation}
-  \eIf{$f_{trial}>0$}{
-   go to step iii 
-   }{
-   set $\Delta {\varepsilon}_{n+1}^h$, $\Delta {\varepsilon}_{n+1}^q$ and $\Delta \overline{{\varepsilon}}^p_{n+1}$ to 0. Go to step iv 
-  }
-
-(iii) Enter small strain return map and solve the system of equations (equation \ref{eqn:discritesedGTNSystem}) for $\Delta {\varepsilon}_{n+1}^h$, $\Delta {\varepsilon}_{n+1}^q$ and $\Delta \overline{{\varepsilon}}^p_{n+1}$
-
-
-(iv) Update Constitutive Variables
-\begin{equation}
-\overline{\boldsymbol{\varepsilon}}^p_{n+1}=\overline{\boldsymbol{\varepsilon}}^p_{n}+\Delta \overline{\boldsymbol{\varepsilon}}^p_{n+1}\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\varepsilon}^{e}_{n+1}=\boldsymbol{\varepsilon}^{e}_{trial}-(1/3)\Delta {\varepsilon}_{n+1}^h\ \mathbf{I}-\Delta {\varepsilon}_{n+1}^q\ \mathbf{n}\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\tau}_{n+1}=(p_{\text {trial }}-K \Delta \varepsilon_{n+1}^h)\mathbf{I}+\frac{2(q_{\text {trial }}-3 \mu \Delta \varepsilon_{n+1}^q)}{3}\mathbf{n} \nonumber
-\end{equation}
+Further developments of the GTN model have been made to better account for fracture in stress states with significant shearing \cite{nahshon_modification_2008, malcher_continuum_2012, leclerc_micromechanics-based_2020, achouri_numerical_2013}.
+This work adopts the expression developed by \citet{nahshon_modification_2008} for shearing-related void growth, which has shown an ability to accurately predict fracture in the blanking metal forming process \cite{achouri_numerical_2013}.
+The porosity evolution equation (Equation \label{eqn:GTN4}) is consequently replaced by
 %\begin{equation}
-%\boldsybol{\tau}_{n+1}=\left(q_{trial}-3\mu\Delta \boldsymbol{\varepsilon}_{n+1}^q\left(\frac{3\mathbf{s}_{trial}}{2q_{trial}}\right)\right)+\left(p_{trial}-K\Delta\varepsilon^{h}_{n+1}\right)\nonumber
+%	\dot{f}={\dot{f}}_{growth}+{\dot{f}}_{nucleation}+{\dot{f}}_{shear}	
+%\end{equation}
+where
+\begin{equation}
+%	{\dot{f}}_{shear}=k_w\frac{fw\left(\boldsymbol{\sigma}\right)}{q}\mathbf{s}:{\dot{\boldsymbol{\varepsilon}}}_p	
+	\dot{f} = (1-f) \, \text{tr}\left(\dot{\boldsymbol{\varepsilon}}_p\right)+A \dot{\bar{\varepsilon}}_p
+%	+ k_w\frac{fw\left(\boldsymbol{\sigma}\right)}{q}\mathbf{s}:{\dot{\boldsymbol{\varepsilon}}}_p
+	+ k_w f\frac{1 - \xi^2 }{\sigma_v} \,\text{dev}(\bb{\sigma}):{\dot{\boldsymbol{\varepsilon}}}_p
+\end{equation}
+%where $k_w$ is a material parameter and $w(\boldsymbol{\sigma})$ is given by
+%\begin{equation}
+%	w\left(\boldsymbol{\sigma}\right) = 1- \xi^2	
 %\end{equation}
 
+
+\paragraph{Non-Local Porosity}
+
+Like the Lemaitre model, mesh dependency in the GTN model can be mitigated by introducing non-local damage variables \cite{reusch_non-local_2003, leclerc_micromechanics-based_2020}.
+In the case of the GTN model, a non-local porosity variable is determined using a non-local gradient (smoothing) equation:
 \begin{equation}
-\boldsymbol{\sigma}_{n+1}=\frac{1}{J}\boldsymbol{\tau}_{n+1}\nonumber
+	\bar{f} - {l_c}^2 \bb{\nabla}^2 \bar{f} = f
+\end{equation}
+where $\bar{f}$ is the non-local (smoothed) porosity field.
+This equation can be discretised, as before, using the described cell-centred finite volume method and zero-flux Neumann boundary conditions.
+%  The effective porosity $f^\ast$ is then calculated according to equation \ref{eqn:GTNCoalescence} using the non-local porosity $\bar{f}$. Where $f$ appears in the system of equations \ref{eqn:discritesedGTNSystem} the non-local porosity is used.
+
+
+
+\subsubsection{Computational Procedure}
+
+\hl{Philip reminder: make notation consistent for tensor multiplication}\\
+For the GTN model, the elastoplasticity stress calculation is extended to determine porosity $f$ in addition to stress and plastic strain.
+The adopted computational algorithm is shown in Algorithm \ref{alg:GTN}.
+As in the Lemaitre computational procedure, we propose an explicit-implicit algorithm to solve the system of equations:
+Equations \ref{eqn:GTN1}, \ref{eqn:GTN2} and \ref{eqn:GTN3} are solved implicitly for the variables $\boldsymbol{\varepsilon}_\text{vol}$, $\boldsymbol{\varepsilon}_\text{dev}$ and $\overline{\boldsymbol{\varepsilon}}_p$ using a Newon-Raphson method, while the porosity $f$ (Equation \ref{eqn:GTN4}) is calculated in a deferred-correction/explicit manner.
+Once again, the overall procedure is implicit in time.
+
+%For each cell, the incremental displacement field $\Delta\mathbf{u}$ for the current time step, at the current iteration, is given. The values of the following variables from the previous time step are also provided:
+%\begin{equation}
+%\left\{F_n^p,\ {{\bar{\varepsilon}}^p}_n,f_n\right\}
+%\end{equation}
+%The goal is then to have a computational procedure to obtain the following variables at time $t^{[m+1]}$
+%\begin{equation}
+%\left\{F^{[m+1]}^p,\ {{\bar{\varepsilon}}^p}^{[m+1]},\boldsymbol{\sigma}^{[m+1]},f^{[m+1]}\right\}
+%\end{equation}
+%This is achieved in the material solver by solving the set of equations laid out in equation \ref{eqn:4.79}.
+%
+%Equation 3.30 is given in terms of the GTN yield equation:
+%\begin{equation}
+%	{\dot{\mathbf{F}}}^p\mathbf{F}^{p-1}=\Delta\gamma\mathbf{R}^{eT}\frac{\partial\phi}{\partial\boldsymbol{\tau}}\mathbf{R}^e
+%\end{equation}
+%Employing the exponential map backward scheme for the time-discretisation of the plastic flow rule, one can obtain:
+%\begin{equation}
+%	\mathbf{F}^{[m+1]}^p=exp\left[\Delta\gamma\mathbf{R}^{[m+1]}^{e^T}\frac{\partial\phi}{\partial\boldsymbol{\tau}^{[m+1]}}\mathbf{R}^{[m+1]}^e\right]\mathbf{F}_n^p
+%\end{equation}
+%Due to plastic isotropy this equation can be written as:
+%\begin{equation}
+%	\mathbf{F}^{[m+1]}^p=\mathbf{R}^{[m+1]}^{e^T}exp\left[\Delta\gamma\frac{\partial\phi}{\partial\boldsymbol{\tau}^{[m+1]}}\right]\mathbf{R}^{[m+1]}^e\mathbf{F}_n^p
+%\end{equation}
+%Subbing in equation \ref{eqn:4.67}
+%\begin{equation}	\mathbf{F}^{[m+1]}^p=\mathbf{R}^{[m+1]}^{e^T}exp\left[\Delta{\boldsymbol{\varepsilon}}^p^{[m+1]}\right]\mathbf{R}^{[m+1]}^e\mathbf{F}_n^p	
+%\end{equation}
+%Using the same procedure laid out in section 3.2.3, the additive split for the elastic and plastic contributions is obtained:
+%\begin{equation}
+%\boldsymbol{\varepsilon}^{[m+1]}^e=\boldsymbol{\varepsilon}^{[m+1]}^{e \text { trial }}-\Delta \varepsilon^{[m+1]}^p
+%\end{equation}
+
+%The porosity $f^{[m+1]}$ is then solved for explicitly. 
+%Using the fact that:
+%\begin{equation}
+%p^{[m+1]}=p_{\text {trial }}-K \Delta \varepsilon^{[m+1]}^h 
+%\end{equation}
+%\begin{equation}
+%q^{[m+1]}=q_{\text {trial }}-3 \mu \Delta \varepsilon^{[m+1]}^q
+%\end{equation}
+
+
+%The system of equations to be solved, $r_i$, implicitly are given by
+%\begin{equation}
+%\label{eqn:discritesedGTNSystem}
+%\left\{\begin{array}{c}
+%r_{\Delta \varepsilon^{[m+1]}^q}=\left(\frac{q_{\text {trial }}-3 \mu \Delta \varepsilon^{[m+1]}^q}{\sigma_y\left(\bar{\varepsilon}^p+\Delta \bar{\varepsilon}^p{ }^{[m+1]}\right)}\right)^2+2 q_1 f^{*i}^{[m+1]} \cosh \left(\frac{3 q_2\left(p_{\text {trial }}-K \Delta \varepsilon^{[m+1]}^h\right)}{2 \sigma_y\left(\bar{\varepsilon}^p+\Delta \bar{\varepsilon}^p{ }^{[m+1]}\right)}\right)-\left(1-q_1^2 {f^{*i}}^2^{[m+1]}\right)=0 \\
+%r_{\Delta \varepsilon^{[m+1]}^h}=\Delta \varepsilon^{[m+1]}^h \frac{\partial \phi}{\partial q}-\Delta \varepsilon^{[m+1]}^q \frac{\partial \phi}{\partial p}=0 \\
+%r_{\Delta \bar{\varepsilon}^p{ }^{[m+1]}}=\Delta \bar{\varepsilon}^p{ }^{[m+1]}-\frac{p \Delta \varepsilon^{[m+1]}^h+q \Delta \varepsilon^{[m+1]}^q}{(1-f^i^{[m+1]}) \sigma_y\left(\bar{\varepsilon}^p+\Delta \bar{\varepsilon}^p{ }^{[m+1]}\right)}=0
+%\end{array}\right.
+%\end{equation}
+%The group of unknowns associated with this system of equations is given by $x_i$
+%\begin{equation}
+%x_i=\left\{\begin{array}{c}
+%\Delta \varepsilon^{[m+1]}^q \\
+%\Delta \varepsilon^{[m+1]}^h \\
+%\Delta \bar{\varepsilon}^p
+%\end{array}\right\}
+%\end{equation}
+%The system of equations is solved at the centre of each volume using the Newton-Raphson method
+%\begin{equation}
+%\boldsymbol{x}_{i n+1}=\boldsymbol{x}_{i n}-\left[\left.\frac{\partial \boldsymbol{r}_i}{\partial \boldsymbol{x}_i}\right|_{\boldsymbol{x}_n}\right]^{-1} \boldsymbol{r}_i\left(\boldsymbol{x}_n\right)
+%\end{equation}
+%$\frac{\partial r_i}{\partial x_i}$ is the Jacobian of the equations $r_i$ with respect to the variables $x_i$ given by:
+%\begin{equation}
+%\frac{\partial \boldsymbol{r}_i}{\partial \boldsymbol{x}_i}=\left[\begin{array}{ccc}
+%\frac{\partial r_{\Delta \varepsilon^{[m+1]}^q}^q}{\partial \Delta \boldsymbol{\varepsilon}^{[m+1]}^q} & \frac{\partial r_{\Delta \varepsilon^{[m+1]}^q}^q}{\partial \Delta \boldsymbol{\varepsilon}^{[m+1]}^h} & \frac{\partial r_{\Delta \varepsilon^{[m+1]}^q}^q}{\partial \Delta \overline{\boldsymbol{\varepsilon}}^p^{[m+1]}} \\
+%\frac{\partial r_{\Delta \varepsilon^{[m+1]}^h}}{\partial \Delta \boldsymbol{\varepsilon}^{[m+1]}^q} & \frac{\partial r_{\Delta \varepsilon^{[m+1]}^h}}{\partial \Delta \boldsymbol{\varepsilon}^{[m+1]}^h} & \frac{\partial r_{\Delta \varepsilon^{[m+1]}^h}}{\partial \Delta \overline{\boldsymbol{\varepsilon}}^p{ }^{[m+1]}} \\
+%\frac{\partial r_{\Delta \overline{\boldsymbol{\varepsilon}}^p{ }^{[m+1]}}}{\partial \Delta \boldsymbol{\varepsilon}^{[m+1]}^q} & \frac{\partial r_{\Delta \overline{\boldsymbol{\varepsilon}}^p{ }^{[m+1]}}}{\partial \Delta \boldsymbol{\varepsilon}^{[m+1]}^h} & \frac{\partial r_{\Delta \overline{\boldsymbol{\varepsilon}}^p{ }^{[m+1]}}}{\partial \Delta \overline{\boldsymbol{\varepsilon}}^p{ }^{[m+1]}}
+%\end{array}\right]
+%\end{equation}
+%Using simple multivariable calculus operations these constituent partial derivatives of the Jacobian can then be derived. These derivatives are provided in Appendix C **. 
+%After solving for these variables
+%($\Delta {\varepsilon}^{[m+1]}^h$, $\Delta {\varepsilon}^{[m+1]}^q$ and $\Delta \overline{{\varepsilon}}^p$) the equivalent plastic strain, elastic strain, pressure, von Mises stress and stress can then be updated:
+%\begin{equation}
+%\vec{\varepsilon}^p{ }^{[m+1]}=\vec{\varepsilon}^p{ }_n+\Delta \vec{\varepsilon}^p{ }^{[m+1]} 
+%\end{equation}
+%\begin{equation}
+%\boldsymbol{\varepsilon}^{e}^{[m+1]}=\boldsymbol{\varepsilon}^{e}_{trial}-\frac{1}{3}\Delta {\varepsilon}^{[m+1]}^h\ \mathbf{I}-\Delta {\varepsilon}^{[m+1]}^q\ \mathbf{n}
+%\end{equation}
+%\begin{equation}
+%p^{[m+1]}=p_{\text {trial }}-K \Delta \varepsilon^{[m+1]}^h 
+%\end{equation}
+%\begin{equation}
+%q^{[m+1]}=q_{\text {trial }}-3 \mu \Delta \varepsilon^{[m+1]}^q 
+%\end{equation}
+%\begin{equation}
+%\boldsymbol{\tau}^{[m+1]}=p^{[m+1]} \boldsymbol{I}+\frac{2q^{[m+1]}}{3} \boldsymbol{n} 
+%\end{equation}
+%The porosity can then be determined:
+%\begin{equation}
+%f_{\mathrm{n}+1}^{\mathrm{i}+1}=f_{\mathrm{n}}+\left(1-f_{\mathrm{n}+1}^{\mathrm{i}}\right) \operatorname{tr}\left(\Delta \varepsilon^{[m+1]}^p\right)+A \Delta \bar{\varepsilon}^p{ }^{[m+1]}
+%\end{equation}
+
+%Where ${f}^{[m+1]}^{i+1}$ is the porosity for the current iteration and $f^{[m+1]}^i$ is the porosity from the previous iteration. The effective porosity $f^{*i+1}^{[m+1]}$ is then calculated according to equation \ref{eqn:GTNCoalescence}.
+%This procedure is provided in Algorithm 5.
+
+\begin{algorithm}[htbp] \label{alg:GTN} \footnotesize
+\SetAlgoLined
+(i) Update deformation gradients for a given incremental displacement
+
+\begin{equation}
+  \textbf{f}^{[m+1]}=\textbf{I}+\nabla\left[\Delta\textbf{u}\right]^T \nonumber
+\end{equation}
+\begin{equation}
+ \textbf{F}^{[m+1]}=\textbf{f}^{[m+1]}\textbf{F}_n\nonumber
 \end{equation}
 
-(v) Calculate the porosity $f^{i+1}_{n+1}$ and the effective porosity $f^{*i+1}_{n+1}$
-\caption{GTN model}
+(ii) Compute trial elastic state
+\begin{equation}
+	\mathbf{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
+\end{equation}
+\begin{equation}
+\mathbf{B}^{\text{trial}}_e =\mathbf{f}^{[m+1]}\mathbf{B}_{e}^{[m]}(\mathbf{f}^{[m+1]})^{T}\nonumber
+\end{equation}
+\begin{equation}
+\boldsymbol{\varepsilon}_e^{\text{trial}}=\frac{1}{2} \ln[\textbf{B}^{\text{trial}}_e]\nonumber
+\end{equation}
+%\begin{equation} % Philip: what is this used for?
+%\bar{\varepsilon}^{p}_{\text{trial}}=\bar{\varepsilon}_{p}^{[m]}\nonumber
+%\end{equation}
+\begin{equation}
+	p^{\text{trial}} = \kappa \, \text{tr}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})\nonumber
+\end{equation}
+\begin{equation}
+	\mathbf{s}^{\text{trial}}=2 \mu \, \text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})\nonumber
+\end{equation}
+\begin{equation}
+	\sigma^{\text{trial}}_v = \sqrt{\sfrac{3}{2}} ||  2\mu \, \text{dev}(\boldsymbol{\varepsilon}^{e}_{\text{trial}})|| \nonumber
+\end{equation}
+\begin{equation}
+    \mathbf{n}=\frac{3}{2}\frac{\mathbf{s}^{\text{\text{trial}}}}{\sigma_v^{\text{trial}}}\nonumber
+\end{equation}
+\begin{equation}
+	\Phi^{\text{trial}} = 
+	\left(\frac{\sigma_v^{\text{trial}}}{\sigma_{y}}\right)^{2}
+	+ q_{1}f_{*[i]}^{[m+1]} \cosh\left(\frac{3q_{2}p^{\text{trial}}}{2\sigma_{y}}\right)
+	-\left(1-q_{1}^{2}{f_{*[i]}^{[m+1]}}^2\right)\nonumber
+\end{equation}
+  \eIf{$\Phi^{\text{trial}}>0$}{
+   go to step (iii)
+   }{
+   set $\Delta \varepsilon_\text{vol} = \Delta \varepsilon_\text{dev} = \Delta \bar{\varepsilon}_p = 0$ and $\Delta \bb{\varepsilon}_p = \bb{0}$. Go to step (iv)
+  }
+
+(iii) Enter small strain return map and solve the system of equations (equation \ref{eqn:discritesedGTNSystem}) for $\Delta {\varepsilon}^{[m+1]}_h$, $\Delta {\varepsilon}^{[m+1]}_q$ and $\Delta \overline{{\varepsilon}}^p_{[m+1]}$
+
+
+(iv) Update the constitutive variables
+\begin{equation}
+	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta \bar{\varepsilon}_p \nonumber
+\end{equation}
+\begin{equation}
+	\bb{\varepsilon}_p^{[m+1]} = \bb{\varepsilon}_p^{[m]} +\Delta \bb{\varepsilon}_p \nonumber
+\end{equation}
+\begin{equation}
+	\boldsymbol{\varepsilon}_{e}^{[m+1]} = \boldsymbol{\varepsilon}^{\text{trial}}
+	- (\sfrac{1}{3}) \Delta {\varepsilon}^{[m+1]}_\text{vol} \, \mathbf{I}
+	- \Delta {\varepsilon}^{[m+1]}_\text{dev} \, \mathbf{n}\nonumber
+\end{equation}
+\begin{equation}
+	\boldsymbol{s}^{[m+1]} =
+	\frac{1}{J}
+	\left[
+%	 	\left(
+%			p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}}
+%		\right)\mathbf{I}
+%		+
+		\sfrac{2}{3} \left(\sigma_v^{\text {trial }} - 3 \mu \Delta \varepsilon^{[m+1]}_\text{dev} \right) \mathbf{n}
+	\right] \nonumber
+\end{equation}
+%\begin{equation}
+%\boldsybol{\tau}^{[m+1]}=\left(q_{trial}-3\mu\Delta \boldsymbol{\varepsilon}^{[m+1]}^q\left(\frac{3\mathbf{s}_{trial}}{2q_{trial}}\right)\right)+\left(p_{trial}-K\Delta\varepsilon^{h}^{[m+1]}\right)\nonumber
+%\end{equation}
+
+%\begin{equation}
+%\boldsymbol{\sigma}^{[m+1]}=\frac{1}{J}\boldsymbol{\tau}^{[m+1]}\nonumber
+%\end{equation}
+
+(v) Implicitly solve the pressure Poisson's equation:
+\begin{equation}
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} =
+%	-\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right]
+	\frac{1}{J}\left(p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}} \right)
+	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m]} \right) \\
+\end{equation}
+
+
+(vi) Update the true (Cauchy) stress
+\begin{equation}
+	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
+\end{equation}
+
+
+(vii) Calculate the porosity $f_{[i+1]}^{[m+1]}$ and the effective porosity $f_{*[i+1]}^{[m+1]}$:
+\begin{equation}
+	f^{[m+1]} = f^{[m]} + \left(1 - f^{[m+1]}_{[i]}\right) \, \text{tr}\left(\dot{\boldsymbol{\varepsilon}}^{[m+1]}_p\right)
+	+ A \dot{\bar{\varepsilon}}^{[m+1]}_p
+	+ k_w f\frac{1 - \xi^2 }{\sigma_v^{[m+1]}} \,\text{dev}(\bb{\sigma}^{[m+1]}):{\dot{\boldsymbol{\varepsilon}}}_p^{[m+1]}
+\end{equation}
+\begin{equation}
+	f^{*[m+1]} =
+	\left\{
+	\begin{array}{cc}
+		f^{[m+1]}  & \text { if } f^{[m+1]}  \leq f_c \\
+		f_c + \left(f^{[m+1]} - f_c\right) \frac{f_u - f_c}{f_f - f_c} & \text { if } f^{[m+1]}  > f_c
+	\end{array}\right.
+\end{equation}
+
+
+(viii) Implicitly solve non-local porosity equation:
+\begin{equation}
+	\bar{f}^{[m+1]} -  l_c^2 \bb{\nabla}^2 \bar{f}^{[m+1]} = f^{[m+1]}
+\end{equation}
+
+\caption{GTN damage model stress calculation algorithm}
 \end{algorithm}
 
 
-\subsubsection{Shear effects}
-
-In the last 15 years, further developments of the GTN model have been made to better acccount for fracture in stress states where shearing is present \cite{nahshon_modification_2008,malcher_continuum_2012,leclerc_micromechanics-based_2020,achouri_numerical_2013}.
-In order to account for shearing effects, the expression developed by \citet{nahshon_modification_2008} is introduced in this work. This formulation has shown an ability to accurately predict fracture in the blanking metal forming process \cite{achouri_numerical_2013}. It results in the following equation for the evolution of porosity:
-\begin{equation}
-	\dot{f}={\dot{f}}_{growth}+{\dot{f}}_{nucleation}+{\dot{f}}_{shear}	
-\end{equation}
-where
-\begin{equation}
-	{\dot{f}}_{shear}=k_w\frac{fw\left(\boldsymbol{\sigma}\right)}{q}\mathbf{s}:{\dot{\boldsymbol{\varepsilon}}}_p	
-\end{equation}
-where $k_w$ is a material parameter and $w(\boldsymbol{\sigma})$ is given by
-\begin{equation}
-	w\left(\boldsymbol{\sigma}\right)=1-\left(\xi\right)^2	
-\end{equation}
 
 
-\subsubsection{Non-local porosity}
 
-In order to mitigate the mesh dependancy that may occur for the GTN model, non-local gradient approaches have also been incorporated into Gurson-type models \cite{reusch_non-local_2003,leclerc_micromechanics-based_2020}.
-The porosity variable is diffused over the mesh through the non-local gradient equation as in section 4.2.6 
-\begin{equation}
-	\left(f-\bar{f}\right)+{{l_c}^2\mathrm{\nabla}}^2f=0
-\end{equation}
-  The effective porosity $f^\ast$ is then calculated according to equation \ref{eqn:GTNCoalescence} using the non-local porosity $\bar{f}$. Where $f$ appears in the system of equations \ref{eqn:discritesedGTNSystem} the non-local porosity is used.
- 
+
 \section{Phase field fracture model}
+
 \subsection{Introduction}
 The more novel phase field approach to the prediction of fracture and failure has received increased attention in the past 15 years \cite{borden_phase-field_2012,miehe_phase_2010,ambati_phase-field_2015,borden_phase-field_2016,miehe_phase_2016,dittmann_variational_2018,samaniego_phase-field_2021}. This approach has shown an ability to predict complex crack patterns, including branching and merging in both two and three dimensional settings \cite{borden_phase-field_2012,miehe_phase_2010}. In this method, sharp cracks are regularized over a continuum (Figure \ref{fig:diffusedSharpCrack}) leading to a system of partial differential equations that are relatively simple to implement in finite element and volume solvers. The method has proven to be robust with computations being performed on the original mesh without any need to track the interface of the crack such as in the Cohesive-zone model method.
 
@@ -2018,24 +2130,24 @@ where $d\left(x\right)\in\left[0,1\right]$,  $d=0$ characterises the unbroken st
 \end{equation}
 The minimization of this functional gives the regularised crack surface as depicted in Figure \ref{fig:Regularising effects of l}. The parameter $l$ is a length scale variable which regularises the crack surface.
 
- \begin{figure}[t!]
-	\centering
-		\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/damageModels/phaseSharpCrack.png}}		
-	  \qquad
-		\subfigure[] {\label{boeing} \includegraphics[width=0.3\textwidth]{./Figures/damageModels/phaseRegularised.png}}		
-\caption{Comparison of a) sharp crack and b) diffusive crack (adapted from \cite{borden_phase-field_2016})}
-	\label{fig:diffusedSharpCrack}
-\end{figure}
-\FloatBarrier
-
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/effectsofl.png}
-\caption{Illustration of the regularising effect of $l$, as $l$ is reduced the crack variable $d$ is regularised over a smaller area}
-\label{fig:Regularising effects of l}
-\end{center}
-\end{figure}
-\FloatBarrier
+% \begin{figure}[t!]
+%	\centering
+%		\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/damageModels/phaseSharpCrack.png}}		
+%	  \qquad
+%		\subfigure[] {\label{boeing} \includegraphics[width=0.3\textwidth]{./Figures/damageModels/phaseRegularised.png}}		
+%\caption{Comparison of a) sharp crack and b) diffusive crack (adapted from \cite{borden_phase-field_2016})}
+%	\label{fig:diffusedSharpCrack}
+%\end{figure}
+%\FloatBarrier
+%
+%\begin{figure}[htb]
+%\begin{center}
+%	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/effectsofl.png}
+%\caption{Illustration of the regularising effect of $l$, as $l$ is reduced the crack variable $d$ is regularised over a smaller area}
+%\label{fig:Regularising effects of l}
+%\end{center}
+%\end{figure}
+%\FloatBarrier
 
 As in \citet{amor_regularized_2009,miehe_phase_2010-1} the elastic strain energy contribution is further split into its tensile and compressive contribution, to ensure that there is no elastic contribution to crack growth when a given volume is under compression
 \begin{equation}
@@ -2065,10 +2177,10 @@ Following the work of \citet{borden_phase-field_2016}  the strong form of the ph
 	\frac{G_c}{2l}\left(d-4l^2\nabla^2d\right)=\mathcal{H}\left(\underline{\mathrm{x}},t\right)	
 	\end{equation}
 \begin{equation}
-	\mathcal{H}\left(\underline{\mathrm{x}},t\right)=g_e^\prime\left(d\right)max{(\psi}_{e_{n+1}}\left(\mathbf{\varepsilon}^e\right),\psi_{e_H}\left(\mathbf{\varepsilon}^e\right))+g_p^\prime\left(d\right)<\psi_p({\bar{\varepsilon}}^p)-w_0>
+	\mathcal{H}\left(\underline{\mathrm{x}},t\right)=g_e^\prime\left(d\right)max{(\psi}_{e^{[m+1]}}\left(\mathbf{\varepsilon}^e\right),\psi_{e_H}\left(\mathbf{\varepsilon}^e\right))+g_p^\prime\left(d\right)<\psi_p({\bar{\varepsilon}}^p)-w_0>
 \end{equation}
 
-where ${\ \psi}_{e_{n+1}}\left(\mathbf{\varepsilon}^e\right)$ is the elastic energy contribution from the current time step, $\psi_{e_H}\left(\mathbf{\varepsilon}^e\right)$ is a history variable which gives the largest value for the elastic energy contribution obtained throughout the simulation, $<\psi_p\left({\bar{\varepsilon}}^p\right)-w_0>$ is a Macaulay bracket where $\psi_p\left({\bar{\varepsilon}}^p\right)$ is the plastic energy contribution and $w_0$ is the plastic work threshold, below which the plastic strain will not contribute to crack growth. 
+where ${\ \psi}_{e^{[m+1]}}\left(\mathbf{\varepsilon}^e\right)$ is the elastic energy contribution from the current time step, $\psi_{e_H}\left(\mathbf{\varepsilon}^e\right)$ is a history variable which gives the largest value for the elastic energy contribution obtained throughout the simulation, $<\psi_p\left({\bar{\varepsilon}}^p\right)-w_0>$ is a Macaulay bracket where $\psi_p\left({\bar{\varepsilon}}^p\right)$ is the plastic energy contribution and $w_0$ is the plastic work threshold, below which the plastic strain will not contribute to crack growth. 
 A Neumann boundary condition $\nabla d\cdot\mathbf{n}=0$ is used to solve this equation.
 
 
@@ -2125,13 +2237,13 @@ The plastic energy contribution to the crack growth is given by \cite{eldahshan_
 
 \subsubsection{Computational Procedure}
 
-As has been previously described, the displacement field is solved at each iteration using the stress field calculated from the return mapping scheme. This displacement field is then used to find a new value for the stress from the material model return mapping scheme. This iterative procedure continues until convergence is achieved. For each cell, we are given the incremental displacement field for the current time step $t_{n+1}$, at the current outer iteration, denoted by $\Delta \mathbf{u}_{n+1}^{i+1}$. The values of the following variables from the previous time step $t_{n}$ are also provided:
+As has been previously described, the displacement field is solved at each iteration using the stress field calculated from the return mapping scheme. This displacement field is then used to find a new value for the stress from the material model return mapping scheme. This iterative procedure continues until convergence is achieved. For each cell, we are given the incremental displacement field for the current time step $t^{[m+1]}$, at the current outer iteration, denoted by $\Delta \mathbf{u}^{[m+1]}_{[i+1]}$. The values of the following variables from the previous time step $t^{[m]}$ are also provided:
 \begin{equation}
 \left\{\mathbf{F}_n^p, \bar{\varepsilon}^p_n, d_n\right\}
 \end{equation}
-The goal is then for the algorithm to obtain the following variables at time $t_{n+1}$
+The goal is then for the algorithm to obtain the following variables at time $t^{[m+1]}$
 \begin{equation}
-\left\{\mathbf{F}_{n+1}^p, \bar{\varepsilon}^p_{n+1},\boldsymbol{\sigma}_{n+1}, d_{n+1}\right\}
+\left\{\mathbf{F}^{[m+1]}_p, \bar{\varepsilon}_p^{[m+1]},\boldsymbol{\sigma}^{[m+1]}, d^{[m+1]}\right\}
 \end{equation}
 
 In order to obtain these values, the algorithm must satisfy the following constitutive behaviour:
@@ -2156,15 +2268,15 @@ At each iteration, after the plasticity has been solved for each volume, the pha
 Using the procedure outlined in section 3.2.3, the system of equations to be solved for when the material is undergoing plastic straining is given as: 
 \begin{equation}
 \left\{\begin{array}{c}
-F_p=\tau_{eq\ n+1}-g_p(d)\sigma_y\left(\bar{\varepsilon}^p_{n+1}\right)=0 \\
-\boldsymbol{\varepsilon}_{n+1}^e=\boldsymbol{\varepsilon}_{n+1}^{e\ trial}-\frac{3}{2} \Delta \gamma \frac{\boldsymbol{\tau}_{n+1}}{\tau_{eq\ n+1}} \\
-\bar{\varepsilon}^p_{n+1}=\bar{\varepsilon}^p_n+\Delta \gamma
+F_p=\tau_{eq\ n+1} - g_p(d)\sigma_y\left(\bar{\varepsilon}_p^{[m+1]}\right)=0 \\
+\boldsymbol{\varepsilon}^{[m+1]}_e=\boldsymbol{\varepsilon}^{[m+1]}_{trial}-\frac{3}{2} \Delta \gamma \frac{\boldsymbol{\tau}^{[m+1]}}{\tau_{eq\ n+1}} \\
+\bar{\varepsilon}_p^{[m+1]}=\bar{\varepsilon}^p_n+\Delta \gamma
 \end{array}\right.
 \end{equation}
 These equations are satisfied by solving equation \ref{eqn:phaseFinal} using the Newton-Raphson method
 \begin{equation}
 \label{eqn:phaseFinal}
-q_{n+1}^{\text {trial }}-g_{\mathrm{p}}(d) 3 \mu \Delta \gamma-g_{\mathrm{p}}(d) \sigma_y\left(\bar{\varepsilon}^p{ }_n+\Delta \gamma\right)=0
+q^{[m+1]}_{\text {trial }}-g_{\mathrm{p}}(d) 3 \mu \Delta \gamma-g_{\mathrm{p}}(d) \sigma_y\left(\bar{\varepsilon}^p{ }_n+\Delta \gamma\right)=0
 \end{equation}
 The algorithm for this entire procedure is given in Algorithm 6.
 
@@ -2173,24 +2285,24 @@ The algorithm for this entire procedure is given in Algorithm 6.
 (i) Update Relative Deformation for given incremental displacement
 
 \begin{equation}
-  \mathbf{f}_{n+1}=\mathbf{I}+\nabla\left[\Delta\textbf{u}\right]\nonumber
+  \mathbf{f}^{[m+1]}=\mathbf{I}+\nabla\left[\Delta\textbf{u}\right]\nonumber
 \end{equation}
 
 \begin{equation}
-\mathbf{F}_{n+1}=\mathbf{f}_{n+1}\mathbf{F}_n\nonumber
+\mathbf{F}^{[m+1]}=\mathbf{f}^{[m+1]}\mathbf{F}_n\nonumber
 \end{equation}
 (ii) Compute trial elasticity
 \begin{equation}
-\mathbf{B}^{e}_{n}=exp\left[{2\boldsymbol{\varepsilon}^{e}_{n}}\right]\nonumber
+\mathbf{B}_{e}^{[m]}=exp\left[{2\boldsymbol{\varepsilon}_{e}^{[m]}}\right]\nonumber
 \end{equation}
 \begin{equation}
-\mathbf{B}^{e}_{trial}=\mathbf{f}_{n+1}\mathbf{B}^{e}_{n}(\mathbf{f}_{n+1})^{T}\nonumber
+\mathbf{B}_{trial}=\mathbf{f}^{[m+1]}\mathbf{B}^{[m]}(\mathbf{f}^{[m+1]})^{T}\nonumber
 \end{equation}
 \begin{equation}
-\boldsymbol{\varepsilon}^{e}_{trial}=\frac{1}{2}ln[\textbf{B}^{e}_{trial}]\nonumber
+\boldsymbol{\varepsilon}_{trial}=\frac{1}{2}ln[\textbf{B}_{trial}]\nonumber
 \end{equation}
 \begin{equation}
-\bar{\varepsilon}^{p}_{trial}=\bar{\varepsilon}^{p}_{n}\nonumber
+\bar{\varepsilon}^{p}_{trial}=\bar{\varepsilon}_{p}^{[m]}\nonumber
 \end{equation}
 \begin{equation}
 {q}_{trial}=g_e(d)\sqrt{\frac{3}{2}}\lvert\lvert2\mu dev(\boldsymbol{\varepsilon}^e)\rvert\rvert\nonumber
@@ -2206,14 +2318,14 @@ f_{trial}={q}_{trial}-g_e(d)\sigma_{y}(\varepsilon^{PEq}_{trial}) \nonumber
 
 (iii) Enter small strain return map and solve for $\Delta\gamma$ using the Newton-Raphson to solve the equation
 \begin{equation}
-{q}_{trial}-g_p(d)3\mu\Delta\gamma-g_p(d)\sigma_{y}(\bar{\varepsilon}^{p}_{n}+\Delta\gamma)=0\nonumber
+{q}_{trial}-g_p(d)3\mu\Delta\gamma-g_p(d)\sigma_{y}(\bar{\varepsilon}_{p}^{[m]}+\Delta\gamma)=0\nonumber
 \end{equation}
 (iv) Update elastic strain
 %\begin{equation}
-%\boldsymbol{\varepsilon}^{e}_{n+1}=\boldsymbol{\varepsilon}^{e}_{trial}-\sqrt{\frac{3}{2}}\Delta\gamma{\frac{dev(\boldsymbol{\varepsilon}^{e}_{trial})}{\lvert\lvert\boldsymbol{\varepsilon}^{e}_{trial}\rvert\rvert}}\nonumber
+%\boldsymbol{\varepsilon}^{e}^{[m+1]}=\boldsymbol{\varepsilon}^{e}_{trial}-\sqrt{\frac{3}{2}}\Delta\gamma{\frac{dev(\boldsymbol{\varepsilon}^{e}_{trial})}{\lvert\lvert\boldsymbol{\varepsilon}^{e}_{trial}\rvert\rvert}}\nonumber
 %\end{equation}
 %\begin{equation}
-%\boldsymbol{\tau}_{n+1}=g_e(d)\mathbf{D}^e:\boldsymbol{\varepsilon}^{e}_{n+1}\ 
+%\boldsymbol{\tau}^{[m+1]}=g_e(d)\mathbf{D}^e:\boldsymbol{\varepsilon}^{e}^{[m+1]}\ 
 %Must incorporate section 4.5.4
 %\nonumber
 %\end{equation}  
