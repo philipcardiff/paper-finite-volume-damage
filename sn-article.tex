@@ -2101,225 +2101,277 @@ Once again, the overall procedure is implicit in time.
 
 \section{Phase field fracture model}
 
-\subsection{Introduction}
-The more novel phase field approach to the prediction of fracture and failure has received increased attention in the past 15 years \cite{borden_phase-field_2012,miehe_phase_2010,ambati_phase-field_2015,borden_phase-field_2016,miehe_phase_2016,dittmann_variational_2018,samaniego_phase-field_2021}. This approach has shown an ability to predict complex crack patterns, including branching and merging in both two and three dimensional settings \cite{borden_phase-field_2012,miehe_phase_2010}. In this method, sharp cracks are regularized over a continuum (Figure \ref{fig:diffusedSharpCrack}) leading to a system of partial differential equations that are relatively simple to implement in finite element and volume solvers. The method has proven to be robust with computations being performed on the original mesh without any need to track the interface of the crack such as in the Cohesive-zone model method.
-
-The method was initially proposed by \citet{francfort_revisiting_1998} to describe brittle fracture. It is based on the variational approach, with the goal being to minimize a potential energy proposed based on Griffiths theory of brittle fracture. This approach leads to a Mumford-Shah \cite{mumford_optimal_1989} type energy potential that can be approximated by a phase-field formulation following the work of \citet{ambrosio_approximation_1990}. This approximation was adopted by \citet{bourdin_time-discrete_2011} to facilitate numerical solutions of the variational formulation. This work was further developed by \citet{miehe_phase_2010} who derived the phase field approach from continuum mechanics and thermodynamic arguments. In addition to an alternative derivation, \citet{miehe_phase_2010} also added an important mechanism for distinguishing tensile and compressive effects on crack growth as well as the inclusion of a history variable $\mathcal{H}$ which ensures the irreversibility of crack growth. A number of studies have shown the ability of these models to produce results consistent with several benchmark cases \cite{borden_phase-field_2012,miehe_phase_2010}.
-
-This approach has since been extended to ductile fracture by \citet{ambati_phase-field_2015,borden_phase-field_2016} and \citet{miehe_phase_2016}. The approach from \citet{ambati_phase-field_2015} involves incorporating a plastic strain dependency in the elastic degradation function while the approach from \citet{miehe_phase_2016} incorporates the plastic strain energy into the crack driving variable $\mathcal{H}$. \citet{borden_phase-field_2016} uses a similar approach to \citet{miehe_phase_2016} by incorporating the plastic strain into the crack driving variable $\mathcal{H}$ while also introducing a plastic degradation function in order to ensure that fracture is preceded by large plastic strains, as has been shown to be the case experimentally. In this work, the approach form \citet{borden_phase-field_2016} is adopted due to the fact that, by incorporating a plastic degradation function, it displays a more physically realistic fracture behaviour.
-
-
-%%%%%%%%%%%%%%%%
-\subsection{Phase Field Damage Model}
-%%%%%%%%%%%%%%%%
-
-The original formulation of the potential energy of the body \cite{mumford_optimal_1989} is given in terms of the deformation tensor and the crack surface
-\begin{equation}
-\label{eqn:originalPotentialEnergyFormulation}
-	E\left(\boldsymbol{\varepsilon}^e,\Gamma_0\right)=\int_{\Omega_0}{\psi\left(\boldsymbol{\varepsilon}^e\right)d\Omega_0}+\int_{\Gamma_0}{G_c^0\ d\Gamma_0}
-\end{equation}
-Where $\psi\left(\boldsymbol{\varepsilon}^e\right)$ is the elastic contribution to the potential energy per unit volume and $G_c$ is the critical fracture energy per unit area. This energy functional is an extension of Griffith’s definition of brittle fracture. This definition of the fracture surface however requires an a priori determination of the fracture surface. In order to enable an efficient numerical treatment of equation \ref{eqn:originalPotentialEnergyFormulation}, \citet{bourdin_time-discrete_2011} introduced the phase field approximation: 
-\begin{equation}
-	E\left(\boldsymbol{\varepsilon}^e,\Gamma_0\right)=\int_{\Omega_0}{g_e(d)\psi\left(\boldsymbol{\varepsilon^e}\right)d\Omega_0}+\int_{\Gamma_0}{G_c^0\ \Gamma_l\left(d\right)d\Omega_0}
-\end{equation}
-
-where $d\left(x\right)\in\left[0,1\right]$,  $d=0$ characterises the unbroken state and d=1 characterises the fully broken state. The variable $d$ is conceptually similar to the damage variable $D$ used in continuum damage mechanics, with $d$ being a macroscopic variable that characterizes the growth of micro voids and micro-cracks, $g_e(d)$ is the elastic degradation function which reduces the elastic strength of the material and $\Gamma_l$ is the crack density functional, which for the model of \citet{borden_phase-field_2016} is given by
-
-\begin{equation}
-	\Gamma_l\left(d\right)=\frac{1}{l}I\left(d\right)=\frac{1}{4l}\left(d^2+4l^2|\nabla d|\right)
-\end{equation}
-The minimization of this functional gives the regularised crack surface as depicted in Figure \ref{fig:Regularising effects of l}. The parameter $l$ is a length scale variable which regularises the crack surface.
-
-% \begin{figure}[t!]
-%	\centering
-%		\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/damageModels/phaseSharpCrack.png}}		
-%	  \qquad
-%		\subfigure[] {\label{boeing} \includegraphics[width=0.3\textwidth]{./Figures/damageModels/phaseRegularised.png}}		
-%\caption{Comparison of a) sharp crack and b) diffusive crack (adapted from \cite{borden_phase-field_2016})}
-%	\label{fig:diffusedSharpCrack}
-%\end{figure}
-%\FloatBarrier
-%
-%\begin{figure}[htb]
-%\begin{center}
-%	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/effectsofl.png}
-%\caption{Illustration of the regularising effect of $l$, as $l$ is reduced the crack variable $d$ is regularised over a smaller area}
-%\label{fig:Regularising effects of l}
-%\end{center}
-%\end{figure}
-%\FloatBarrier
-
-As in \citet{amor_regularized_2009,miehe_phase_2010-1} the elastic strain energy contribution is further split into its tensile and compressive contribution, to ensure that there is no elastic contribution to crack growth when a given volume is under compression
-\begin{equation}
-\label{eqn:energyElasticFunctional}
-E_l\left(\mathbf{\boldsymbol{\varepsilon}^e},d\right)=\int_{\Omega_0}\left(g_e\left(d\right){\psi_e}^+\left(\boldsymbol{\varepsilon}^e\right)+g_e\left(d\right){\psi_e}^-\left(\boldsymbol{\varepsilon}^e\right)\right)\ d\Omega_0+\int_{\Gamma_0}{G_c^0\Gamma_l\left(d\right)\Omega_0}	
-\end{equation}
-
-Where ${\psi_e}^+\left(\boldsymbol{\varepsilon}^e\right)$ is the contribution of the tensile strains and ${\psi_e}^-\left(\boldsymbol{\varepsilon}^e\right)$ is the contribution of the compressive strains. The energy functional in equation \ref{eqn:energyElasticFunctional} only accounts for the elastic contribution to crack growth. For ductile materials, it is necessary to incorporate a plastic energy contribution to the crack growth. To this end, a plastic energy contribution is added to equation \ref{eqn:energyElasticFunctional} in \citet{borden_phase-field_2016}
-\begin{equation}
-	E_l\left(\boldsymbol{\varepsilon}^e,{\bar{\varepsilon}}^p,d\right)=\int_{\Omega_0}\left(g_e\left(d\right){\psi_e}^+\left(\boldsymbol{\varepsilon}^e\right)+g_e\left(d\right){\psi_e}^-\left(\boldsymbol{\varepsilon}^e\right)+g_p\left(d\right)\psi_p\left({\bar{\varepsilon}}^p\right)\right)\ d\Omega_0+\int_{\Gamma_0}{G_c^0\Gamma_l\left(d\right)d\Omega_0}	
-\end{equation}
-
-Where $g_p\left(d\right)$ is the plastic degradation function, $\psi_p\left({\bar{\varepsilon}}^p\right)$ is the plastic energy contribution. 
-The plastic and elastic degradation functions are given by:
-\begin{equation}
-	g_e\left(d\right)=1-d^2	
-\end{equation}
-\begin{equation}
-	g_p\left(d\right)=1-d^2	
-\end{equation}
-
 \subsection{Model Formulation}
+In recent years, phase field approaches have received much attention for the prediction of fracture and failure \cite{borden_phase-field_2012, miehe_phase_2010, ambati_phase-field_2015, borden_phase-field_2016, miehe_phase_2016, dittmann_variational_2018, samaniego_phase-field_2021}, showing an ability to predict complex crack patterns, including branching and merging in both two and three dimensions \cite{borden_phase-field_2012, miehe_phase_2010}.
+In this method, sharp cracks are \emph{regularised} over a continuum, leading to a system of partial differential equations that are relatively simple to implement in finite element, finite volume and related solvers.
+%The method has proven robust with computations being performed on the original mesh without any need to track the interface of the crack such as in the Cohesive-zone model method.
 
-Following the work of \citet{borden_phase-field_2016}  the strong form of the phase field equation is given by:
-\begin{equation}
-\label{eqn:phaseFieldEquation}
-	\frac{G_c}{2l}\left(d-4l^2\nabla^2d\right)=\mathcal{H}\left(\underline{\mathrm{x}},t\right)	
-	\end{equation}
-\begin{equation}
-	\mathcal{H}\left(\underline{\mathrm{x}},t\right)=g_e^\prime\left(d\right)max{(\psi}_{e^{[m+1]}}\left(\mathbf{\varepsilon}^e\right),\psi_{e_H}\left(\mathbf{\varepsilon}^e\right))+g_p^\prime\left(d\right)<\psi_p({\bar{\varepsilon}}^p)-w_0>
+The phase field method for damage, initially proposed by \citet{francfort_revisiting_1998} to describe brittle fracture, is based on a variational approach to minimise a Griffiths theory potential energy functional. %proposed based on Griffiths theory of brittle fracture.
+This approach leads to a Mumford-Shah \cite{mumford_optimal_1989} type energy potential that can be approximated by a phase-field formulation following the work of \citet{ambrosio_approximation_1990}.
+This approximation was adopted by \citet{bourdin_time-discrete_2011} to facilitate numerical solutions of the variational formulation, and further extended by \citet{miehe_phase_2010} who derived the phase field approach from continuum mechanics and thermodynamic arguments.
+%In addition to an alternative derivation,
+\citet{miehe_phase_2010} also added an important mechanism for distinguishing between tensile and compressive effects on crack growth, as well as including a history variable $\mathcal{H}$ which ensures the irreversibility of crack growth.
+Several studies have shown the ability of these models to produce results consistent with benchmark fracture cases \cite{borden_phase-field_2012,miehe_phase_2010}.
+
+The phase field approach has since been extended to ductile fracture by \citet{ambati_phase-field_2015, borden_phase-field_2016} and \citet{miehe_phase_2016}.
+The approach from \citet{ambati_phase-field_2015} involves incorporating a plastic strain dependency in the elastic degradation function while the approach from \citet{miehe_phase_2016} incorporates the plastic strain energy into the crack driving variable $\mathcal{H}$.
+\citet{borden_phase-field_2016} uses a similar approach to \citet{miehe_phase_2016} by incorporating the plastic strain into the crack driving variable $\mathcal{H}$ while also introducing a plastic degradation function to ensure that fracture is preceded by large plastic strains, as is the case experimentally.
+
+
+
+%%%%%%%%%%%%%%%%
+%\subsection{Phase Field Damage Model}
+%%%%%%%%%%%%%%%%
+%
+%The original formulation of the potential energy of the body \cite{mumford_optimal_1989} is given in terms of the deformation tensor and the crack surface
+%\begin{equation}
+%\label{eqn:originalPotentialEnergyFormulation}
+%	E\left(\boldsymbol{\varepsilon}^e,\Gamma_0\right)=\int_{\Omega_0}{\psi\left(\boldsymbol{\varepsilon}^e\right)d\Omega_0}+\int_{\Gamma_0}{G_c^0\ d\Gamma_0}
+%\end{equation}
+%Where $\psi\left(\boldsymbol{\varepsilon}^e\right)$ is the elastic contribution to the potential energy per unit volume and $G_c$ is the critical fracture energy per unit area. This energy functional is an extension of Griffith’s definition of brittle fracture. This definition of the fracture surface however requires an a priori determination of the fracture surface. In order to enable an efficient numerical treatment of equation \ref{eqn:originalPotentialEnergyFormulation}, \citet{bourdin_time-discrete_2011} introduced the phase field approximation: 
+%\begin{equation}
+%	E\left(\boldsymbol{\varepsilon}^e,\Gamma_0\right)=\int_{\Omega_0}{g_e(d)\psi\left(\boldsymbol{\varepsilon^e}\right)d\Omega_0}+\int_{\Gamma_0}{G_c^0\ \Gamma_l\left(d\right)d\Omega_0}
+%\end{equation}
+%
+%where $d\left(x\right)\in\left[0,1\right]$,  $d=0$ characterises the unbroken state and d=1 characterises the fully broken state. The variable $d$ is conceptually similar to the damage variable $D$ used in continuum damage mechanics, with $d$ being a macroscopic variable that characterizes the growth of micro voids and micro-cracks, $g_e(d)$ is the elastic degradation function which reduces the elastic strength of the material and $\Gamma_l$ is the crack density functional, which for the model of \citet{borden_phase-field_2016} is given by
+%
+%\begin{equation}
+%	\Gamma_l\left(d\right)=\frac{1}{l}I\left(d\right)=\frac{1}{4l}\left(d^2+4l^2|\nabla d|\right)
+%\end{equation}
+%The minimization of this functional gives the regularised crack surface as depicted in Figure \ref{fig:Regularising effects of l}. The parameter $l$ is a length scale variable which regularises the crack surface.
+%
+%% \begin{figure}[t!]
+%%	\centering
+%%		\subfigure[] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/damageModels/phaseSharpCrack.png}}		
+%%	  \qquad
+%%		\subfigure[] {\label{boeing} \includegraphics[width=0.3\textwidth]{./Figures/damageModels/phaseRegularised.png}}		
+%%\caption{Comparison of a) sharp crack and b) diffusive crack (adapted from \cite{borden_phase-field_2016})}
+%%	\label{fig:diffusedSharpCrack}
+%%\end{figure}
+%%\FloatBarrier
+%%
+%%\begin{figure}[htb]
+%%\begin{center}
+%%	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/effectsofl.png}
+%%\caption{Illustration of the regularising effect of $l$, as $l$ is reduced the crack variable $d$ is regularised over a smaller area}
+%%\label{fig:Regularising effects of l}
+%%\end{center}
+%%\end{figure}
+%%\FloatBarrier
+%
+%As in \citet{amor_regularized_2009,miehe_phase_2010-1} the elastic strain energy contribution is further split into its tensile and compressive contribution, to ensure that there is no elastic contribution to crack growth when a given volume is under compression
+%\begin{equation}
+%\label{eqn:energyElasticFunctional}
+%E_l\left(\mathbf{\boldsymbol{\varepsilon}^e},d\right)=\int_{\Omega_0}\left(g_e\left(d\right){\psi_e}^+\left(\boldsymbol{\varepsilon}^e\right)+g_e\left(d\right){\psi_e}^-\left(\boldsymbol{\varepsilon}^e\right)\right)\ d\Omega_0+\int_{\Gamma_0}{G_c^0\Gamma_l\left(d\right)\Omega_0}	
+%\end{equation}
+%
+%Where ${\psi_e}^+\left(\boldsymbol{\varepsilon}^e\right)$ is the contribution of the tensile strains and ${\psi_e}^-\left(\boldsymbol{\varepsilon}^e\right)$ is the contribution of the compressive strains. The energy functional in equation \ref{eqn:energyElasticFunctional} only accounts for the elastic contribution to crack growth. For ductile materials, it is necessary to incorporate a plastic energy contribution to the crack growth. To this end, a plastic energy contribution is added to equation \ref{eqn:energyElasticFunctional} in \citet{borden_phase-field_2016}
+%\begin{equation}
+%	E_l\left(\boldsymbol{\varepsilon}^e,{\bar{\varepsilon}}^p,d\right)=\int_{\Omega_0}\left(g_e\left(d\right){\psi_e}^+\left(\boldsymbol{\varepsilon}^e\right)+g_e\left(d\right){\psi_e}^-\left(\boldsymbol{\varepsilon}^e\right)+g_p\left(d\right)\psi_p\left({\bar{\varepsilon}}^p\right)\right)\ d\Omega_0+\int_{\Gamma_0}{G_c^0\Gamma_l\left(d\right)d\Omega_0}	
+%\end{equation}
+%
+%Where $g_p\left(d\right)$ is the plastic degradation function, $\psi_p\left({\bar{\varepsilon}}^p\right)$ is the plastic energy contribution. 
+%The plastic and elastic degradation functions are given by:
+%\begin{equation}
+%	g_e\left(d\right)=1-d^2	
+%\end{equation}
+%\begin{equation}
+%	g_p\left(d\right)=1-d^2	
+%\end{equation}
+%
+%\subsection{Model Formulation}
+
+In this work, the approach form \citet{borden_phase-field_2016} is chosen to be most suitable, given the large plastic strains expected in wire drawing.
+The strong form of the phase field equation is given by:
+%, by incorporating a plastic degradation function, it displays a more physically realistic fracture behaviour.
+%Following the work of \citet{borden_phase-field_2016}  the 
+\begin{equation} \label{eqn:phaseFieldEquation}
+	\frac{G_c}{2l} \left(d - 4 l^2 \bb{\nabla}^2 d \right) = \mathcal{H} \left(\underline{\mathrm{x}},t \right)	
 \end{equation}
+where $0 < d \leq 1$ is the damage variable, with $d = 0$ characterising the unbroken state and $d = 1$ characterising the fully broken state. 
+The variable $d$ is conceptually similar to the damage variable $D$ used in the Lemaitre and GTN damage mechanics, with $d$ being a macroscopic variable that characterises the growth of micro-voids and micro-cracks.
+The critical fracture energy per unit area is given by $G_c$.
+The parameter $l$ is a length-scale variable that regularises the crack surface. It is typically chosen as a function of the local element/cell size.
+The crack driving variable $\mathcal{H}$ is
+\begin{equation}
+	\mathcal{H}\left(\underline{\mathrm{x}},t\right)=
+%		g_e^\prime(d) \,
+		-2d \,
+		\text{max}
+		\left[
+			\psi_e
+			\left(\bb{\varepsilon}^e\right),
+			\bar{psi}_{e}\left(\bb{\varepsilon}^e\right)
+		\right]
+%	+g_p^\prime \left(d\right)
+	-2d
+	\langle \psi_p({\bar{\varepsilon}}^p)-w_0 \rangle
+\end{equation}
+where $\psi_e \left(\mathbf{\varepsilon}^e\right)$ is the current elastic energy contribution, $\bar{\psi}_e \left(\mathbf{\varepsilon}^e\right)$ is a history variable which gives the largest value reached by the elastic energy contribution in time, 
+%$<\psi_p\left({\bar{\varepsilon}}^p\right)-w_0>$ is a Macaulay bracket
+%\subsubsection{Elastic model}
+%The spherical-deviatoric decomposition of the elastic strain energy is employed as in \citet{amor_regularized_2009}.
+The elastic energy contribution $\psi_e \left(\mathbf{\varepsilon}^e\right)$ is decomposed into positive and negative components, such that only positive elastic strain energy contributes towards the crack driving energy \citep{amor_regularized_2009}:
+\begin{eqnarray}
+	\psi_e &=&
+	(1 - d^2) \psi_{e}^{+} \left(\bb{\varepsilon}_e \right)
+	+ \psi_{e}^{-} \left(\bb{\varepsilon}_e \right) \\
+	\psi_e^{+}\left(\bb{\varepsilon}^{e}\right) &=&
+	\frac{\kappa}{2} \langle \text{tr}\left(\bb{\varepsilon}_{e}\right)\rangle^2
+	+\mu \,\text{dev}(\bb{\varepsilon}_e): \text{dev}(\bb{\varepsilon}_e) \\
+    	\psi_e^{-} \left(\bb{\varepsilon}_{e}\right) &=&
+	\frac{\kappa}{2} \langle-\text{tr}\left(\bb{\varepsilon}_{e}\right) \rangle^2
+\end{eqnarray}
+%where $\boldsymbol{\varepsilon}_{dev}^{\mathrm{e}}=dev({\boldsymbol{\varepsilon}}^e)$. The positive elastic strain energy is what contributes towards crack driving energy.
 
-where ${\ \psi}_{e^{[m+1]}}\left(\mathbf{\varepsilon}^e\right)$ is the elastic energy contribution from the current time step, $\psi_{e_H}\left(\mathbf{\varepsilon}^e\right)$ is a history variable which gives the largest value for the elastic energy contribution obtained throughout the simulation, $<\psi_p\left({\bar{\varepsilon}}^p\right)-w_0>$ is a Macaulay bracket where $\psi_p\left({\bar{\varepsilon}}^p\right)$ is the plastic energy contribution and $w_0$ is the plastic work threshold, below which the plastic strain will not contribute to crack growth. 
-A Neumann boundary condition $\nabla d\cdot\mathbf{n}=0$ is used to solve this equation.
+%$\psi_p\left({\bar{\varepsilon}}^p\right)$ is the plastic energy contribution, and $w_0$ is the plastic work threshold, below which the plastic strain will not contribute to crack growth.
+
+The plastic energy contribution to the crack growth $\psi_p\left({\bar{\varepsilon}}^p\right)$ is given by \cite{eldahshan_3d_2022}:
+\begin{equation}
+	\psi_p({\bar{\varepsilon}}^p)=\int_0^{\bar{\varepsilon}^p} \sigma_y \, d \bar{\varepsilon}^p
+\end{equation}
+and $w_0$ is the plastic work threshold, below which the plastic strain will not contribute to crack growth.
+
 
 
 %\subsection{Mechanical constitutive laws}
 
-\subsubsection{Elastic model}
 
-The spherical-deviatoric decomposition of the elastic strain energy is employed as in \citet{amor_regularized_2009}. Here the elastic strain energy is decomposed into positive and negative components:
+
+%The stress is therefore given by
+%\begin{equation}
+%\boldsymbol{\sigma}=\frac{\partial \psi}{\partial \varepsilon^e}=(1-a d)^2 \operatorname{Ktr}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right) \mathbf{I}+(1-d)^2 2 \mu \boldsymbol{\varepsilon}_{\mathrm{dev}}^{\mathrm{e}}
+%\end{equation}
+%\begin{equation}
+%a= \begin{cases}1 & \text { if } \operatorname{tr}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)>0 \\ 0 & \text { else } \end{cases}
+%\end{equation}
+
+
+%\subsubsection{Elasto-plastic model}
+
+%The return mapping algorithm which employs the logarithmic (Hencky strain) is employed as laid out in Chapter 3. The standard von Mises yield function is given by
+%\begin{equation}
+%\mathrm{F}=\tau_{\mathrm{eq}}-\sigma_{\mathrm{y}}
+%\end{equation}
+%As previously mentioned, this formulation leads to an unphysical material response when coupled with the phase field model. As the material degrades, the elastic response pulls the stress back within the yield surface, leading to the material failure being preceded by an elastic response. As noted by \citet{borden_phase-field_2016} however, it has been observed experimentally that failure is preceded by plastic strain for ductile materials. In order to account for this behaviour, 
+
+Finally, the isotropic $J_2$ yield function (Equation \ref{eq:yieldFunc}) is modified as \citep{borden_phase-field_2016}
+%The plastic degradation function $g_p(d)$ is incorporated by \citet{borden_phase-field_2016} into the yield function:
 \begin{equation}
-\psi_e=g_{\mathrm{e}}(d) \psi_e{ }^{+}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)+\psi_e^{-}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)
-\end{equation}
-\begin{equation}
-    \psi_e^{+}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)=\frac{\mathrm{K}}{2}<\operatorname{tr}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)>^2+\mu \boldsymbol{\varepsilon}_{\mathrm{dev}}^{\mathrm{e}}: \boldsymbol{\varepsilon}_{\mathrm{dev}}^{\mathrm{e}}
-\end{equation}
-
-\begin{equation}
-    \psi_e^{-}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)=\frac{\mathrm{K}}{2}<-\operatorname{tr}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)>^2
-\end{equation}
-
-where $\boldsymbol{\varepsilon}_{dev}^{\mathrm{e}}=dev({\boldsymbol{\varepsilon}}^e)$. The positive elastic strain energy is what contributes towards crack driving energy. The stress is therefore given by
-
-\begin{equation}
-\boldsymbol{\sigma}=\frac{\partial \psi}{\partial \varepsilon^e}=(1-a d)^2 \operatorname{Ktr}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right) \mathbf{I}+(1-d)^2 2 \mu \boldsymbol{\varepsilon}_{\mathrm{dev}}^{\mathrm{e}}
-\end{equation}
-\begin{equation}
-a= \begin{cases}1 & \text { if } \operatorname{tr}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)>0 \\ 0 & \text { else } \end{cases}
-\end{equation}
-
-
-
-\subsubsection{Elasto-plastic model}
-
-The return mapping algorithm which employs the logarithmic (Hencky strain) is employed as laid out in Chapter 3. The standard von Mises yield function is given by
-\begin{equation}
-\mathrm{F}=\tau_{\mathrm{eq}}-\sigma_{\mathrm{y}}
-\end{equation}
-As previously mentioned, this formulation leads to an unphysical material response when coupled with the phase field model. As the material degrades, the elastic response pulls the stress back within the yield surface, leading to the material failure being preceded by an elastic response. As noted by \citet{borden_phase-field_2016} however, it has been observed experimentally that failure is preceded by plastic strain for ductile materials. In order to account for this behaviour, the plastic degradation function $g_p(d)$ is incorporated by \citet{borden_phase-field_2016} into the yield function:
-\begin{equation}
-\mathrm{F}=\tau_{\mathrm{eq}}-g_p(d)\sigma_y
+%	\mathrm{F}=\tau_{\mathrm{eq}}-g_p(d)\sigma_y
+	\Phi = \sigma_{v}' \; - \; (1 - d^2) \, \sigma_y\left(\bar{\varepsilon}_p \right)
 \end{equation}
 where 
-\begin{equation}
-\tau_{eq}=\sqrt{\frac{3}{2} \boldsymbol{\tau}_d:\boldsymbol{\tau}_d}
-\end{equation}
-\begin{equation}
-\boldsymbol{\tau}_d=g_{\mathrm{e}}(d)\ 2 \mu \operatorname{dev}\left(\boldsymbol{\varepsilon}^{\mathrm{e}}\right)
-\end{equation}
+\begin{eqnarray}
+	\sigma_{v}' &=& \sqrt{\sfrac{3}{2} \, \bb{s}' : \bb{s}'} \\
+%	\tau_{eq}=\sqrt{\frac{3}{2} \boldsymbol{\tau}_d:\boldsymbol{\tau}_d}
+	\boldsymbol{s}' &=& (1 - d^2)\, 2 \mu \, \text{dev}\left(\bb{\varepsilon}_{e}\right)
+\end{eqnarray}
+%\begin{equation}
+%	\boldsymbol{\tau}_d=g_{\mathrm{e}}(d)\ 2 \mu \, \text{dev}\left(\bb{\varepsilon}_{e}\right)
+%	%\boldsymbol{\tau}_d= (1 - d^2)\, 2 \mu \, \text{dev}\left(\bb{\varepsilon}_{e}\right)
+%\end{equation}
 
-The plastic energy contribution to the crack growth is given by \cite{eldahshan_3d_2022}:
-\begin{equation}
-\psi_p({\bar{\varepsilon}}^p)=\int_0^{\bar{\varepsilon}^p} \sigma_y d \bar{\varepsilon}^p
-\end{equation}
+In this work, the phase field equation (Equation \ref{eqn:phaseFieldEquation}) is discretised using the described cell-centred finite volume method, and zero-flux Neumann boundary conditions $\bb{n} \cdot \nabla d=0$ are used for all boundaries.
 
 
 \subsubsection{Computational Procedure}
 
-As has been previously described, the displacement field is solved at each iteration using the stress field calculated from the return mapping scheme. This displacement field is then used to find a new value for the stress from the material model return mapping scheme. This iterative procedure continues until convergence is achieved. For each cell, we are given the incremental displacement field for the current time step $t^{[m+1]}$, at the current outer iteration, denoted by $\Delta \mathbf{u}^{[m+1]}_{[i+1]}$. The values of the following variables from the previous time step $t^{[m]}$ are also provided:
-\begin{equation}
-\left\{\mathbf{F}_n^p, \bar{\varepsilon}^p_n, d_n\right\}
-\end{equation}
-The goal is then for the algorithm to obtain the following variables at time $t^{[m+1]}$
-\begin{equation}
-\left\{\mathbf{F}^{[m+1]}_p, \bar{\varepsilon}_p^{[m+1]},\boldsymbol{\sigma}^{[m+1]}, d^{[m+1]}\right\}
-\end{equation}
+%%As has been previously described, the displacement field is solved at each iteration using the stress field calculated from the return mapping scheme. This displacement field is then used to find a new value for the stress from the material model return mapping scheme. This iterative procedure continues until convergence is achieved. For each cell, we are given the incremental displacement field for the current time step $t^{[m+1]}$, at the current outer iteration, denoted by $\Delta \mathbf{u}^{[m+1]}_{[i+1]}$. The values of the following variables from the previous time step $t^{[m]}$ are also provided:
+%%\begin{equation}
+%%\left\{\mathbf{F}_n^p, \bar{\varepsilon}^p_n, d_n\right\}
+%%\end{equation}
+%%The goal is then for the algorithm to obtain the following variables at time $t^{[m+1]}$
+%%\begin{equation}
+%%\left\{\mathbf{F}^{[m+1]}_p, \bar{\varepsilon}_p^{[m+1]},\boldsymbol{\sigma}^{[m+1]}, d^{[m+1]}\right\}
+%%\end{equation}
+%%
+%%In order to obtain these values, the algorithm must satisfy the following constitutive behaviour:
+%%\begin{equation}
+%%\dot{\boldsymbol{F}}^p \boldsymbol{F}^{p-1}=\dot{\gamma} \boldsymbol{R}^{e T} \frac{\boldsymbol{\tau}_d}{\tau_{eq}} \boldsymbol{R}^e=\overline{\boldsymbol{d}}^p 
+%%\end{equation}
+%%
+%%\begin{equation}
+%%\dot{\bar{\varepsilon}}^p=\dot{\gamma}
+%%\end{equation}
+%%Subject to the Kuhn-Tucker conditions 
+%%\begin{equation}
+%%\left\{\begin{array}{c}
+%%\dot{\gamma}=\geq 0 \\
+%%F_p\geq 0 \\
+%%\dot{\gamma}F_p=0
+%%\end{array}\right.
+%%\end{equation}
+%
+%At each iteration, after the plasticity has been solved for each volume, the phase field crack variable $d$ is solved for globally (equation \ref{eqn:phaseFieldEquation}).
+%
+%Using the procedure outlined in section 3.2.3, the system of equations to be solved for when the material is undergoing plastic straining is given as: 
+%\begin{equation}
+%\left\{\begin{array}{c}
+%F_p=\tau_{eq\ n+1} - g_p(d)\sigma_y\left(\bar{\varepsilon}_p^{[m+1]}\right)=0 \\
+%\boldsymbol{\varepsilon}^{[m+1]}_e=\boldsymbol{\varepsilon}^{[m+1]}_{trial}-\frac{3}{2} \Delta \gamma \frac{\boldsymbol{\tau}^{[m+1]}}{\tau_{eq\ n+1}} \\
+%\bar{\varepsilon}_p^{[m+1]}=\bar{\varepsilon}^p_n+\Delta \gamma
+%\end{array}\right.
+%\end{equation}
+%These equations are satisfied by solving equation \ref{eqn:phaseFinal} using the Newton-Raphson method
+%\begin{equation}
+%\label{eqn:phaseFinal}
+%q^{[m+1]}_{\text {trial }}-g_{\mathrm{p}}(d) 3 \mu \Delta \gamma-g_{\mathrm{p}}(d) \sigma_y\left(\bar{\varepsilon}^p{ }_n+\Delta \gamma\right)=0
+%\end{equation}
 
-In order to obtain these values, the algorithm must satisfy the following constitutive behaviour:
-\begin{equation}
-\dot{\boldsymbol{F}}^p \boldsymbol{F}^{p-1}=\dot{\gamma} \boldsymbol{R}^{e T} \frac{\boldsymbol{\tau}_d}{\tau_{eq}} \boldsymbol{R}^e=\overline{\boldsymbol{d}}^p 
-\end{equation}
+Similar to the Lemaitre and GTN procedures, a deferred-correction procedure is adopted here for incorporation of the phase (damage) evolution equation.
+Within each outer iteration, the elastoplastic quantities are calculated using the latest available phase field variable $d^{[m+1]}_{(i)}$ from the previous outer iteration $i$.
+Subsequently, the phase field equation (Equation \ref{eqn:phaseFieldEquation}) is solved using the latest available stress and strain fields.
+The algorithm for the phase field stress calculation procedure is given in Algorithm \ref{alg:phaseField}.
 
-\begin{equation}
-\dot{\bar{\varepsilon}}^p=\dot{\gamma}
-\end{equation}
-Subject to the Kuhn-Tucker conditions 
-\begin{equation}
-\left\{\begin{array}{c}
-\dot{\gamma}=\geq 0 \\
-F_p\geq 0 \\
-\dot{\gamma}F_p=0
-\end{array}\right.
-\end{equation}
-
-At each iteration, after the plasticity has been solved for each volume, the phase field crack variable $d$ is solved for globally (equation \ref{eqn:phaseFieldEquation}).
-
-Using the procedure outlined in section 3.2.3, the system of equations to be solved for when the material is undergoing plastic straining is given as: 
-\begin{equation}
-\left\{\begin{array}{c}
-F_p=\tau_{eq\ n+1} - g_p(d)\sigma_y\left(\bar{\varepsilon}_p^{[m+1]}\right)=0 \\
-\boldsymbol{\varepsilon}^{[m+1]}_e=\boldsymbol{\varepsilon}^{[m+1]}_{trial}-\frac{3}{2} \Delta \gamma \frac{\boldsymbol{\tau}^{[m+1]}}{\tau_{eq\ n+1}} \\
-\bar{\varepsilon}_p^{[m+1]}=\bar{\varepsilon}^p_n+\Delta \gamma
-\end{array}\right.
-\end{equation}
-These equations are satisfied by solving equation \ref{eqn:phaseFinal} using the Newton-Raphson method
-\begin{equation}
-\label{eqn:phaseFinal}
-q^{[m+1]}_{\text {trial }}-g_{\mathrm{p}}(d) 3 \mu \Delta \gamma-g_{\mathrm{p}}(d) \sigma_y\left(\bar{\varepsilon}^p{ }_n+\Delta \gamma\right)=0
-\end{equation}
-The algorithm for this entire procedure is given in Algorithm 6.
-
-\begin{algorithm}[H]
+\hl{Andrew: check equations}\\
+\begin{algorithm}[htbp] \label{alg:phaseField} \footnotesize
 \SetAlgoLined
-(i) Update Relative Deformation for given incremental displacement
+(i) Update deformation gradients for a given incremental displacement
 
 \begin{equation}
-  \mathbf{f}^{[m+1]}=\mathbf{I}+\nabla\left[\Delta\textbf{u}\right]\nonumber
+  \textbf{f}^{[m+1]}=\textbf{I}+\nabla\left[\Delta\textbf{u}\right]^T \nonumber
+\end{equation}
+\begin{equation}
+ \textbf{F}^{[m+1]}=\textbf{f}^{[m+1]}\textbf{F}_n\nonumber
 \end{equation}
 
+(ii) Compute trial elastic state
 \begin{equation}
-\mathbf{F}^{[m+1]}=\mathbf{f}^{[m+1]}\mathbf{F}_n\nonumber
-\end{equation}
-(ii) Compute trial elasticity
-\begin{equation}
-\mathbf{B}_{e}^{[m]}=exp\left[{2\boldsymbol{\varepsilon}_{e}^{[m]}}\right]\nonumber
+	\mathbf{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
 \end{equation}
 \begin{equation}
-\mathbf{B}_{trial}=\mathbf{f}^{[m+1]}\mathbf{B}^{[m]}(\mathbf{f}^{[m+1]})^{T}\nonumber
+	\mathbf{B}^{\text{trial}}_e = \mathbf{f}^{[m+1]}\mathbf{B}^{[m]}_e \left(\mathbf{f}^{[m+1]}\right)^{T}\nonumber
 \end{equation}
 \begin{equation}
-\boldsymbol{\varepsilon}_{trial}=\frac{1}{2}ln[\textbf{B}_{trial}]\nonumber
+	\boldsymbol{\varepsilon}^{\text{trial}}_e = \frac{1}{2} \ln \left(\textbf{B}^{\text{trial}}_e \right) \nonumber
+\end{equation}
+%\begin{equation}
+%\bar{\varepsilon}^{p}_{trial}=\bar{\varepsilon}_{p}^{[m]}\nonumber
+%\end{equation}
+\begin{equation}
+	\sigma_v^{\text{trial}} =
+	\left(1 - d_{[i]}^{[m+1]2} \right) \sqrt{\frac{3}{2}} || 2\mu \, \text{dev}(\bb{\varepsilon}_e)|| \nonumber
 \end{equation}
 \begin{equation}
-\bar{\varepsilon}^{p}_{trial}=\bar{\varepsilon}_{p}^{[m]}\nonumber
+	\Phi^{\text{trial}} =
+	\sigma_v^{\text{trial}}
+	- \left(1 - d_{[i]}^{[m+1]2} \right) \, \sigma_{y}\left(\bar{\varepsilon}_p^{[m]} \right) \nonumber 
 \end{equation}
-\begin{equation}
-{q}_{trial}=g_e(d)\sqrt{\frac{3}{2}}\lvert\lvert2\mu dev(\boldsymbol{\varepsilon}^e)\rvert\rvert\nonumber
-\end{equation}
-\begin{equation}
-f_{trial}={q}_{trial}-g_e(d)\sigma_{y}(\varepsilon^{PEq}_{trial}) \nonumber 
-\end{equation}
-  \eIf{$f_{trial}>0$}{
-   go to step iii to solve for $\Delta\gamma$
+\eIf{$\Phi_{\text{trial}}>0$}{
+   go to step (iii) to solve for $\Delta \bar{\varepsilon}_p$
    }{
-   $\Delta\gamma=0$ and go to step iv
+   $\Delta\bar{\varepsilon}_p = 0$ and go to step (iv)
   }
 
-(iii) Enter small strain return map and solve for $\Delta\gamma$ using the Newton-Raphson to solve the equation
+(iii) Use the Newton-Raphson to solve the yield equation for the equivalent plastic strain increment $\Delta\bar{\varepsilon}_p$:
 \begin{equation}
-{q}_{trial}-g_p(d)3\mu\Delta\gamma-g_p(d)\sigma_{y}(\bar{\varepsilon}_{p}^{[m]}+\Delta\gamma)=0\nonumber
+	\sigma_v^{\text{trial}}
+	- \left(1 - d_{[i]}^{[m+1]2} \right) 3 \mu\Delta\bar{\varepsilon}_p
+	- \left(1 - d_{[i]}^{[m+1]2} \right) \sigma_{y}(\bar{\varepsilon}_{p}^{[m]} + \Delta\bar{\varepsilon}_p)
+	= 0 \nonumber
 \end{equation}
+
 (iv) Update elastic strain
 %\begin{equation}
 %\boldsymbol{\varepsilon}^{e}^{[m+1]}=\boldsymbol{\varepsilon}^{e}_{trial}-\sqrt{\frac{3}{2}}\Delta\gamma{\frac{dev(\boldsymbol{\varepsilon}^{e}_{trial})}{\lvert\lvert\boldsymbol{\varepsilon}^{e}_{trial}\rvert\rvert}}\nonumber
@@ -2328,13 +2380,30 @@ f_{trial}={q}_{trial}-g_e(d)\sigma_{y}(\varepsilon^{PEq}_{trial}) \nonumber
 %\boldsymbol{\tau}^{[m+1]}=g_e(d)\mathbf{D}^e:\boldsymbol{\varepsilon}^{e}^{[m+1]}\ 
 %Must incorporate section 4.5.4
 %\nonumber
-%\end{equation}  
-(v) Update stress tensor (section 4.4.4)
-(vi) Solve for phase field variable d using previously calculated values for coupled fields
+%\end{equation}
+
+(v) Implicitly solve the pressure Poisson's equation:
 \begin{equation}
-	\frac{G_c}{2l}\left(d-4l^2\nabla^2d\right)=\mathcal{H}\left(\underline{\mathrm{x}},t\right)	
-	\end{equation}
-\caption{Phase-Field Model}
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} =
+%	-\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right]
+	\frac{1}{J}\left(p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}} \right)
+	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m]} \right) \\
+\end{equation}
+
+
+(vi) Update the true (Cauchy) stress
+\begin{equation}
+	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
+\end{equation}
+
+
+(vi) Solve the phase field equation for $d$:
+\begin{equation}
+	\frac{G_c}{2l}\left(d^{[m+1]} -4l^2 \bb{\nabla}^2 d^{[m+1]} \right) =
+	\mathcal{H}^{[m+1]}_{[i]} %\left(\underline{\mathrm{x}},t\right)	
+\end{equation}
+
+\caption{Phase field damage model stress calculation algorithm}
 \end{algorithm}
 
 
