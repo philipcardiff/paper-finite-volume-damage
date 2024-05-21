@@ -468,7 +468,7 @@ The effect of these proposed modifications are examined in Section \ref{sec:test
 %\end{equation}
 
 
-\subsubsection{Hydrostatic Pressure Calculation}
+\subsubsection{Hydrostatic Pressure Calculation} \label{sec:pressureApproach}
 As is well-known, displacement-only formulations are susceptible to displaying numerical hydrostatic pressure oscillations in regions of large isochoric plastic strains.
 In \citet{cardiff_lagrangian_2017}, it was proposed to smooth the relative deformation gradient Jacobian field.
 In contrast, the current approach forms and solves a pressure Poisson equation:
@@ -1976,7 +1976,7 @@ Once again, the overall procedure is implicit in time.
 %Where ${f}^{[m+1]}^{i+1}$ is the porosity for the current iteration and $f^{[m+1]}^i$ is the porosity from the previous iteration. The effective porosity $f^{*i+1}^{[m+1]}$ is then calculated according to equation \ref{eqn:GTNCoalescence}.
 %This procedure is provided in Algorithm 5.
 
-\begin{algorithm}[htbp] \label{alg:GTN} \footnotesize
+\begin{algorithm}[htbp] \label{alg:GTN} \small
 \SetAlgoLined
 (i) Update deformation gradients for a given incremental displacement
 
@@ -2456,10 +2456,16 @@ The algorithm for the phase field stress calculation procedure is given in Algor
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Test Cases} \label{sec:test_cases}
+\section{Benchmark Cases} \label{sec:test_cases}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-This section assesses the performance of the developed finite volume procedures on three benchmark test cases: (i) 2-D axisymmetric notched round bar, (ii) 3-D flat notched bar, and (iii) 2-D axisymmetric wire drawing.
+This section assesses the performance of the developed finite volume procedures on two benchmark test cases: (i) 2-D axisymmetric notched round bar and (ii) 3-D flat notched bar. %and (iii) 2-D axisymmetric wire drawing.
+Both test cases are similar in that a region of localised plastic straining developed at the centre of the specimen but differ in terms of the level of triaxiality experienced.
+The cases are presented simultaneously rather than sequentially to allow easier comparison of the material models.
+
+Unless stated otherwise, a global Rhie-Chow scale factor $\mathcal{R} = 0.01$ is used in all of the following finite volume simulations.
+All simulations were run in parallel on eight CPU cores (Intel Xeon 6152).
+
 Comparisons are made with predictions from finite element software Abaqus and results from the literature.
 In the Abaqus models, linear interpolation functions are used in the finite element simulations (Abaqus element code C3D8T for 3-D and CAX4RT for axisymmetry).
 For reference, single-cell verifications of the proposed material models are provided in Appendix \ref{app:one_cell}, providing confidence that the constitutive laws are implemented as intended.
@@ -2471,16 +2477,15 @@ For reference, single-cell verifications of the proposed material models are pro
 %- Case showing the effect of new Lematire model
 
 %In this section, simulations of displacements being applied to a notched round bar (NRB) and a flat notched bar (FNB) are conducted in Abaqus and OpenFOAM with results compared to each other as well as to results in the literature.
-\hl{In all of the following simulations conducted on OpenFOAM, the Rhie-Chow scale factor is set at 0.01}
+
 % to mitigate its effect on damage localisation behaviour}
 % (the effect of the Rhie-Chow method will be explored in more detail in chapter 6).
 %Linear (first-order) interpolation is used in the finite volume and finite element simulations with C3D8T and CAX4RT elements used in Abaqus for the three-dimensional and axi-symmetric simulations respectively.
 %The following simulations in this work for a notched round bar and a flat notched bar were performed in parallel on the UCD Sonic High Performance Computing (HPC) cluster, utilizing 8 processors.
-\hl{All simulations were run using 8 CPU cores (Intel Xeon 6152)}.
 
 
 %%%%%%%%%%%
-\subsection{Notched Round Bar}
+\subsection{Geometries and Meshes}
 %%%%%%%%%%%
 The notched round bar (Figure \ref{fig:notched_bar_geom}) has been widely used for benchmarking plasticity and damage procedures \cite{cesar_de_sa_damage_2006, fincato_return_2018, vaz_aspects_2001}.
 The geometry consists of a 40 \si{\milli\meter} long round bar of diameter 18 \si{\milli\meter} with a 4 \si{\milli\meter} rounded notch.
@@ -2495,78 +2500,107 @@ A 2-D axisymmetric model is created, including a horizontal symmetry plane, and 
 
 \begin{figure}[htbp]
 	\centering
-		\subfigure[8000 cell mesh] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/axiNotchedMeshBW.png}}
+%		\subfigure[8000 cell mesh] {\label{airbus}\includegraphics[width=0.1\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/axiNotchedMeshBW.png}}
+		\includegraphics[width=0.1\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/axiNotchedMeshBW.png}
 		
-		\subfigure[Marked cell in pink where results are analysed] {\label{boeing} \includegraphics[width=0.3\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/markedCellAxi.png}}
+%		\subfigure[Marked cell in pink where results are analysed] {\label{boeing} \includegraphics[width=0.3\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/markedCellAxi.png}}
 		
-		\caption{Notched round bar mesh}
+		\caption{Notched round bar mesh (mesh with 100 cells)}
 	\label{fig:notched_bar_mesh}
 \end{figure}
 
-A vertical displacement of 1.0 \si{\milli\meter} is applied to the upper boundary over 100 quasi-static loading steps, corresponding to 0.01 \si{\milli\meter} increments.
 
-Table \ref{tab:notched_bar_mat} gives the assumed elastoplastic material parameters.
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{llll} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $69$ GPa \\
-			Poisson's ratio & $v$ & $0.3$   \\
-			Hardening law & $\sigma_y$ & $589({0.0001+\bar{\varepsilon}}^p)^{0.216}$ MPa  \\
-			\hline
-		\end{tabular}
-	\caption{Material properties for the notched round bar}
-	\label{tab:notched_bar_mat}
-\end{table}
-
-
-
-%%%%%%%%%%%
-\subsection{Flat Notched Bar}
-%%%%%%%%%%%
 The 3-D flat notched tensile specimen (Figure \ref{fig:flat_bar_geom}) is another common test case for assessing damage models \citep{borden_phase-field_2016, eldahshan_phase_2021}.
 The geometry consists of $152.4 \times 25.4$ \si{\milli\meter} plate with 4.06 \si{\milli\meter} diameter side notches.
-The solution domain comprises one-eight of the specimen by exploiting three symmetry planes.
+The solution domain comprises one-eighth of the specimen by exploiting three symmetry planes.
 A structured hexahedral mesh is employed (Figure \ref{fig:flat_bar_mesh}).
 
 \begin{figure}[htb] \label{fig:flat_bar_geom}
 \begin{center}
-	\includegraphics[width=0.6\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/flatNotchedTensile.png}
+	\includegraphics[width=0.3\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/flatNotchedTensile.png}
 \caption{Geometry of the flat notched bar}
 \end{center}
 \end{figure}
 
 \begin{figure}[htbp]
 	\centering
-		\subfigure[10000 cell mesh] {\label{airbus}\includegraphics[width=0.1\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/bordenMesh.png}}
+%		\subfigure[10000 cell mesh]
+%		{
+%		\label{airbus}
+		\includegraphics[width=0.1\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/bordenMesh.png}
+%		}
 		
-		\subfigure[Marked cell in pink where results are analysed] {\label{boeing} \includegraphics[width=0.3\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/bordenCell.png}}
+%		\subfigure[Marked cell in pink where results are analysed] {\label{boeing} \includegraphics[width=0.3\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/bordenCell.png}}
 		
-		\caption{Flat notched bar mesh}
+		\caption{Flat notched bar mesh (mesh with 1000 cells)}
 	\label{fig:flat_bar_mesh}
 \end{figure}
 
-A vertical displacement of 1.143 \si{\milli\meter} is applied to the upper boundary over 100 quasi-static loading steps, corresponding to 0.01143 \si{\milli\meter} increments.
 
-Table \ref{tab:flat_bar_mat} gives the assumed elastoplastic material parameters.
+
+
+\subsection{Loading Conditions}
+
+For the notched round bar case, a vertical displacement of 1.0 \si{\milli\meter} is quasi-statically applied to the upper boundary.
+For the elastoplastic cases without damage, a displacement increment size of 0.01 \si{\milli\meter} is used, whereas a smaller increment size of 0.001 \si{\milli\meter} is used for the damage cases.
+%A displacement of $0.8\ mm$ is applied to the top boundary of the NRB specimen, with 800 time steps used in these simulations corresponding to displacement increments of $0.001\ mm$.
+
+
+For the flat notched bar case, a vertical displacement of 1.143 \si{\milli\meter} is quasi-statically applied to the upper boundary.
+% over 100 quasi-static loading steps, corresponding to 0.01143 \si{\milli\meter} increments.
+Displacement increments of $0.01143$ \si{\milli\meter} are applied in the elastoplastic cases and displacement increments of $0.001143$ \si{\milli\meter} are applied in the damage cases.
+
+% by default in this case until the rapid loss of load-carrying capacity is observed.
+For the Abaqus finite element cases, the adaptive time-stepping procedure was employed, allowing a minimum displacement increment of $0.01143$ \si{\micro\meter}.
+
+
+
+
+\subsection{Material Parameters}
+
+The elastoplastic material parameters for the notched round bar are given in Table \ref{tab:notched_bar_mat}, while the parameters for the flat notched bar are given in Table \ref{tab:flat_bar_mat}.
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{llll} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $68.8$ GPa \\
-			Poisson's ratio & $v$ & $0.33$   \\
-			Hardening law & $\sigma_y$ & $320+688\bar{\varepsilon}^p$ MPa  \\
+		\begin{tabular}{lllll} \hline
+			Property & Symbol & Value  & Units \\ \hline 
+			Young's modulus & $E$ & $69$ & GPa \\
+			Poisson's ratio & $v$ & $0.3$  & - \\
+			Hardening law & $\sigma_y$ & $589({10^{-4}+\bar{\varepsilon}}_p)^{0.216}$ & MPa  \\
 			\hline
 		\end{tabular}
-	\caption{Material properties for the flat notched bar}
+	\caption{Material properties for the notched round bar case}
+	\label{tab:notched_bar_mat}
+\end{table}
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{lllll} \hline
+			Property & Symbol & Value & Units  \\ \hline 
+			Young's modulus & $E$ & $68.8$ & GPa \\
+			Poisson's ratio & $v$ & $0.33$   & -\\
+			Hardening law & $\sigma_y$ & $320+688\bar{\varepsilon}_p$ & MPa  \\
+			\hline
+		\end{tabular}
+	\caption{Material properties for the flat notched bar case}
 	\label{tab:flat_bar_mat}
 \end{table}
 
 
 
-%\subsection{Plasticity model} \label{PlasticityTestCases}
+\subsection{Plasticity Model Verification} \label{PlasticityTestCases}
 
-Before verifying the damage and fracture models, the implementation of the plasticity model described is verified by comparing its results to (i) the elasto-plastic model implemented by  \citet{clancy_improving_2019}) in OpenFOAM that uses the logarithmic strain and the Mandel stress \cite{caminero_modeling_2011}, (ii) to the elasto-plastic model implemented in OpenFOAM by \citet{cardiff_lagrangian_2017}, which uses the Green strain tensor and the return mapping algorithm described by \citet{simo_computational_1998} and (iii) to results obtained from simulations conducted in Abaqus based on the Jaumann stress rate.
+Before verifying the damage and fracture models, the implementation of the described plasticity model is verified by comparison with three other procedures:
+\begin{enumerate}[label=(\alph*)]
+	\item The approach of \citet{clancy_improving_2019} implemented in OpenFOAM that uses the logarithmic strain and the Mandel stress \cite{caminero_modeling_2011};
+	\item The approach of \citet{cardiff_lagrangian_2017} implemented in OpenFOAM, which uses the Green strain tensor (left Cauchy–Green deformation tensor) and the return mapping algorithm described by \citet{simo_computational_1998};
+	\item The default approach in Abaqus, which is based on the Jaumann stress rate.
+\end{enumerate}
+
+Verification consists of examining the reaction forces at the loading boundary and the equivalent plastic strain $\bar{\varepsilon}_p$, equivalent stress $\sigma_v$, hydrostatic pressure $p$ and axial stress $\sigma_{yy}$ (stress in the loading direction) at the centre of the specimen (location of the maximum equivalent plastic strain and where fracture will initiate when damage models are incorporated).
+
+The mesh spacing and time-step size are chosen so that spatial and temporal discretisation are small for all cases.
+%  discrepancy is unrelated to the time-step or mesh size discretisation error.
+%Throughout this chapter, relatively fine meshes and small time steps are used to ensure that this form of error is negligible.
+
 
 %These simulations are conducted using the material properties described in Tables 5.5 and 5.6.
 
@@ -2575,108 +2609,173 @@ Before verifying the damage and fracture models, the implementation of the plast
 %
 %A displacement of $1.143\ mm$ is applied to the top boundary of the flat notched bar specimen, with 100 time steps used in this simulation corresponding to increments of $0.01143\ mm$. 
 
-\subsubsection{Reaction force vs displacement}
+\subsubsection{Reaction Forces}
 
-It can be seen in Figure 5.11 that the results align well, verifying the implementation of this model. It is worth noting that the reaction force for both the \citet{clancy_improving_2019} implementation and the implementation of this work (which both use the logarithmic strain) is slightly less than that given by the \citet{cardiff_lagrangian_2017} implementation and the Abaqus simulation in the latter stages of the deformation. It is unclear exactly why this is, though it could be related to the fact that formulations which employ the logarithmic strain are not exactly mathematically equivalent to those which employ the Green strain tensor.
-
+The predicted reaction forces at the loading boundaries (Figures \ref{fig:plastic_forces}) align closely between all approaches.
+It is worth noting that the reaction forces for both the \citet{clancy_improving_2019} implementation and the implementation of this work (which both use the logarithmic strain) are slightly less than the \citet{cardiff_lagrangian_2017}  and the Abaqus predictions in the latter stages of the deformation.
+Although the reason for these subtle differences is unclear, the lack of mathematical equivalence between the logarithmic and Green/Jaumann strain approaches may be the cause.
 \begin{figure}[htbp]
 	\centering
-		\subfigure[Notched round bar] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/forceDispAxi.png}}
-		
-		\subfigure[Flat notched bar] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/forceDispBorden.png}}
-		
-		\caption{Force-displacement curves}
-	\label{label_for_entire_figure}
+		\subfigure[Notched round bar]
+		{
+			\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/forceDispAxi.png}
+		}
+		\subfigure[Flat notched bar]
+		{
+			\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/forceDispBorden.png}
+		}
+		\caption{Reaction forces at the loading boundaries for the notched round bar and flat notched bar cases}
+	\label{fig:plastic_forces}
 \end{figure}
 \FloatBarrier
 
 
 
-\subsubsection{Results at cell centre of interest}
+\subsubsection{Stress and Strain Quantities at the Centre of the Specimens}
 
-The results at the centroid of a chosen cell (marked in pink in Figures 5.9 and 5.10) are here compared for the implementation of this work, the \citet{cardiff_lagrangian_2017} implementation and the results from Abaqus. It is noticeable that in both test cases, the equivalent plastic strain is marginally greater in the OpenFOAM simulations than the Abaqus ones in the latter stages of the deformation. As can be seen in Appendix F, this discrepancy is unrelated to the time-step or mesh size discretisation error. Throughout this chapter, relatively fine meshes and small time steps are used to ensure that this form of error is negligible.
-
-It is unclear exactly why this difference (or other small differences which will be encountered) later in the chapter exists, though it could be related to the fact that in Abaqus the Jaumann rate is used to update the stress tensor \cite{soyarslan_finite_2010}, unlike in OpenFOAM.
-
-\subsubsection{Notched round bar}
-
-For the NRB, the results for the cell at the centre of the specimen are compared (Figure 5.9). This cell is chosen because it is where fracture initiates for both the Lemaitre and GTN model simulations that will be encountered later in this chapter. 
-
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.9\textwidth]{./Figures/plasticityCompare/axiCompare/disp_EpsPEq.png}
-\caption{Equivalent plastic strain vs. displacement}
-\label{fig:eqPlasticStrainNotchedRoundBar}
-\end{center}
+%The results at the centroid of a chosen cell (marked in pink in Figures 5.9 and 5.10) are here compared for the implementation of this work, the \citet{cardiff_lagrangian_2017} implementation and the results from Abaqus.
+The equivalence plastic strain predictions at the specimen centres are shown to agree for all approaches (Figure \ref{fig:eqPlasticStrainPlasticity}).
+The predicted equivalent plastic strain is marginally greater in the latter stages of the deformation for the finite volume (OpenFOAM) simulations than the Abaqus ones.
+These differences have been found to remain as the mesh spacing and time step are reduced, ruling out discretisation error as the cause.
+%As can be seen in Appendix F,
+A possible reason for the difference is the use of the Jaumann objective rate in Abaqus \cite{soyarslan_finite_2010}, in contrast to the logarithmic and Green strain approaches used in OpenFOAM.
+%It is unclear exactly why this difference (or other small differences which will be encountered) later in the chapter exists, though it could be related to the fact that in Abaqus the Jaumann rate is used to update the stress tensor \cite{soyarslan_finite_2010}, unlike in OpenFOAM.
+\begin{figure}[htbp]
+%\begin{center}
+%	\includegraphics[width=0.4\textwidth]{./Figures/plasticityCompare/axiCompare/disp_EpsPEq.png}
+%	\caption{Equivalent plastic strain vs. displacement}
+%	\label{fig:eqPlasticStrainNotchedRoundBar}
+%\end{center}
+	\centering
+		\subfigure[Notched round bar]
+		{\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/axiCompare/disp_EpsPEq.png}}
+		
+		\subfigure[Flat notched bar] 
+		{\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_EpsPEq.png}}
+	\caption{Equivalent plastic strain at the specimen centres}
+	\label{fig:eqPlasticStrainPlasticity}
 \end{figure}
 
 
+%\subsubsection{Notched round bar}
+
+The predictions for equivalent stress $\sigma_v$, hydrostatic pressure $p$, and axial stress (stress in the loading direction) $\sigma_{yy}$ are shown to agree for the different approaches (Figure \ref{fig:stressStrainCentre}).
+Of particular note is the pressure distribution, which is smooth and does not show numerical oscillations, providing confidence in the proposed pressure smoothing approach (Section \ref{sec:pressureApproach}).
+%For the NRB, the cells' results at the centre of the specimen are compared (Figure 5.9).
+%This cell is chosen because it is where fracture initiates for both the Lemaitre and GTN model simulations that will be encountered later in this chapter. 
+%For the FNB, results are shown for the cell that is $6.912\ mm$ to the right of the centre of this specimen.
+%This cell is chosen because it is where fracture initiates for the Lemaitre model (Figure 5.10).
 \begin{figure}[htbp]
 	\centering
-		\subfigure[Equivalent stress vs. displacement] {\label{airbus}\includegraphics[width=0.6\textwidth]{./Figures/plasticityCompare/axiCompare/disp_sigmaEq.png}}
+		\subfigure[Notched round bar: Equivalent stress $\sigma_v$ vs displacement]
+		{\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/axiCompare/disp_sigmaEq.png}}
+		\subfigure[Flat notched bar: Equivalent stress $\sigma_v$ vs displacement]
+		{\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_sigmaEq.png}}
 		
-		\subfigure[Pressure vs. displacement] 
-  {\label{airbus}\includegraphics[width=0.6\textwidth]{./Figures/plasticityCompare/axiCompare/disp_Pressure.png}}
+		\subfigure[Notched round bar: Pressure $p$ vs displacement] 
+		{\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/axiCompare/disp_Pressure.png}}
+		\subfigure[Flat notched bar: Pressure $p$ vs displacement] 
+		{\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_Pressure.png}}
 		
-		\subfigure[Sigma YY vs. displacement] 
-  {\label{airbus}\includegraphics[width=0.6\textwidth]{./Figures/plasticityCompare/axiCompare/disp_sigmaYY.png}}
-		
-		\caption{Comparison of stress state}
-	\label{label_for_entire_figure}
+		\subfigure[Notched round bar: Axial stress $\sigma_{yy}$ vs displacement] 
+  		{\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/axiCompare/disp_sigmaYY.png}}
+		\subfigure[Flat notched bar: Axial stress $\sigma_{yy}$ vs displacement] 
+		{\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_sigmaYY.png}}
+				
+		\caption{Stress and Strain Quantities at the Centre of the notched round bar and flat notched bar specimens}
+	\label{fig:stressStrainCentre}
 \end{figure}
 \FloatBarrier
 
-\subsubsection{Flat notched bar}
 
-For the FNB, results are shown for the cell that is $6.912\ mm$ to the right of the centre of this specimen. This cell is chosen because it is where fracture initiates for the Lemaitre model (Figure 5.10).
+
+
+%\subsubsection{Flat notched bar}
+
+%For the FNB, results are shown for the cell that is $6.912\ mm$ to the right of the centre of this specimen. This cell is chosen because it is where fracture initiates for the Lemaitre model (Figure 5.10).
+
+%\begin{figure}[htb]
+%\begin{center}
+%	\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_EpsPEq.png}
+%\caption{Equivalent plastic strain vs. displacement}
+%\label{fig:notchedRoundBAr}
+%\end{center}
+%\end{figure}
+
+
+%\begin{figure}[htbp]
+%	\centering
+%		\subfigure[Equivalent stress vs. displacement] {\label{airbus}\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_sigmaEq.png}}
+%		
+%		\subfigure[Pressure vs. displacement]
+%		{\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_Pressure.png}}
+%		
+%		\subfigure[Sigma YY vs. displacement]
+%		{\includegraphics[width=0.3\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_sigmaYY.png}}
+%		
+%		\caption{Comparison of stress state}
+%	\label{label_for_entire_figure}
+%\end{figure}
+\FloatBarrier
+
+
+
+\subsection{Lemaitre model}
+Following on from the verification of the elastoplasticity procedure, the notched round and flat bar test cases are examined using the proposed damage models.
+
+%A displacement of $0.8\ mm$ is applied to the top boundary of the NRB specimen, with 800 time steps used in these simulations corresponding to displacement increments of $0.001\ mm$.
+
+The Lemaitre material parameters for the notched round bar, taken from \citet{cesar_de_sa_damage_2006}, are given in Table \ref{table:NRB_material_properties_lemaitre}, while the Lemaitre material parameters for the flat notched bar case are given in Table \ref{table:FNB_material_properties_lemaitre}.
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{lllll} \hline
+			Property & Symbol & Value & Units \\ \hline 
+			Young's modulus & $E$ & $69.9$ & GPa \\
+			Poisson's ratio & $v$ & $0.3$  & - \\
+			Lemaitre damage denominator & $S_0$ & $1.1$ & MPa  \\
+			Lemaitre damage exponent & $b$ & 1.0 & - \\
+			Characteristic length & $l_c$ & $0.6325$ & mm  \\
+			Hardening law & $\sigma_y$ & $589({10^{-4} +\bar{\varepsilon}}_p)^{0.216}$ & MPa \\
+			\hline
+		\end{tabular}
+	\caption{Lemaitre material parameters for the notched round bar case}
+	\label{table:NRB_material_properties_lemaitre}
+\end{table}
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{lllll} \hline
+			Property & Symbol & Value & Units  \\ \hline 
+			Young's modulus & $E$ & $68.9$ & GPa \\
+			Poisson's ratio & $v$ & $0.33$  & - \\
+			Lemaitre damage denominator & $S_0$ & $0.5$ & MPa  \\
+			Lemaitre damage exponent & $b$ & 1.0 & -  \\
+			Characteristic Length & $l_c$ & $0.6325$ & mm  \\
+			Hardening law & $\sigma_y$ & $320+688 \, \bar{\varepsilon}_p$ & MPa \\
+			\hline
+		\end{tabular}
+	\caption{Lemaitre material parameters for the flat notched bar case}
+	\label{table:FNB_material_properties_lemaitre}
+\end{table}
+
+
+\subsubsection{Reaction Forces}
+
+\hl{Comments on reaction forces for both cases.}
 
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.9\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_EpsPEq.png}
-\caption{Equivalent plastic strain vs. displacement}
+	\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/bordenDispForce.png}
+\caption{Force vs. displacement}
 \label{fig:notchedRoundBAr}
 \end{center}
 \end{figure}
 
 
+
+\subsubsection{Predicted Damage Distribution}
+The distribution of the non-local damage at a displacement of $0.6$ mm in the OpenFOAM simulation is compared with the results provided in \citet{cesar_de_sa_damage_2006} in Figure 5.16. In both of these cases, the non-local damage reaches a maximum of $\approx0.5$; it is clear that in both of these simulations, the distribution of the damage over the specimen follows a similar pattern.
+
 \begin{figure}[htbp]
-	\centering
-		\subfigure[Equivalent stress vs. displacement] {\label{airbus}\includegraphics[width=0.6\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_sigmaEq.png}}
-		
-		\subfigure[Pressure vs. displacement]
-  {\label{airbus}\includegraphics[width=0.6\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_Pressure.png}}
-		
-		\subfigure[Sigma YY vs. displacement]
-  {\label{airbus}\includegraphics[width=0.6\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_sigmaYY.png}}
-		
-		\caption{Comparison of stress state}
-	\label{label_for_entire_figure}
-\end{figure}
-\FloatBarrier
-
-\subsubsection{Lemaitre model}
-
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{llll} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $69.9$ GPa \\
-			Poisson's ratio & $v$ & $0.3$   \\
-			Lemaitre damage denominator & $S_0$ & $1.1$ MPa  \\
-			Lemaitre damage exponent & $b$ & 1.0  \\
-			Characteristic Length & $l_c$ & $0.6325$ mm  \\
-			Hardening law & $\sigma_y$ & $589({0.0001+\bar{\varepsilon}}^p)^{0.216}$ MPa \\
-			\hline
-		\end{tabular}
-	\caption{Material properties for the NRB}
-	\label{tab:material_properties}
-\end{table}
-
-A displacement of $0.8\ mm$ is applied to the top boundary of the NRB specimen, with 800 time steps used in these simulations corresponding to displacement increments of $0.001\ mm$. The material properties in Table 5.7 are taken from \citet{cesar_de_sa_damage_2006}.
-
-The distribution of the non-local damage at a displacement of $0.6\ mm$ in the OpenFOAM simulation is compared with the results provided in \citet{cesar_de_sa_damage_2006} in Figure 5.16. In both of these cases the non-local damage reaches a maximum of $\approx0.5$, it is clear that in both of these simulations the distribution of the damage over the specimen follows a similar pattern.
-
-\begin{figure}[t!]
 	\centering
 		\subfigure[Results from \cite{cesar_de_sa_damage_2006}] {\label{airbus}\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/updated_deSaNonLocal.jpeg}}
 		\qquad
@@ -2687,9 +2786,10 @@ The distribution of the non-local damage at a displacement of $0.6\ mm$ in the O
 \end{figure}
 \FloatBarrier
 
-\subsubsection{Lemaitre model: Abaqus vs. OpenFOAM}
+%\subsubsection{Lemaitre model: Abaqus vs. OpenFOAM}
 
-In this sub-section results from the OpenFOAM and Abaqus implementations of the non-local gradient Lemaitre model are compared. It can be seen in Figure 5.17, that the OpenFOAM simulation of the non-local gradient Lemaitre model localises at a slightly quicker rate than the Abaqus implementation. This has been encountered earlier in the comparison of the equivalent plastic strain in section 5.3.2. The marginally faster increase of the equivalent plastic strain and damage results in a slightly quicker loss of load-carrying capacity for the specimen, as can be observed in Figure 5.18.
+%In this sub-section results from the OpenFOAM and Abaqus implementations of the non-local gradient Lemaitre model are compared.
+Comparing the OpenFOAM and Abaqus predictions (Figure 5.17), the OpenFOAM simulation of the non-local gradient Lemaitre model localises at a slightly quicker rate than the Abaqus implementation. This has been encountered earlier in the comparison of the equivalent plastic strain in section 5.3.2. The marginally faster increase of the equivalent plastic strain and damage results in a slightly quicker loss of load-carrying capacity for the specimen, as shown in Figure 5.18.
 
 \begin{figure}[htb]
 \begin{center}
@@ -2699,7 +2799,7 @@ In this sub-section results from the OpenFOAM and Abaqus implementations of the 
 \end{center}
 \end{figure}
 
-\begin{figure}[t!]
+\begin{figure}[htbp]
 	\centering
 		\subfigure[Non-local damage vs.displacement (mm)] {\label{airbus}\includegraphics[width=0.6\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_damageNonLocal.png}}
 	
@@ -2710,43 +2810,24 @@ In this sub-section results from the OpenFOAM and Abaqus implementations of the 
 \end{figure}
 \FloatBarrier
 
-\textbf{Flat notched bar}
 
-Simulations are also performed on the flat notched bar case. Displacement increments of $0.001143\ mm$ are applied by default in this case until the rapid loss of load-carrying capacity is observed. For the Abaqus case, the option was given for the simulation to use displacement increments as small as $0.00001143\ mm$, via the adaptive time stepping scheme available in this software.
 
-\begin{table}[htb]
-	\centering
-		\begin{tabular}{llll} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $68.9$ GPa \\
-			Poisson's ratio & $v$ & $0.33$   \\
-			Lemaitre damage denominator & $S_0$ & $0.5$ MPa  \\
-			Lemaitre damage exponent & $b$ & 1.0  \\
-			Characteristic Length & $l_c$ & $0.6325$ mm  \\
-			Hardening law & $\sigma_y$ & $320+688 \, \bar{\varepsilon}_p$ MPa \\
-			\hline
-		\end{tabular}
-	\caption{Material properties for the FNB}
-	\label{tab:material_properties}
-\end{table}
+%\textbf{Flat notched bar}
 
-It is clear from Figure 5.19 that the results align well. Again it can be observed that there are slightly quicker increases in the damage and equivalent plastic strain for the OpenFOAM simulation (Figure 5.20). It is worth noting that Abaqus struggles to converge in the rapid crack propagation stage of this simulation, with it requiring very small displacement increments until it eventually crashes after a total displacement of $~0.463\ mm$. By contrast, no such issues were encountered with the OpenFOAM simulation.
+%Simulations are also performed on the flat notched bar case. Displacement increments of $0.001143\ mm$ are applied by default in this case until the rapid loss of load-carrying capacity is observed.
+%For the Abaqus case, the option was given for the simulation to use displacement increments as small as $0.00001143\ mm$, via the adaptive time stepping scheme available in this software.
+
+
+%It is clear from Figure 5.19 that the results align well.
+Again, it can be observed that there are slightly quicker increases in the damage and equivalent plastic strain for the OpenFOAM simulation (Figure 5.20). It is worth noting that Abaqus struggles to converge in the rapid crack propagation stage of this simulation, with it requiring very small displacement increments until it eventually crashes after a total displacement of $~0.463\ mm$. By contrast, no such issues were encountered with the OpenFOAM simulation.
 
 Further tests were conducted for different values of $S_0$ (Figure 5.21). As the value of $S_0$ is increased, the rapid crack propagation occurs later in the deformation process. It is noticeable that the discrepancies between OpenFOAM and Abaqus simulations are larger the later in the deformation process that fracture occurs.
 
 \begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.9\textwidth]{./Figures/LemaitreCompare/borden/bordenDispForce.png}
-\caption{Force vs. displacement}
-\label{fig:notchedRoundBAr}
-\end{center}
-\end{figure}
-
-\begin{figure}[t!]
 	\centering
-		\subfigure[Displacement vs. non-local Damage] {\label{airbus}\includegraphics[width=0.6\textwidth]{./Figures/LemaitreCompare/borden/disp_damageNonLocal.png}}
+		\subfigure[Displacement vs. non-local Damage] {\label{airbus}\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_damageNonLocal.png}}
 	
-		\subfigure[Displacement vs. equivalent plastic strain] {\label{boeing} \includegraphics[width=0.6\textwidth]{./Figures/LemaitreCompare/borden/disp_EpsPEq.png}}
+		\subfigure[Displacement vs. equivalent plastic strain] {\label{boeing} \includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_EpsPEq.png}}
 		
 		\caption{Abaqus and OpenFOAM implementations comparison}
 	\label{label_for_entire_figure}
@@ -2755,38 +2836,50 @@ Further tests were conducted for different values of $S_0$ (Figure 5.21). As the
 
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.9\textwidth]{./Figures/LemaitreCompare/borden/lemaitreBordenCompare.png}
+	\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/lemaitreBordenCompare.png}
 \caption{Force vs. displacement for different values of $S_0$}
 \label{fig:notchedRoundBAr}
 \end{center}
 \end{figure}
 \FloatBarrier
 
-\subsubsection{GTN model}
+
+
+
+\subsection{GTN Model}
 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{llll} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $69$ GPa \\
-			Poisson's ratio & $v$ & $0.3$   \\
-			q1 & $q1$ & $1.5$  \\
-		    q2 & $q2$ & $1$  \\
-		    q3 & $q3$ & $2.25$  \\
-		    Initial porosity & $f_0$ & $0.002$  \\
-		    Mean & $\varepsilon_n$ & $0.15$  \\
-		    Standard deviation & $S_n$ & $0.08$  \\
-		    Volume fraction & $f_N$ & $0.2$  \\
-			Hardening law & $\sigma_y$ & $589({0.0001+\bar{\varepsilon}}^p)^{0.216}$ MPa  \\
-			\hline
+		\begin{tabular}{lllll} \hline
+		    Property & Symbol & Value & Units  \\ \hline 
+		    Young's modulus & $E$ & $69$ & GPa \\
+		    Poisson's ratio & $v$ & $0.3$   & - \\
+		    q1 & $q_1$ & $1.5$  & -\\
+		    q2 & $q_2$ & $1$  & -\\
+		    q3 & $q_3$ & $2.25$  & -\\
+		    Initial porosity & $f_0$ & $0.002$  &  -\\
+		    Mean & $\varepsilon_n$ & $0.15$  &  -\\
+		    Standard deviation & $S_n$ & $0.08$  &  -\\
+		    Volume fraction & $f_N$ & $0.2$  & -\\
+		    Hardening law & $\sigma_y$ & $589({10^{-4}+\bar{\varepsilon}}_p)^{0.216}$ & MPa  \\
+		\hline
 		\end{tabular}
-	\caption{Material properties for the NRB}
-	\label{tab:material_properties}
+	\caption{GTN material parameters for the notched round bar case}
+	\label{table:NRB_material_properties_GTN}
 \end{table}
 
-In this section, simulations are conducted on the implemented GTN model in OpenFOAM as well as on Abaqus using the inbuilt GTN model. A displacement of $0.5\ mm$ is applied. Increments of displacement of $0.001\ mm$ are applied by default. The Abaqus simulation is given the option to use increments as small as $0.00001\ mm$ to aid with convergence. 
+%In this section, simulations are conducted on the implemented GTN model in OpenFOAM as well as on Abaqus using the inbuilt GTN model. A displacement of $0.5\ mm$ is applied. Increments of displacement of $0.001\ mm$ are applied by default. The Abaqus simulation is given the option to use increments as small as $0.00001\ mm$ to aid with convergence. 
 
-In Figure 5.22, it can be seen that the results align reasonably well. As with the simulations conducted with the Lemaitre model, quicker localisation can be observed. A feature of this test case is the sharp crack propagation (Figure 5.23). The Abaqus simulation has convergence issues and eventually crashes at a displacement of $~0.371\ mm$. No such convergence issues were encountered with OpenFOAM. The superior convergence abilities of the OpenFOAM simulations are likely due to the fact that is uses the segregated-solution procedure (Section 2.7.3). By contrast, the Abaqus simulations require the calculation of the tangent stiffness matrix, which is derived during the finite element solution process. For elasto-plastic damage models, plastic deformation influences the onset and progression of damage, and vice versa. This interaction can result in a significant coupling in the tangent stiffness matrix, manifesting as non-trivial off-diagonal terms \cite{bathe_finite_1996}. These terms can introduce convergence difficulties.
+In Figure 5.22, it can be seen that the results align well.
+As with the simulations conducted with the Lemaitre model, quicker localisation can be observed.
+A feature of this test case is the sharp crack propagation (Figure 5.23).
+The Abaqus simulation has convergence issues and eventually crashes at a displacement of approximately $0.371$.
+No such convergence issues were encountered with OpenFOAM.
+The superior convergence abilities of the OpenFOAM simulations are likely because of the segregated solution procedure.
+By contrast, the Abaqus simulations require the calculation of the tangent stiffness matrix.
+For elastoplastic damage models, plastic deformation influences the onset and progression of damage and vice versa.
+This interaction can result in a significant coupling in the tangent stiffness matrix, manifesting as non-trivial off-diagonal terms \cite{bathe_finite_1996}.
+These terms can introduce convergence difficulties.
 
 \begin{figure}[htb]
 \begin{center}
@@ -2807,7 +2900,9 @@ In Figure 5.22, it can be seen that the results align reasonably well. As with t
 \end{figure}
 \FloatBarrier
 
-\subsubsection{Phase field fracture}
+\subsubsection{Phase Feld Model}
+
+In this section, OpenFOAM simulations are conducted for the flat notched bar case in \citet{borden_phase-field_2016}. The material properties are given in Table 5.10. Displacement increments of $0.001143\ mm$ are used until fracture has occurred. The results obtained are compared with those from \citet{borden_phase-field_2016} and \citet{eldahshan_phase_2021}. 
 
 \begin{table}[htb]
 	\centering
@@ -2821,11 +2916,10 @@ In Figure 5.22, it can be seen that the results align reasonably well. As with t
 			Hardening law & $\sigma_y$ & $320+688\, {\bar{\varepsilon}}_p$ MPa  \\
 			\hline
 		\end{tabular}
-	\caption{Material properties for phase field fracture FNB}
-	\label{tab:material_properties}
+	\caption{Phase field material parameters for the notched flat notched bar case}
+	\label{table:FNB_material_properties_phaseField}
 \end{table}
 
-In this section, OpenFOAM simulations are conducted for the flat notched bar case in \citet{borden_phase-field_2016}. The material properties are given in Table 5.10. Displacement increments of $0.001143\ mm$ are used until fracture has occurred. The results obtained are compared with those from \citet{borden_phase-field_2016} and \citet{eldahshan_phase_2021}. 
 
 It can be seen that the results line up well, verifying the implementation of the model. It is worth noting that the normalised stress reported by \citet{borden_phase-field_2016} prior to the rapid crack propagation is slightly lower than that obtained both here and by \citet{eldahshan_phase_2021}.
 
@@ -2844,13 +2938,28 @@ It can be seen that the results line up well, verifying the implementation of th
 \section{Wire Drawing Simulations}
 %%%%%%%%%%%%%%%%%%%%%%%%
 
+In the previous section, the developed elastoplastic damage procedures were verified on benchmark cases.
+In this section, the procedures are applied to the wire drawing metal forming process.
+A schematic of the wire drawing process is given in Figure \ref{fig:wireDrawing}.
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.7\textwidth]{./Figures/SimulationAndAnalysis/modelCompare/drawingSchematic.png}
-\caption{Schematic of the wire drawing process}
-\label{fig:notchedRoundBAr}
+	\includegraphics[width=0.4\textwidth]{./Figures/SimulationAndAnalysis/modelCompare/drawingSchematic.png}
+	\caption{Schematic of the wire drawing process}
+	\label{fig:wireDrawing}
 \end{center}
 \end{figure}
+The key parameters in the wire drawing process are the die semi-angle $\alpha\ (^{\circ})$, which is the angle made by the die with the wire axis, and the reduction ratio $r\ (\%)$ is given by
+\begin{equation}
+    r = 100 \times \left(\frac{d_i^2 - d_o^2}{d_i^2}\right)
+\end{equation}
+where $D_i$ is the wire initial diameter and $D_o$ is the die of outlet diameter.
+
+ % (Figure 7.3).
+%For these wire-drawing simulations, an Eulerian-inspired Lagrangian method is employed \cite{cardiff_eulerian-inspired_2017}. In this approach, as the wire is being pulled through the die, cells are added to the wire at the inlet (or upstream) boundary and cells are deleted from the mesh at the outlet (or downstream) boundary (Figure 7.2). The simulation is
+%carried out until consistent values are reached along the wire for its properties after exiting the outlet patch. The wire is continuously being pulled in the axial direction by a fixed increment of displacement at each time step. More details on this procedure can be seen in \citet{cardiff_eulerian-inspired_2017}. The contact boundary is handled using the method developed in \citet{cardiff_development_2012,cardiff_lagrangian_2017}.
+
+In the current cases, an initial contact is applied so that at the first step, the simulation is as shown in Figure 7.3. This can lead to localisations of plastic strain in the region of the wire in contact with the die. As the simulation moves forward a quasi steady-state solution is obtained. 
+
 
 \begin{figure}[htb]
 \begin{center}
@@ -2860,17 +2969,6 @@ It can be seen that the results line up well, verifying the implementation of th
 \end{center}
 \end{figure}
 
-
-
-A schematic of the wire drawing process is given in Figure 7.1. A wire of initial diameter $D_i$ is pulled through a die of outlet diameter $D_o$. The reduction ratio $r\ (\%)$ is given by
-\begin{equation}
-    r=\left(\frac{d_i^2-d_o^2}{d_i^2}\right)\times100
-\end{equation}
-The die semi-angle $\alpha\ (^{\circ})$ is the angle made by the die with the horizontal (Figure 7.3).
-For these wire-drawing simulations, an Eulerian-inspired Lagrangian method is employed \cite{cardiff_eulerian-inspired_2017}. In this approach, as the wire is being pulled through the die, cells are added to the wire at the inlet (or upstream) boundary and cells are deleted from the mesh at the outlet (or downstream) boundary (Figure 7.2). The simulation is
-carried out until consistent values are reached along the wire for its properties after exiting the outlet patch. The wire is continuously being pulled in the axial direction by a fixed increment of displacement at each time step. More details on this procedure can be seen in \citet{cardiff_eulerian-inspired_2017}. The contact boundary is handled using the method developed in \citet{cardiff_development_2012,cardiff_lagrangian_2017}.
-
-For these wire drawing cases, an initial contact is applied so that at the first step, the simulation is as shown in Figure 7.3. This can lead to localisations of plastic strain in the region of the wire in contact with the die. As the simulation moves forward a quasi steady-state solution is obtained. 
 
 
 \begin{figure}[t!]
