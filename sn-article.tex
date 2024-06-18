@@ -2726,21 +2726,21 @@ The elastoplastic material parameters for the notched round bar are given in Tab
 
 \subsubsection{Reaction Forces}
 
-The predicted reaction forces at the loading boundaries (Figures \ref{fig:plastic_forces}) align closely between all approaches.
+The predicted reaction forces at the loading boundaries (Figures \ref{fig:plastic_forces}) align closely between all approaches, where the forces and displacement for half the domain are shown.
 It is worth noting that the reaction forces for both the \citet{clancy_improving_2019} implementation and the implementation in this work (which both use the logarithmic strain) are slightly less than the \citet{cardiff_lagrangian_2017}  and Abaqus predictions in the latter stages of the deformation.
 These differences have been found to remain as the mesh spacing and time step are reduced, ruling out discretisation error as the cause.
 Although the reason for these subtle differences is unclear, the lack of mathematical equivalence between the logarithmic and Green/Jaumann strain approaches may be the cause.
-Similarly, the use of the Jaumann objective rate in Abaqus \cite{soyarslan_finite_2010}, may also contribute to the subtle differences.
+Similarly, the use of the Jaumann objective rate in Abaqus \cite{soyarslan_finite_2010} may also contribute to the subtle differences.
 %in contrast to the logarithmic and Green strain approaches used in OpenFOAM.
 \begin{figure}[htbp]
 	\centering
 		\subfigure[Notched round bar]
 		{
-			\label{airbus}\includegraphics[height=0.45\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/forceDispAxi}
+			\label{airbus}\includegraphics[height=0.45\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/forceDispAxi2}
 		}
 		\subfigure[Flat notched bar]
 		{
-			\label{airbus}\includegraphics[height=0.45\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/forceDispFlat}
+			\label{airbus}\includegraphics[height=0.44\textwidth]{./Figures/finiteVolumeImplementation/inhomogenousDeformation/forceDispFlat2}
 		}
 		\caption{Reaction forces at the upper loading boundary for the notched round bar and flat notched bar cases compared with predictions from the methods of \citet{cardiff_lagrangian_2017}, \citet{clancy_improving_2019} and finite element software Abaqus}
 	\label{fig:plastic_forces}
@@ -2765,12 +2765,12 @@ Once again, the cause of the subtle differences in the latter stages is unclear 
 	\centering
 		\subfigure[Notched round bar]
 		{
-			\includegraphics[width=0.45\textwidth]{./Figures/plasticityCompare/axiCompare/disp_EpsPEq.png}
+			\includegraphics[width=0.45\textwidth]{./Figures/plasticityCompare/axiCompare/disp_EpsPEq3}
 			\label{fig:eps_round_bar}
 		}
 		\subfigure[Flat notched bar] 
 		{
-			\includegraphics[width=0.45\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_EpsPEq.png}
+			\includegraphics[width=0.45\textwidth]{./Figures/plasticityCompare/bordenCompare/disp_EpsPEq3}
 			\label{fig:eps_flat_bar}
 		}
 	\caption{Equivalent plastic strain at the specimen centres for the notched round bar and flat notched bar cases}
@@ -2898,11 +2898,11 @@ This interaction can result in a significant coupling in the tangent stiffness m
 	\centering
 		\subfigure[Notched round bar]
 		{
-			\includegraphics[height=0.35\textwidth]{./Figures/LemaitreCompare/axiCompare/1.1LemaitreCompare.png}
+			\includegraphics[height=0.35\textwidth]{./Figures/LemaitreCompare/axiCompare/1.1LemaitreCompare3}
 		}
 		\subfigure[Flat notched bar]
 		{
-			\includegraphics[height=0.35\textwidth]{./Figures/LemaitreCompare/borden/bordenDispForce.png}
+			\includegraphics[height=0.35\textwidth]{./Figures/LemaitreCompare/borden/bordenDispForce2}
 		}
 		\caption{Reaction force predictions using the Lemaitre damage model}
 	\label{fig:lemaitre_forces}
@@ -2916,25 +2916,25 @@ This effect can also be observed when viewing the reaction forces (Figure \ref{f
 The reason for this is unclear but could be related to the differences in plasticity model formulation, as noted in previous sections.
 \begin{figure}[htbp]
 	\centering
-		\subfigure[Non-local damage vs. displacement (mm)]
+		\subfigure[Non-local damage vs displacement]
 		{
-			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_damageNonLocal.png}
+			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_damageNonLocal3}
 		}
-		\subfigure[Equivalent plastic strain vs. displacement]
+		\subfigure[Equivalent plastic strain vs displacement]
 		{
-			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_EpsPEq.png}
+			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_EpsPEq3}
 		}
 	\caption{Damage and plastic strain predictions for the notched round bar case using the Lemaitre model}
 	\label{fig:lemaitre_point_values_axi}
 \end{figure}
 \begin{figure}[htb]
 	\centering
-		\subfigure[Non-local damage vs. displacement (mm)]
+		\subfigure[Non-local damage vs displacement]
 		{
 			%\label{airbus}
 			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_damageNonLocal.png}
 		}
-		\subfigure[Equivalent plastic strain vs. displacement]
+		\subfigure[Equivalent plastic strain vs displacement]
 		{
 			%\label{boeing}
 			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_EpsPEq.png}
@@ -2989,8 +2989,7 @@ The OpenFOAM and Abaqus simulations are seen to be in agreement up to the point 
 \begin{figure}[htb]
 \begin{center}
 	\includegraphics[width=0.5\textwidth]{./Figures/LemaitreCompare/borden/lemaitreBordenCompare.png}
-\caption{Force vs. displacement for different values of the Lemaitre parameter $S_0$ on the flat notched bar case}
-%\label{fig:notchedRoundBAr}
+\caption{Force vs. displacement for different values of the Lemaitre parameter $S_0$ on the flat notched bar case. The forces and displacements are shown for the half model.}
 \end{center}
 \end{figure}
 
@@ -3374,7 +3373,7 @@ Consistent with the Lemaitre cases, the Abaqus simulation has convergence issues
 %As noted above, the segregated solution procedure likely contributes to the superior convergence abilities of the OpenFOAM simulations.
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.7\textwidth]{./Figures/GTNCompare/forceDispGTN.jpg}
+	\includegraphics[width=0.6\textwidth]{./Figures/GTNCompare/forceDispGTN.jpg}
 	\caption{Predicted force vs displacement for the notched round bar case using the GTN model, compared with predictions from Abaqus.}
 	\label{fig:axi_GTN_forceDisp}
 \end{center}
