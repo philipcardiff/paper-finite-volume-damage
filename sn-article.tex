@@ -226,7 +226,7 @@ The article ends with a summary of the main conclusions.
 
 This section outlines the Lagrangian large strain, finite volume methodology, where details of the constitutive laws are left to Secton \ref{sec:constitutive_laws}.
 
-\subsection{Linear momentum conservation}
+\subsection{Linear Momentum Conservation}
 
 The dynamic, Lagrangian, strong integral form of linear momentum conservation for a body $\Omega$, bounded by a surface $\Gamma$ with outwards pointing normal $\textbf{n}$, can be expressed in \emph{total} Lagrangian form as
 \begin{equation} \label{eqn:totalLagFormulation}
@@ -429,8 +429,7 @@ More recent segment-to-segment finite volume contact procedures could also be us
 
 
 
-\subsubsection{Rhie-Chow Stabilisation}
-
+\subsubsection{Rhie-Chow Stabilisation} \label{sec:RhieChowStab}
 The difference in the computational stencil for the first and third terms on the right-hand side in Equation \ref{eqn:MomentumImplicitExplicit} introduces third-order numerical diffusion to the discretisation, which quells spurious zero-energy checkerboarding solution oscillations.
 First introduced by Rhie and Chow \cite{rhie_numerical_1983} for cell-centred finite volume methods, \citet{demirdzic_numerical_1995} extended this approach for solid mechanics.
 % based on the earlier approach of Rhie and Chow \citet{demirdzic_numerical_1995}.
@@ -468,7 +467,7 @@ Two mitigation strategies are proposed here to produce a modified Rhie-Chow stab
 In the first approach, the smoothing effect is reduced globally, lessening the smearing of damage fields; however, this approach's disadvantage is that solution convergence is slowed as the stabilisation term is reduced in magnitude everywhere.
 In addition, numerical oscillations are more likely to appear, particularly in regions undergoing purely elastic deformation where no dissipation mechanisms exist.
 In the second approach, a damage variable $0 < D \leq 1$ (to be introduced in Section \ref{sec:constitutive_laws}) reduces the smoothing effect only in regions of damage.
-The effect of these proposed modifications is examined in Section \ref{sec:test_cases}.
+The effect of these proposed modifications is examined in Section \ref{sec:RhieChowResults}.
 Although the purpose of the proposed modifications is to reduce the amount of stabilisation, $\mathcal{R}$ is not limited to be less than unity and hence can be used to increase the amount of stabilisation if desired.
 
 %\begin{equation}
@@ -634,7 +633,7 @@ Nonetheless, there is no limitation on the decomposition of the cells in the die
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Constitutive damage laws} \label{sec:constitutive_laws}
+\section{Constitutive Damage Laws} \label{sec:constitutive_laws}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %- maths details of the three damage laws
@@ -1542,7 +1541,7 @@ where $S$ can be a function of $\eta$ and $\xi$ as described above.
 	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
 \end{equation}
 
-(vii) Update the local damage (use the modified form for $Y$ if the crack $h > 0$)
+(vii) Update the local damage (use the modified form for $Y$ if $h > 0$)
 %\ref{eq:triaxCutoff} and \ref{eq:damageLimit}
 \begin{equation} % note: flip sign from Andrew's thesis, as Andrew assume p = hyd(sigma), whereas we assume p = -hyd(sigma)
 	D^{[m+1]} =
@@ -2102,11 +2101,11 @@ Once again, the overall procedure is implicit in time.
 	- \Delta {\varepsilon}^{[m+1]}_\text{dev} \, \bb{n}\nonumber
 \end{equation}
 \begin{equation}
-	\hat{p} = p_{\text {trial }} + \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}}
+	\hat{p} = \left(\sfrac{1}{J^{[m+1]}} \right) \left(p_{\text {trial }} + \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}} \right)
 \end{equation}
 \begin{equation}
 	\boldsymbol{s}^{[m+1]} =
-	\frac{1}{J}
+	\left(\sfrac{1}{J^{[m+1]}}\right)
 	\left[
 %	 	\left(
 %			p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}}
@@ -2178,7 +2177,7 @@ Once again, the overall procedure is implicit in time.
 
 
 
-\subsection{Phase field fracture model}
+\subsection{Phase Field Fracture Model}
 
 \subsubsection{Model Formulation}
 In recent years, phase field approaches have received much attention for the prediction of fracture and failure \cite{borden_phase-field_2012, miehe_phase_2010, ambati_phase-field_2015, borden_phase-field_2016, miehe_phase_2016, dittmann_variational_2018, samaniego_phase-field_2021}, showing an ability to predict complex crack patterns, including branching and merging in both two and three dimensions \cite{borden_phase-field_2012, miehe_phase_2010}.
@@ -2469,13 +2468,13 @@ The algorithm for the phase field stress calculation procedure is given in Algor
 %\nonumber
 %\end{equation}
 \begin{equation}
-	\hat{p} = -\frac{\kappa}{J^{[m+1]}} \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+	\hat{p} = -\left(\sfrac{\kappa}{J^{[m+1]}} \right)\; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
 \end{equation}
 \begin{equation}
 %	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \bb{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
 	\boldsymbol{s}^{[m+1]}
 	=
-	\left[1 - \left(d^{[m+1]}_{[i]}\right)^2 \right] (\sfrac{1}{J}) \, 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+	\left[1 - \left(d^{[m+1]}_{[i]}\right)^2 \right] (\sfrac{1}{J^{[m+1]}}) \, 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
 \end{equation}
 \begin{equation}
 	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta \bar{\varepsilon}_p \nonumber
@@ -2547,11 +2546,12 @@ This section assesses the performance of the developed finite volume procedures 
 In both test cases, a region of localised plastic strain develops at the centre of the specimen, but the levels of triaxiality experienced differ.
 The cases are presented simultaneously rather than sequentially to allow easier comparison of the material models.
 
-Unless stated otherwise, a global momentum Rhie-Chow scale factor $\mathcal{R} = 0.01$ is used in all of the following finite volume simulations, and the pressure Rhie-Chow scale factor was $\mathcal{R}_p = 10^3$.
+%The effect of the Rhie-Chow scale factor $\mathcal{R} is studied in Section \ref{sec:RhieChow}
+%A global momentum Rhie-Chow scale factor $\mathcal{R} = 0.01$ was used unless stated otherwise, and the pressure Rhie-Chow scale factor was $\mathcal{R}_p = 10^3$.
 
-\hl{Update:} All simulations were run in parallel on eight CPU cores (Intel Xeon 6152).
+%\hl{Update:} All simulations were run in parallel on eight CPU cores (Intel Xeon 6152).
 
-Comparisons are made with predictions from finite element software Abaqus and results from the literature.
+Comparisons are made with predictions from previously developed procedures, finite element software Abaqus and results from the literature.
 In the Abaqus models, linear interpolation functions are used (Abaqus element code \texttt{C3D8T} for 3-D and \texttt{CAX4RT} for axisymmetry).
 For reference, single-cell verifications of the proposed material models are provided in Appendix \ref{app:one_cell}, providing confidence that the constitutive laws are implemented as intended.
 
@@ -2606,9 +2606,11 @@ A 2-D axisymmetric model is created, including a horizontal symmetry plane, wher
 
 
 The 3-D flat notched tensile specimen (Figure \ref{fig:flat_bar_geom}) is another common test case for assessing damage models \citep{borden_phase-field_2016, eldahshan_phase_2021}.
-The 3-D geometry consists of $152.4 \times 25.4 \times 2.37$ mm plate with 4.06 mm diameter side notches.
+The 3-D geometry comprises a $152.4 \times 25.4 \times 2.37$ mm plate with 4.06 mm diameter side notches.
 The solution domain comprises one-eighth of the specimen by exploiting three symmetry planes.
 A graded structured hexahedral mesh is employed with 10,000 hexahedral cells (Figure \ref{fig:flat_bar_mesh}).
+
+The mesh spacing and time-step size have been chosen so that spatial and temporal discretisation are small for all cases.
 
 %\begin{figure}[htb] \label{fig:flat_bar_geom}
 %\begin{center}
@@ -2647,6 +2649,7 @@ A graded structured hexahedral mesh is employed with 10,000 hexahedral cells (Fi
 For both cases, an axial displacement of $1.0$ mm is quasi-statically applied to the upper boundary, resulting in a total elongation of $2$ mm applied to the entire sample when accounting for the symmetry planes (Figures \ref{fig:notched_bar_geom_mesh} and \ref{fig:flat_bar_geom_mesh}).
 %For the elastoplastic cases without damage, a displacement increment size of $0.01$ mm is used, whereas a smaller increment size of $0.001$ mm is used for the cases with damage.
 The loading is applied over 1000 equal loading steps, resulting in a time step size of 1 ms.
+A global Rhie-Chow stabilisation factor of $\mathcal{R} = 0.01$ is used for all cases unless stated otherwise; the effect of this term is examined in Section \ref{sec:RhieChowResults}.
 % For the elastoplastic cases without damage, a displacement increment size of $0.01$ mm is used, whereas a smaller increment size of $0.001$ mm is used for the cases with damage.
 %A displacement of $0.8\ mm$ is applied to the top boundary of the NRB specimen, with 800 time steps used in these simulations corresponding to displacement increments of $0.001\ mm$.
 
@@ -2657,11 +2660,11 @@ The loading is applied over 1000 equal loading steps, resulting in a time step s
 %In the elastoplastic cases, displacement increments of $0.01143$ m are applied, and in the damage cases, displacement increments of $0.001143$ m are applied.
 
 % by default in this case until the rapid loss of load-carrying capacity is observed.
-An adaptive time-stepping procedure was employed for the Abaqus finite element cases, with a maximum time increment of $1$ ms and a minimum of \hl{XXX} ms.
+For the Abaqus finite element cases, an adaptive time-stepping procedure was employed, with a maximum time increment size of $1$ ms and a minimum of $0.001$ ms.
 % increment of $0.01143$ mm.
 %From the result data, it seems that abaqus was run with a fix step of 10 ms for no damage and 1 ms for damage. We could use this in OF for easy comparison. running and check with Andrew.
 
-\hl{we can easily add a plot of the number of outer iterations}
+%\hl{we can easily add a plot of the number of outer iterations}
 
 
 
@@ -2674,10 +2677,10 @@ Before verifying the damage and fracture models, the implementation of the descr
 	\item The default approach in the finite element software Abaqus, which is based on the Jaumann stress rate.
 \end{enumerate}
 
-Verification consists of examining the reaction forces at the loading boundary, and the equivalent plastic strain $\bar{\varepsilon}_p$, equivalent stress $\sigma_v$, hydrostatic pressure $p$ and axial stress $\sigma_{yy}$ (stress in the loading direction) at the centre of the notched round bar and at the coordinate $(7.02 0 0)$ mm for the flat notched bar, where the origin is the geometric centre.
+%Verification consists of examining the reaction forces at the loading boundary and the equivalent plastic strain $\bar{\varepsilon}_p$, equivalent stress $\sigma_v$, hydrostatic pressure $p$ and axial stress $\sigma_{yy}$ (stress in the loading direction) at the centre of the notched round bar and at the coordinate $(7.02\ 0\ 0)$ mm for the flat notched bar, where the origin is the geometric centre and the first coordinate is in the direction of the notch.
+Verification consists of examining the reaction forces at the loading boundary and the equivalent plastic strain $\bar{\varepsilon}_p$ at the centre of the notched round bar and the coordinate $(7.02\ 0\ 0)$ mm for the flat notched bar, where the origin is the geometric centre and the first coordinate is in the direction of the notch.
 These locations have been chosen as the damage is greatest here in the later test cases.
 
-The mesh spacing and time-step size have been chosen so that spatial and temporal discretisation are small for all cases.
 %  discrepancy is unrelated to the time-step or mesh size discretisation error.
 %Throughout this chapter, relatively fine meshes and small time steps are used to ensure that this form of error is negligible.
 
@@ -2724,8 +2727,11 @@ The elastoplastic material parameters for the notched round bar are given in Tab
 \subsubsection{Reaction Forces}
 
 The predicted reaction forces at the loading boundaries (Figures \ref{fig:plastic_forces}) align closely between all approaches.
-It is worth noting that the reaction forces for both the \citet{clancy_improving_2019} implementation and the implementation in this work (which both use the logarithmic strain) are slightly less than the \citet{cardiff_lagrangian_2017}  and the Abaqus predictions in the latter stages of the deformation.
+It is worth noting that the reaction forces for both the \citet{clancy_improving_2019} implementation and the implementation in this work (which both use the logarithmic strain) are slightly less than the \citet{cardiff_lagrangian_2017}  and Abaqus predictions in the latter stages of the deformation.
+These differences have been found to remain as the mesh spacing and time step are reduced, ruling out discretisation error as the cause.
 Although the reason for these subtle differences is unclear, the lack of mathematical equivalence between the logarithmic and Green/Jaumann strain approaches may be the cause.
+Similarly, the use of the Jaumann objective rate in Abaqus \cite{soyarslan_finite_2010}, may also contribute to the subtle differences.
+%in contrast to the logarithmic and Green strain approaches used in OpenFOAM.
 \begin{figure}[htbp]
 	\centering
 		\subfigure[Notched round bar]
@@ -2743,14 +2749,12 @@ Although the reason for these subtle differences is unclear, the lack of mathema
 
 
 
-\subsubsection{Stresses and Strains}
+\subsubsection{Plastic Strains}
 
 %The results at the centroid of a chosen cell (marked in pink in Figures 5.9 and 5.10) are here compared for the implementation of this work, the \citet{cardiff_lagrangian_2017} implementation and the results from Abaqus.
 The equivalent plastic strain predictions at the points of interest (see above) agree for all approaches (Figure \ref{fig:eqPlasticStrainPlasticity}), with the values being marginally greater in the later stages for the finite volume (OpenFOAM) simulations compared with the Abaqus predictions.
-The value is seen to increase smoothly In the notched round bar case (Figure \ref{fig:eps_round_bar}), whereas there is an initial elastic region followed by a stepper slope in the flat notched bar case (Figure \ref{fig:eps_flat_bar}).
-These differences have been found to remain as the mesh spacing and time step are reduced, ruling out discretisation error as the cause.
-%As can be seen in Appendix F,
-A possible reason for the difference is the use of the Jaumann objective rate in Abaqus \cite{soyarslan_finite_2010}, in contrast to the logarithmic and Green strain approaches used in OpenFOAM.
+The equivalent plastic strain value is seen to increase smoothly in the notched round bar case (Figure \ref{fig:eps_round_bar}), whereas there is an initial elastic region followed by a stepper slope in the flat notched bar case (Figure \ref{fig:eps_flat_bar}).
+Once again, the cause of the subtle differences in the latter stages is unclear but may be attributed to the mathematical differences between the logarithmic, Green and Jaumann strain approaches.
 %It is unclear exactly why this difference (or other small differences which will be encountered) later in the chapter exists, though it could be related to the fact that in Abaqus the Jaumann rate is used to update the stress tensor \cite{soyarslan_finite_2010}, unlike in OpenFOAM.
 \begin{figure}[htbp]
 %\begin{center}
@@ -2776,13 +2780,13 @@ A possible reason for the difference is the use of the Jaumann objective rate in
 
 %\subsubsection{Notched round bar}
 
-Similarly, the predictions for equivalent stress $\sigma_v$, hydrostatic pressure $p$, and axial stress (stress in the loading direction) $\sigma_{yy}$ are shown to agree for the different approaches (Figure \ref{fig:stressStrainCentre}).
-Of particular note is the pressure distribution, which is smooth and does not show numerical oscillations, providing confidence in the proposed pressure smoothing approach (Section \ref{sec:pressureApproach}).
-%For the NRB, the cells' results at the centre of the specimen are compared (Figure 5.9).
-%This cell is chosen because it is where fracture initiates for both the Lemaitre and GTN model simulations that will be encountered later in this chapter. 
-%For the FNB, results are shown for the cell that is $6.912\ mm$ to the right of the centre of this specimen.
-%This cell is chosen because it is where fracture initiates for the Lemaitre model (Figure 5.10).
-\hl{Images of stress distributions may be better here} \hl{point values are already shown above}
+%Similarly, the predictions for equivalent stress $\sigma_v$, hydrostatic pressure $p$, and axial stress (stress in the loading direction) $\sigma_{yy}$ are shown to agree for the different approaches (Figure \ref{fig:stressStrainCentre}).
+%Of particular note is the pressure distribution, which is smooth and does not show numerical oscillations, providing confidence in the proposed pressure smoothing approach (Section \ref{sec:pressureApproach}).
+%%For the NRB, the cells' results at the centre of the specimen are compared (Figure 5.9).
+%%This cell is chosen because it is where fracture initiates for both the Lemaitre and GTN model simulations that will be encountered later in this chapter. 
+%%For the FNB, results are shown for the cell that is $6.912\ mm$ to the right of the centre of this specimen.
+%%This cell is chosen because it is where fracture initiates for the Lemaitre model (Figure 5.10).
+%\hl{Images of stress distributions may be better here} \hl{point values are already shown above}
 %\begin{figure}[htbp]
 %	\centering
 %		\subfigure[Notched round bar: Equivalent stress $\sigma_v$ vs displacement]
@@ -2834,19 +2838,20 @@ Of particular note is the pressure distribution, which is smooth and does not sh
 %		\caption{Comparison of stress state}
 %	\label{label_for_entire_figure}
 %\end{figure}
-\FloatBarrier
 
 
 
-\subsection{Lemaitre model}
-After verifying the elastoplasticity procedure, the notched round and flat bar test cases are examined using the proposed damage models.
-Comparisons are given against results available in the literature and those generated using Abaqus.
+
+\subsection{Lemaitre Model}
+We now move on to verifying the damage procedures, starting with the Lemaitre model.
+%As the elastoplasticity procedure has been verified, the notched round and flat bar test cases are examined using the proposed damage models.
+Comparisons are given against results from the literature and those generated using Abaqus.
 
 %A displacement of $0.8\ mm$ is applied to the top boundary of the NRB specimen, with 800 time steps used in these simulations corresponding to displacement increments of $0.001\ mm$.
 
 \subsubsection{Material Parameters}
 
-The Lemaitre material parameters for the notched round bar, taken from \citet{cesar_de_sa_damage_2006}, are given in Table \ref{table:NRB_material_properties_lemaitre}, while the Lemaitre material parameters for the flat notched bar case are given in Table \ref{table:FNB_material_properties_lemaitre}.
+The Lemaitre material parameters for the notched round bar case, taken from \citet{cesar_de_sa_damage_2006}, are given in Table \ref{table:NRB_material_properties_lemaitre}, while the Lemaitre material parameters for the flat notched bar case are given in Table \ref{table:FNB_material_properties_lemaitre}.
 \begin{table}[htb]
 	\centering
 		\begin{tabular}{lllll} \hline
@@ -2880,12 +2885,11 @@ The Lemaitre material parameters for the notched round bar, taken from \citet{ce
 
 
 \subsubsection{Reaction Forces}
-
-Comparing the OpenFOAM and Abaqus reaction force predictions (Figure \ref{fig:lemaitre_forces}), the OpenFOAM and Abaqus predictions can be seen to agree closely. 
+Comparing the current OpenFOAM implementation and Abaqus reaction force predictions (Figure \ref{fig:lemaitre_forces}), the OpenFOAM and Abaqus predictions can be seen to agree closely. 
 %This has been encountered earlier in the comparison of the equivalent plastic strain in section 5.3.2. The marginally faster increase of the equivalent plastic strain and damage results in a slightly quicker loss of load-carrying capacity for the specimen, as shown in Figure 5.18.
-The Abaqus simulations struggled to converge in the rapid crack propagation stage of the flat notched bar case, requiring very small time increments until it eventually crashes before reaching the end time.
+The Abaqus simulations struggled to converge in the rapid crack propagation stage of the flat notched bar case, requiring very small time increments until it eventually crashing before reaching the end time.
 %of $~0.463$ mm.
-In contrast, no such issues were encountered with the OpenFOAM simulation.
+In contrast, no such issues were encountered with the segregated, finite-volume OpenFOAM simulations.
 The reason for this difference in convergence behaviour is unclear but may stem from the different solution algorithms employed (Newton-Raphson vs Picard).
 The Newton-Raphson approach used in Abaqus requires the calculation of the tangent stiffness matrix.
 For elastoplastic damage models, plastic deformation influences the onset and progression of damage and vice versa.
@@ -2894,42 +2898,53 @@ This interaction can result in a significant coupling in the tangent stiffness m
 	\centering
 		\subfigure[Notched round bar]
 		{
-			\includegraphics[height=0.3\textwidth]{./Figures/LemaitreCompare/axiCompare/1.1LemaitreCompare.png}
+			\includegraphics[height=0.35\textwidth]{./Figures/LemaitreCompare/axiCompare/1.1LemaitreCompare.png}
 		}
-		\qquad
 		\subfigure[Flat notched bar]
 		{
-			\includegraphics[height=0.3\textwidth]{./Figures/LemaitreCompare/borden/bordenDispForce.png}
+			\includegraphics[height=0.35\textwidth]{./Figures/LemaitreCompare/borden/bordenDispForce.png}
 		}
 		\caption{Reaction force predictions using the Lemaitre damage model}
 	\label{fig:lemaitre_forces}
 \end{figure}
 
 
-
-\subsubsection{Stresses, Strains and Damage}
-
-Similiar to the forces, the local values for damage and equivalent plastic strain can be seen to closely agree between OpenFOAM and Abaqus (Figure \ref{fig:lemaitre_point_values}).
-Nonetheless, upon examining the figures closely, the OpenFOAM damage and strain are observed to increase slightly quicker than those from Abaqus.
+\subsubsection{Damage and Plastic Strains}
+Similar to the forces, the local values for damage and equivalent plastic strain can be seen to closely agree between OpenFOAM and Abaqus (Figures \ref{fig:lemaitre_point_values_axi} and \ref{fig:lemaitre_point_values_flat}).
+Nonetheless, upon examining the figures closely, the OpenFOAM damage and strain increase slightly quicker than those from Abaqus.
 This effect can also be observed when viewing the reaction forces (Figure \ref{fig:lemaitre_forces}) in the previous section.
 The reason for this is unclear but could be related to the differences in plasticity model formulation, as noted in previous sections.
 \begin{figure}[htbp]
 	\centering
-		\subfigure[Non-local damage vs.displacement (mm)]
+		\subfigure[Non-local damage vs. displacement (mm)]
 		{
-			\includegraphics[width=0.3\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_damageNonLocal.png}
-			}
+			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_damageNonLocal.png}
+		}
 		\subfigure[Equivalent plastic strain vs. displacement]
 		{
-			\includegraphics[width=0.3\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_EpsPEq.png}
+			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_EpsPEq.png}
 		}
-		\caption{Abaqus and OpenFOAM implementations comparison}
-	\label{fig:lemaitre_point_values}
+	\caption{Damage and plastic strain predictions for the notched round bar case using the Lemaitre model}
+	\label{fig:lemaitre_point_values_axi}
+\end{figure}
+\begin{figure}[htb]
+	\centering
+		\subfigure[Non-local damage vs. displacement (mm)]
+		{
+			%\label{airbus}
+			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_damageNonLocal.png}
+		}
+		\subfigure[Equivalent plastic strain vs. displacement]
+		{
+			%\label{boeing}
+			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_EpsPEq.png}
+		}
+	\caption{Damage and plastic strain predictions for the flat notched bar case using the Lemaitre model}
+	\label{fig:lemaitre_point_values_flat}
 \end{figure}
 
-Figure \ref{fig:lemaitre_damage_field} compares the predicted non-local damage distribution at a loading displacement of $1.2$ mm with the predictions provided in \citet{cesar_de_sa_damage_2006}.
-Close agreement can be observed between the distributions and values can be observed.
-
+For the notched round bar case, Figure \ref{fig:lemaitre_damage_field} compares the predicted non-local damage distribution at a loading displacement of $1.2$ mm with the predictions provided in \citet{cesar_de_sa_damage_2006}.
+Close agreement can be observed between the distributions and values.
 \begin{figure}[htbp]
 	\centering
 		\subfigure[OpenFOAM simulation]
@@ -2937,13 +2952,15 @@ Close agreement can be observed between the distributions and values can be obse
 			\includegraphics[height=0.4\textwidth]{./Figures/LemaitreCompare/nlDamageLemaitre.png}
 		}
 		\qquad
-		\subfigure[Results from \cite{cesar_de_sa_damage_2006}]
+		\subfigure[Results from \citet{cesar_de_sa_damage_2006}]
 		{
 			\includegraphics[height=0.4\textwidth]{./Figures/LemaitreCompare/updated_deSaNonLocal2}
 		}
 		\caption{Comparison of non-local damage distribution \hl{mirror foam results; use same scale}}
 	\label{fig:lemaitre_damage_field}
 \end{figure}
+
+
 
 
 %\subsubsection{Lemaitre model: Abaqus vs. OpenFOAM}
@@ -2964,25 +2981,14 @@ Close agreement can be observed between the distributions and values can be obse
 
 
 \subsubsection{Effect of the $S_0$ Parameter}
-
-Here, the simulations are repeated for different values of the material damage parameter $S_0$ to demonstrate its effect.
+To demonstrate the effect of the material damage parameter $S_0$, the flat notched bar simulations are repeated here for different values.
 As the value of $S_0$ increases, rapid crack propagation occurs later in the deformation process.
-The discrepancies between OpenFOAM and Abaqus simulations are larger the later in the deformation process that fracture occurs.
-Once again, 
-\begin{figure}[htb]
-	\centering
-		\subfigure[Displacement vs. non-local Damage] {\label{airbus}\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_damageNonLocal.png}}
-		\subfigure[Displacement vs. equivalent plastic strain] {\label{boeing} \includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_EpsPEq.png}}
-		
-		\caption{Abaqus and OpenFOAM implementations comparison}
-	%\label{label_for_entire_figure}
-\end{figure}
-\FloatBarrier
-
+The OpenFOAM and Abaqus simulations are seen to be in agreement up to the point of early termination of the Abaqus models.
+%The discrepancies between OpenFOAM and Abaqus simulations are larger the later in the deformation process that fracture occurs, although a full comparison is not possible due to the early termination of the Abaqus models.
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/lemaitreBordenCompare.png}
-\caption{Force vs. displacement for different values of $S_0$}
+	\includegraphics[width=0.5\textwidth]{./Figures/LemaitreCompare/borden/lemaitreBordenCompare.png}
+\caption{Force vs. displacement for different values of the Lemaitre parameter $S_0$ on the flat notched bar case}
 %\label{fig:notchedRoundBAr}
 \end{center}
 \end{figure}
@@ -2990,10 +2996,76 @@ Once again,
 
 
 
-\subsubsection{Rhie Chow Case setup} \label{rhieChowExplorationCases}
+\subsubsection{Effect of the Rhie Chow Stabilisation Term} \label{sec:RhieChowResults}
+This section explores the effect of the Rhie-Chow stabilisation term (Section \ref{sec:RhieChowStab}) by examining its impact on the predicted force-displacement curves for the notched round bar and flat notched bar cases.
 
-To explore the effect of the Rhie-Chow stabilisation term, various simulations are conducted for different values of the Rhie-Chow scale factor. The values of the Rhie-Chow scale factor used are $0.01,0.02,0.05,0.1,0.15$ and $0.2$. The geometry of the cases is the same as in Chapter 5. The cases looked at are as follows:
-\hl{Consider what to add here from comment text and figures}
+%, where the Rhie-Chow stabilisation term is independently changed as follows:
+%\begin{enumerate}[label=(\alph*)]
+%	\item The Rhie-Chow global scale factor $\mathcal{R}$ is varied from 0.01 to 0.2;
+%	%\item The effect of loading (time) step size
+%	\item The Rhie-Chow field is scaled as a function of the damage variable according to $\mathcal{R} (1-D)^2$.
+%\end{enumerate}
+
+To get insight into its effect, the Rhie-Chow global scale factor $\mathcal{R}$ is varied from 0.01 to 0.2 (Figure \ref{fig:vary_RC_global}).
+As the Rhie-Chow global scale factor $\mathcal{R}$ is decreased, a greater level of localisation is predicted to occur.
+In contrast, as the scale factor increases, a greater smoothing is seen in the force-displacement trace.
+As the purpose of the Rhie-Chow term is to smooth out oscillations in the solution field, it is perhaps unsurprising that it tends to quell physical localisations due to damage.
+The predictions for the notched round bar (Figure \ref{fig:vary_RC_global}(a)) are seen to be less sensitive than in the flat notched bar case (Figure \ref{fig:vary_RC_global}(b).
+This difference can be explained by the increased damage localisation in the latter stages of the flat-notched bar case.
+\begin{figure}[htbp]
+	\centering
+		\subfigure[Notched round bar]
+		{
+		\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispNonLocalLemaitreAxi.png}
+		}
+		\subfigure[Flat notched bar]
+		{
+		\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispBordenNonLocalLemaitre.png}
+		}
+	\caption{Force vs displacement predictions using the Lemaitre model where the Rhie-Chow global scale factor $\mathcal{R}$ is varied from 0.01 to 0.2.}
+	\label{fig:vary_RC_global}
+\end{figure}
+
+These results above suggest that a small value of the Rhie-Chow scale factor $\mathcal{R}$ should be used to avoid excessive smoothing in regions of localised damage.
+Nonetheless, as noted in Section \ref{sec:RhieChowStab}), the Rhie-Chow term plays an important role in quelling numerical oscillations, particularly in the elastic regions where no dissipative mechanisms exist.
+In addition, smaller values of the Rhie-Chow term scale factor have been found to slow the convergence of the outer Picard iterations.
+Consequently, as described in Section \ref{sec:RhieChowStab}), a damage-dependent Rhie-Chow scaling field is proposed here: $\mathcal{R} (1-D)^2$.
+In this case, a larger global scale factor $\mathcal{R} = 0.1$ can be used throughout the domain, which is then automatically reduced in regions where damage develops ($D > 1$).
+Many forms of scaling field could be chosen, where the form examined here has been chosen to quickly (greater than linear) reduce the Rhie-Chow stabilisation as the damage variable reduces from unity.
+
+
+The predicted force-displacement curves using the proposed spatially-varying approach are shown in Figure \ref{fig:RC_proposed}, where the predictions obtained using uniform global Rhie-Chow scale factors of $0.1$ and $0.01$ are given for comparison.
+It can be observed that the proposed strategy reduces the effect of the Rhie-Chow scale factor on localisation behaviour.
+%when employing the Rhie-Chow scale field $\mathcal{R}_{field}$ approach.
+Therefore, this scheme gains the benefits of a higher Rhie-Chow scale factor (improved convergence properties, reduction of numerical oscillations) up until crack propagation begins.
+At this point, the Rhie-Chow effects are reduced and therefore, its over-smoothing effect on the fracture behaviour is mitigated.
+%It is noticeable that the proposed strategy leads to slightly lower reaction forces.
+%This is due to the fact that by reducing the scale factor below 0.01, these residual forces that exist after the crack propagation stage are reduced.
+%These residual forces are somewhat non-physical in any case, as will be discussed in the next section.
+\begin{figure}[htb]
+	\centering
+		\subfigure[Notched round bar]
+		{
+			\includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeCharacteristics/0.005_forceDispAxi.png}
+		}
+		\subfigure[Flat notched bar]
+		{
+			\includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeCharacteristics/0.005_forceDispBorden.png}
+		}
+	\caption{The effect of the proposed spatially-varying Rhie-Chow scaling field on the predicted force-displacement curves, compared with uniform global scale factors of 0.01 and 0.1}
+	\label{fig:RC_proposed}
+\end{figure}
+
+The effect of the Rhie-Chow stabilisation term has been shown only here for the Lemaitre damage model; however, the same behaviour is seen using the GTN and phase field models.
+Similarly, this effect can even be important is purely elastoplastic cases (no damage), particularly when localised plastic regions are present, e.g. shear bands.
+%To illustrate the benefit of this proposed scheme, simulations are conducted for cases a, b and c with a time-step of $0.005\ s$. Rhie-Chow scaling fields of $\mathcal{R}_{field}(D)=(1-D)^2\ 0.1$ and $\mathcal{R}_{field}(d)=(1-d)^2\ 0.1$ are used for the Lemaitre and phase field model simulations respectively.
+
+
+
+%To explore the effect of the Rhie-Chow stabilisation term, various simulations are conducted for different values of the Rhie-Chow scale factor. The values of the Rhie-Chow scale factor used are $0.01,0.02,0.05,0.1,0.15$ and $0.2$.
+%The geometry of the cases is the same as in Chapter 5.
+%The cases looked at are as follows:
+%\hl{Consider what to add here from comment text and figures}
 
 %\begin{enumerate}[label=(\alph*)]
 %\item Flat notched bar - non-local Lemaitre
@@ -3098,26 +3170,6 @@ To explore the effect of the Rhie-Chow stabilisation term, various simulations a
 %\begin{equation}
 %g_0(\boldsymbol{p})=\frac{1}{N} \sum_{q=1}^N\left(\frac{R_q^{0.01}(\boldsymbol{p})-R_q^{\mathcal{R}}}{R_q^{0.01}}\right)
 %\end{equation}
-%
-%\begin{figure}[t!]
-%	\centering
-%		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispBordenNonLocalLemaitre.png}}
-%		\qquad
-%		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_obj_BordenNonLocalLemaitre.png}}
-%	
-%	\caption{Case a - flat notched bar w) non-local Lemaitre}
-%	\label{label_for_entire_figure}
-%\end{figure}
-%
-%\begin{figure}[t!]
-%	\centering
-%		\subfigure[Force vs. displacement] {\label{airbus}\includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_forceDispNonLocalLemaitreAxi.png}}
-%		\qquad
-%		\subfigure[\% difference vs. scale factor] {\label{boeing} \includegraphics[width=0.45\textwidth]{./Figures/RhieChowCompare/0.015_obj_nonLocalLemaitreAxi.png}}
-%	
-%	\caption{Case b - notched round bar w) non-local Lemaitre}
-%	\label{label_for_entire_figure}
-%\end{figure}
 %
 %\begin{figure}[t!]
 %	\centering
@@ -3255,10 +3307,11 @@ To explore the effect of the Rhie-Chow stabilisation term, various simulations a
 
 
 %%%%
-\subsubsection{Effect of the Effective Non-Local Damage Parameter}
+%%\subsubsection{Effect of the Effective Non-Local Damage Parameter}
 %%%%
-The benefits of this scheme can be seen in Figures \ref{axiCaseEffNL} and \ref{bordenCaseEffNL}. These figures show the results obtained with the novel formulation. For these simulations, the material parameter $D_c$ is set as $0.55$. A more physically realistic damage evolution can be observed, and rapid crack propagation is evident in the force-displacement curve. Such a rapid loss of load-carrying capacity at a certain point for tensile specimens has been observed experimentally \cite{li_ductile_2011,malcher_improved_2014}. It is worth noting that the fact that the damage is set as $0.99$ combined with the diffusive effects of the Rhie-Chow term will still lead to some nonphysical residual force-displacement behaviour of the simulations (e.g. the residual force required for further displacement in Figure \ref{bordenCaseEffNL}).
-\hl{Consider what comment figures to add here}.
+%% PhilipC: this effect is noted in the chevron crack case so we don't need to add a section on it
+%The benefits of this scheme can be seen in Figures \ref{axiCaseEffNL} and \ref{bordenCaseEffNL}. These figures show the results obtained with the novel formulation. For these simulations, the material parameter $D_c$ is set as $0.55$. A more physically realistic damage evolution can be observed, and rapid crack propagation is evident in the force-displacement curve. Such a rapid loss of load-carrying capacity at a certain point for tensile specimens has been observed experimentally \cite{li_ductile_2011,malcher_improved_2014}. It is worth noting that the fact that the damage is set as $0.99$ combined with the diffusive effects of the Rhie-Chow term will still lead to some nonphysical residual force-displacement behaviour of the simulations (e.g. the residual force required for further displacement in Figure \ref{bordenCaseEffNL}).
+%\hl{Consider what comment figures to add here}.
 
 %\begin{figure}[t!]
 %	\centering
@@ -3285,7 +3338,8 @@ The benefits of this scheme can be seen in Figures \ref{axiCaseEffNL} and \ref{b
 %%%%
 
 \subsubsection{Material Parameters}
-
+For the GTN model, the notched round bar is only examined here.
+The GTN material properties for the notched round bar case are given in Table \ref{table:NRB_material_properties_GTN}.
 \begin{table}[htb]
 	\centering
 		\begin{tabular}{lllll} \hline
@@ -3308,35 +3362,43 @@ The benefits of this scheme can be seen in Figures \ref{axiCaseEffNL} and \ref{b
 
 %In this section, simulations are conducted on the implemented GTN model in OpenFOAM as well as on Abaqus using the inbuilt GTN model. A displacement of $0.5\ mm$ is applied. Increments of displacement of $0.001\ mm$ are applied by default. The Abaqus simulation is given the option to use increments as small as $0.00001\ mm$ to aid with convergence. 
 
+%%%%
 \subsubsection{Reaction Forces}
-
-In Figure 5.22, it can be seen that the results align well.
-As with the simulations conducted with the Lemaitre model, quicker localisation can be observed in the OpenFOAM implementation.
-A feature of this test case is the sharp crack propagation (Figure 5.23).
-The Abaqus simulation has convergence issues and eventually crashes at a displacement of approximately $0.371$ mm.
-Once again, no convergence issues were encountered in the OpenFOAM simulations.
-As noted above, the superior convergence abilities of the OpenFOAM simulations are likely because of the segregated solution procedure.
-
-
-\subsubsection{Stresses, Strains and Damage}
-
+%%%%
+The predicted force-displacement curves for the GTN model are compared with predictions from Abaqus in Figure \ref{fig:axi_GTN_forceDisp}.
+The forces align well, where, as with the Lemaitre model, a slightly quicker localisation can be observed in the OpenFOAM implementation.
+A feature of this test case when using the current GTN model and parameters is the sharp crack propagation, i.e. the sudden drop off in force in Figure \ref{fig:axi_GTN_forceDisp}.
+Consistent with the Lemaitre cases, the Abaqus simulation has convergence issues and eventually crashes, while convergence issues were not encountered in the OpenFOAM simulations.
+% at approximately $0.371$ mm displacement
+%As noted above, the segregated solution procedure likely contributes to the superior convergence abilities of the OpenFOAM simulations.
 \begin{figure}[htb]
 \begin{center}
 	\includegraphics[width=0.7\textwidth]{./Figures/GTNCompare/forceDispGTN.jpg}
-\caption{Force vs. displacement}
-\label{fig:notchedRoundBAr}
+	\caption{Predicted force vs displacement for the notched round bar case using the GTN model, compared with predictions from Abaqus.}
+	\label{fig:axi_GTN_forceDisp}
 \end{center}
 \end{figure}
 
-\begin{figure}[t!]
+%%%%
+\subsubsection{Porosity and Plastic Strains}
+%%%%
+The predicted porosity and equivalent plastic strain at the neck's centre are compared with Abaqus's predictions in Figure \ref{fig:axi_GTN_pointResults}.
+Porosity and plastic strain increase smoothly up to the point at which the crack propagates, after which their values significantly increase.
+\begin{figure}[htb]
 	\centering
-		\subfigure[Porosity vs. displacement] {\label{airbus}\includegraphics[width=0.4\textwidth]{./Figures/GTNCompare/epsilonPEq_GTN.jpg}}
-		\subfigure[Equivalent plastic strain vs. displacement] {\label{boeing} \includegraphics[width=0.4\textwidth]{./Figures/GTNCompare/displacement_porosity.jpg}}
-		
-		\caption{Abaqus and OpenFOAM implementations comparison}
-	\label{label_for_entire_figure}
+		\subfigure[Porosity vs displacement]
+		{
+			\includegraphics[width=0.4\textwidth]{./Figures/GTNCompare/epsilonPEq_GTN.jpg}
+		}
+		\subfigure[Equivalent plastic strain vs displacement]
+		{
+			\includegraphics[width=0.4\textwidth]{./Figures/GTNCompare/displacement_porosity.jpg}
+		}
+		\caption{Predicted porosity and equivalent plastic strain at the centre of the notched round bar case using the GTN model, compared with predictions from Abaqus.}
+	\label{fig:axi_GTN_pointResults}
 \end{figure}
-\FloatBarrier
+
+
 
 
 \subsection{Phase Field Model}
@@ -3344,9 +3406,8 @@ As noted above, the superior convergence abilities of the OpenFOAM simulations a
 %In this section, OpenFOAM simulations are conducted for the flat notched bar case in \citet{borden_phase-field_2016}.
 
 \subsubsection{Material Parameters}
-
-The material properties are given in Table \ref{table:FNB_material_properties_phaseField}.
-
+For the phase field model, the flat notched bar is only examined here, and the predictions are compared with the results from \citet{borden_phase-field_2016} and \citet{eldahshan_phase_2021}.
+The phase field model material properties are given in Table \ref{table:FNB_material_properties_phaseField}.
 \begin{table}[htb]
 	\centering
 		\begin{tabular}{lllll} \hline
@@ -3354,7 +3415,7 @@ The material properties are given in Table \ref{table:FNB_material_properties_ph
 			Young's modulus & $E$ & $68.8$ & GPa \\
 			Poisson's ratio & $v$ & $0.33$  & - \\
 			Critical Fracture Energy & $G_c$ & $60\times10^3$ &  J/m$^2$ \\
-			Plastic Threshold & $W_o$ & $1\times10^7$ &  MPa \\
+			Plastic Threshold & $W_o$ & $10$ &  MPa \\
 			Characteristic Length & $l_c$ & $0.3226$ &  mm    \\
 			Hardening law & $\sigma_y$ & $320+688\, {\bar{\varepsilon}}_p$ &  MPa  \\
 			\hline
@@ -3365,22 +3426,24 @@ The material properties are given in Table \ref{table:FNB_material_properties_ph
 
 
 \subsubsection{Reaction Forces}
-
-The predicted reaction forces (Figure \ref{fig:phaseFieldForce}) agree closely with those from \citet{borden_phase-field_2016} and \citet{eldahshan_phase_2021}. 
+For consistency with results in the literature, the results are presented here as normalised stress vs normalised displacement, resulting in a scaled version of the force vs displacement curve.
+The normalised stress is the reaction force divided by the initial area of the narrowest cross-section, and the normalised displacement is the total displacement divided by the specimen's initial length.
+The predicted normalised stress vs normalised displacement for the phase field model of the flat notched bar is shown in Figure \ref{fig:phaseFieldForce}.
+The normalised stress trace plateaus after the initial elastic region, followed by a rapid drop corresponding to crack propagation.
+The results agree closely with those from \citet{borden_phase-field_2016} and \citet{eldahshan_phase_2021}.
 %It can be seen that the results line up well, verifying the implementation of the model.
 It is worth noting that the normalised stress reported by \citet{borden_phase-field_2016} before the rapid crack propagation is slightly lower than that obtained here and by \citet{eldahshan_phase_2021}.
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.4\textwidth]{./Figures/phaseCompare.png}
-\caption{Normalised stress vs normalised strain}
-\label{fig:phaseFieldForce}
+	\includegraphics[width=0.5\textwidth]{./Figures/phaseCompare.png}
+	\caption{Predicted normalised stress vs normalised displacement for the flat notched bar case using the phase field model, compared with predictions from \citet{borden_phase-field_2016} and \citet{eldahshan_phase_2021}.}
+	\label{fig:phaseFieldForce}
 \end{center}
 \end{figure}
 
 
-\subsubsection{Stresses, Strains and Damage}
-
-\hl{No comparisons in the thesis: check references to see what can be compared}
+%\subsubsection{Stresses, Strains and Damage}
+%\hl{No comparisons in the thesis: check references to see what can be compared}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -3673,7 +3736,7 @@ The current phase field model does not distinguish between tensile and compressi
 \end{figure}
 
 %%%%
-\subsubsection{Comparison of Damage Models Approaches}
+\subsubsection{Summary}
 %%%%
 Along with the limitations in the GTN and phase field models described in the previous section, other factors make them unsuitable for further investigation in predicting fracture in wire drawing processes.
 The phase field fracture model requires a relatively fine mesh \cite{borden_phase-field_2016}, making it computationally expensive. The GTN model requires the calibration of multiple parameters, which is not feasible given the data available for the cases that will be looked at here.
