@@ -2943,20 +2943,21 @@ The reason for this is unclear but could be related to the differences in plasti
 	\label{fig:lemaitre_point_values_flat}
 \end{figure}
 
-For the notched round bar case, Figure \ref{fig:lemaitre_damage_field} compares the predicted non-local damage distribution at a loading displacement of $1.2$ mm with the predictions provided in \citet{cesar_de_sa_damage_2006}.
+For the notched round bar case, Figure \ref{fig:lemaitre_damage_field} compares the predicted non-local damage distribution at a loading displacement of $1.2$ mm with the predictions provided in \citet{cesar_de_sa_damage_2006}, where the results are displayed on the initial mesh.
 Close agreement can be observed between the distributions and values.
 \begin{figure}[htbp]
 	\centering
-		\subfigure[OpenFOAM simulation]
-		{
-			\includegraphics[height=0.4\textwidth]{./Figures/LemaitreCompare/nlDamageLemaitre.png}
-		}
-		\qquad
-		\subfigure[Results from \citet{cesar_de_sa_damage_2006}]
-		{
-			\includegraphics[height=0.4\textwidth]{./Figures/LemaitreCompare/updated_deSaNonLocal2}
-		}
-		\caption{Comparison of non-local damage distribution \hl{mirror foam results; use same scale}}
+		\includegraphics[height=0.4\textwidth]{./Figures/LemaitreCompare/axi_lemaitre_compare}
+%		\subfigure[OpenFOAM simulation]
+%		{
+%			\includegraphics[height=0.4\textwidth]{./Figures/LemaitreCompare/nlDamageLemaitre.png}
+%		}
+%		\qquad
+%		\subfigure[Results from \citet{cesar_de_sa_damage_2006}]
+%		{
+%			\includegraphics[height=0.4\textwidth]{./Figures/LemaitreCompare/updated_deSaNonLocal2}
+%		}
+		\caption{Comparison of non-local damage distribution in the notched round bar case using the Lemaitre model at a total displacement of 1.2 mm. Predicted from the current work are on the left, while results from \citet{cesar_de_sa_damage_2006} are on the right. The results are displayed on the initial mesh.}
 	\label{fig:lemaitre_damage_field}
 \end{figure}
 
@@ -3452,13 +3453,13 @@ It is worth noting that the normalised stress reported by \citet{borden_phase-fi
 
 \subsection{The Wire Drawing Process}
 
-This section applies the developed damage procedures to the wire drawing metal forming process (Figure \ref{fig:wireDrawing}).
-The key parameters in the wire drawing process are the die semi-angle $\alpha$ (in $^{\circ}$), which is the angle made by the die with the wire axis, and the reduction ratio $r$ ($\%$), given by
+This section applies the developed and verified damage procedures to the wire drawing process (Figure \ref{fig:wireDrawing}).
+The key parameters are the die semi-angle $\alpha$ (in $^{\circ}$), which is the angle made by the die with the wire axis, and the reduction ratio $r$ ($\%$), given by
 \begin{equation}
     r = 100 \times \left(\frac{d_i^2 - d_o^2}{d_i^2}\right)
 \end{equation}
 where $d_i$ is the wire's initial diameter, and $d_o$ is the die outlet diameter.
-The final wire diameter tends to be marginally larger than the outlet diameter due to elastic \emph{spring back}.
+The final wire diameter tends to be marginally larger than the die outlet diameter due to elastic \emph{spring back}.
 \begin{figure}[htb]
 \begin{center}
 	\includegraphics[width=0.5\textwidth]{./Figures/SimulationAndAnalysis/modelCompare/drawingSchematic.pdf}
@@ -3511,7 +3512,7 @@ The final wire diameter tends to be marginally larger than the outlet diameter d
 %%%%
 In wire drawing, fracture typically originates in the centre of the specimen due to the combination of triaxiality and plastic strain \cite{gonzalez_assessment_2018, norasethasopon_prediction_2008, hoffmanner_selection_1971, choi_study_2010}.
 To compare the ability of the damage models to predict this type of damage, a \emph{typical} wire drawing pass is considered, with a reduction ratio $r$ of 10\% and a semi-angle $\alpha$ of $6^{\circ}$ \cite{roh_process_2021}.
-This case is not expected to display \emph{catastrophic} fracture; however, damage accumulation is expected.
+This case is not expected to display \emph{catastrophic} fracture; however, damage accumulation is envisaged.
 The simulations are performed as 2-D axisymmetric with a structured quadrilateral mesh.
 An average cell width of $0.4$ mm is employed, which has been found to minimise mesh errors.
 Table \ref{tab:wire_Draw_geom} summarises the geometry and mesh parameters.
@@ -3573,7 +3574,8 @@ The die elastic parameters (Table \ref{tab:die_draw_material_properties}) corres
 	\label{tab:die_draw_material_properties}
 \end{table}
 
-A back tension (\hl{how much?}) is applied to the wire upstream boundary, while a total drawing displacement of 30 mm is applied to the downstream wire boundary over 150 ms.
+%A back tension (\hl{how much?}) is applied to the wire upstream boundary, while a
+A total drawing displacement of 30 mm is applied to the downstream wire boundary over 150 ms, allowing quasi-steady-state conditions to be reached.
 Frictional contact (Coulomb coefficient of 0.1) is assumed between the wire and die contact surfaces.
 All other die surfaces are assumed to have a zero displacement condition, mimicking the steel casings typically used.
 %The loading conditions are summarised in Table \ref{tab:wire_draw_BCs}.
@@ -3625,8 +3627,8 @@ For the Lemaitre model \emph{with} crack-closure effects, the crack-closure para
 Figure \ref{fig:lemaitre_wire_draw_damage} provides the predicted Lemaitre damage distributions.
 It can be observed that without crack-closure effects (upper image in Figure \ref{fig:lemaitre_wire_draw_damage}), the Lemaitre model gives a somewhat unrealistic damage distribution, with damage being at a maximum away from the centre of the wire.
 This is because it does not distinguish between positive and negative triaxialities. 
-In contrast, the damage is correctly predicted at a maximum in the centre of the wire for the Lemaitre model with crack-closure effects (lower image in Figure \ref{fig:lemaitre_wire_draw_damage}).
-This is because this is where the triaxiality and, relatedly, the positive stress tensor are at a maximum.
+In contrast, the damage is correctly predicted at a maximum in the centre of the wire for the Lemaitre model \emph{with} crack-closure effects (lower image in Figure \ref{fig:lemaitre_wire_draw_damage}).
+This is where the triaxiality and, relatedly, the positive stress tensor are at a maximum.
 Both models predict limited damage evolution towards the outer surface of the wire due to the triaxiality cut-off $\left(-\sfrac{1}{3}\right)$ for damage evolution.
 \begin{figure}[htbp]
 	\centering
@@ -3672,17 +3674,18 @@ The GTN model wire parameters are given in Table \ref{tab:GTN_wire_draw_mat}, co
 \end{table}
 
 For the GTN model, porosity growth is negligible for typical wire drawing passes due to the high hydrostatic pressures, making void nucleation the dominant mechanism driving the evolution of the porosity \cite{cao_modelling_2014}.
-The GTN model accurately predicts the porosity to be at maximum at the centre of the wire (Figure \ref{fig:GTN_wire_draw_poro}).
-This is because porosity evolution due to nucleation is only set to occur when the hydrostatic pressure is negative (equation \ref{eqn:nucleatonA}).
+The GTN model accurately predicts the porosity to be maximum at the centre of the wire (Figure \ref{fig:GTN_wire_draw_poro}).
+This is because porosity evolution due to nucleation is only set to occur when the hydrostatic pressure is negative (Equation \ref{eqn:nucleatonA}).
 However, there are apparent issues with the assumption of the Gaussian distribution for void nucleation.
 To illustrate this, the evolution of the equivalent plastic strain and porosity are shown in Figure \ref{fig:GTN_wire_draw_plot} for a cell near the axis of the wire.
 % and which has a cell-centre $0.3047\ mm$ to the right of the wire inlet at the initial time step.
 %The evolution of these variables is only displayed while this cell is in the process zone i.e. the region where it undergoes plastic straining.
-It can be observed that the Gaussian assumption leads to the porosity saturating at a certain value, after which it does not evolve. This is unlikely to reflect the true material behaviour \cite{cao_modelling_2014}. 
+It can be observed that the Gaussian assumption leads to the porosity saturating.
+This is unlikely to reflect the true material behaviour \cite{cao_modelling_2014}, suggesting an alternative assumption may be more appropriate.
 %\hl{What is expected?} \hl{Could we not change the parameters to avoid this?}
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.7\textwidth]{./Figures/SimulationAndAnalysis/modelCompare/gtnModel.png}
+	\includegraphics[width=0.7\textwidth]{./Figures/SimulationAndAnalysis/modelCompare/gtnModel2.png}
 	\caption{Predicted porosity distribution in wire drawing for the GTN model}
 	\label{fig:GTN_wire_draw_poro}
 \end{center}
@@ -3723,13 +3726,13 @@ The current phase field model does not distinguish between tensile and compressi
 		\subfigure[Distribution for the damage variable $d$]
 		{
 		%\label{airbus}
-		\includegraphics[width=0.8\textwidth]{./Figures/SimulationAndAnalysis/modelCompare/phaseFieldExample.png}
+		\includegraphics[width=0.8\textwidth]{./Figures/SimulationAndAnalysis/modelCompare/phaseFieldExample2.png}
 		}
 	  \qquad
 		\subfigure[Distribution of the equivalent plastic strain $\bar{\epsilon}_p$]
 		{
 		%\label{boeing}
-		\includegraphics[width=0.8\textwidth]{./Figures/SimulationAndAnalysis/modelCompare/phaseFieldEpsPEq.png}
+		\includegraphics[width=0.8\textwidth]{./Figures/SimulationAndAnalysis/modelCompare/phaseFieldEpsPEq2.png}
 		}
 	\caption{Predicted damage and equivalent plastic strain fields in wire drawing for the phase field model.}
 	\label{fig:PF_wire_draw}
@@ -3793,9 +3796,9 @@ A reduction of $r = 20\%$ and a die semi-angle of $\alpha = 10^{\circ}$ are chos
 %\end{table}
 
 Table \ref{tab:chevron_mat} gives the assumed wire elastoplastic Lemaitre properties.
-These properties have been chosen with the drawing reduction and angle to be in a drawing regime that produces chevron cracks.
+These properties, along with the drawing reduction and angle, have been chosen to be in a drawing regime expected to produce chevron cracks.
 Table \ref{tab:die_draw_material_properties} gives the die elastic properties.
-\hl{Where did these props come from?}
+%\hl{Where did these props come from?}
 \begin{table}[htb]
 	\centering
 		\begin{tabular}{llll} \hline
@@ -3828,11 +3831,11 @@ Table \ref{tab:die_draw_material_properties} gives the die elastic properties.
 %	\label{tab:material_properties}
 %\end{table}
 
-Using the developed effective non-local damage scheme, the accurate modelling of chevron cracks is evident in Figure \ref{simulatedChevronCrack}.
+The non-local damage field (Figure \ref{simulatedChevronCrack}) predicts the formation of chevron cracks, as expected.
 The characteristic semi-lunar-shaped cracks are found to occur at a fixed frequency and continue to form as long as the drawing continues.
-From the modelling perspective, it has been found that if the local damage field $D$ is not restricted when $\bar{D}_{eff} > D_c$, as described in Section \ref{sec:lemaitre_comp_proc}, the non-local damage field grows excessively, resulting in the over-prediction of damage.
+From the modelling perspective, it has been found that if the local damage field $D$ is not restricted when $\bar{D} > D_c$, as described in Section \ref{sec:lemaitre_comp_proc}, the non-local damage field grows excessively, resulting in the over-prediction of damage.
 Consequently, rapid crack propagation ensues, and the formation of chevron cracks is not predicted.
-Hence, the inclusion of such a damage-limiting procedure has been found to be crucial in the prediction of these types of defects.
+Hence, the inclusion of such a damage-limiting procedure is crucial in the prediction of these types of defects.
 %The unrestricted growth of the local damage field $D$ leads to the rapid growth of the $\bar{D}$ field, and therefore, many cells have a value for $\bar{D}$ which exceeds $D_c$.
 % (Figure \ref{simulatedDamageNotLimited} b). 
 %the results can be seen if the growth of the local damage field $D$ is not restricted when $\bar{D}_{eff}>D_c$ (step (i) in Algorithm \ref{effectiveNonLocalDamage}).
@@ -3841,14 +3844,14 @@ Hence, the inclusion of such a damage-limiting procedure has been found to be cr
 		\subfigure[Axisymmetric mesh]
 		{
 			%\label{airbus}
-			\includegraphics[width=0.7\textwidth]{./Figures/finiteVolumeCharacteristics/simulatedChevron.png}
+			\includegraphics[width=0.7\textwidth]{./Figures/finiteVolumeCharacteristics/simulatedChevron2.png}
 		}
-		\subfigure[$270^{\circ}$ rotational extrusion]
+		\subfigure[Rotational extrusion ($270^{\circ}$) of the axisymmetric mesh]
 		{
 			%\label{boeing}
-			\includegraphics[width=0.7\textwidth]{./Figures/finiteVolumeCharacteristics/270ChevronCracking.png}
+			\includegraphics[width=0.7\textwidth]{./Figures/finiteVolumeCharacteristics/270ChevronCracking2.png}
 		}
-		\caption{Chevron cracks in wire drawing}
+		\caption{Prediction of chevron cracks in wire drawing using the Lemaitre damage model. The distribution of the damage variable $d$ is shown.}
 	\label{simulatedChevronCrack}
 \end{figure}
 
@@ -3921,7 +3924,7 @@ The coefficient of friction was taken as $\mu = 0.08$, as determined in \citet{r
 Neither the die's specific geometry nor the die's material properties are specified in \citet{roh_process_2021}, so a conical die is assumed here with die material parameters taken from \citet{clancy_improving_2019}, corresponding to tungsten carbide.
 %The material properties for both die and wire are given in Tables 7.17 and 7.18.
 A total drawing displacement of 30 mm is applied to the wire downstream boundary in increments of 0.1 mm with a time step size of 0.5 ms (the total simulation time was 150 ms).
-A back tension of \hl{XXXX} was applied to the wire upstream boundary.
+%A back tension of \hl{XXXX} was applied to the wire upstream boundary.
 %All other die surfaces are assumed to have a zero displacement condition \hl{check}.
 As before, the damage can only evolve after a drawing displacement of $2$ mm to avoid localisation in the initial time steps.
 %\begin{table}[htb]
@@ -4048,7 +4051,7 @@ Initially, 50 sets of values for $\sigma_{\infty}$, $k$ and $\beta$ (Equation \r
 %	\label{tab:material_properties}
 %\end{table}
 Each of these sets of values is used to simulate a tensile test. The force-displacement curves from each simulation are then compared to the experimental data up to 6.5\% engineering strain (onset of necking).
-The results with the minimum difference from this \emph{global} sampling are then further optimised using the \emph{local} Nelder-Mead method \cite{luersen_globalized_2004} to refine the material parameters.
+The parameter sets with the minimum difference from this \emph{global} sampling are then further optimised using the \emph{local} Nelder-Mead method \cite{luersen_globalized_2004} to refine the material parameters.
 Table \ref{tab:material_model_calibration} gives the final optimised values.
 Here, two forms of the Lemaitre model are compared: (i) the classic form, where the $S$ parameter is a constant, and (ii) the form proposed in Equation \ref{eqn:proposedLemaitre}, which introduces a triaxiality dependence to the $S$ parameter. 
 % The resulting parameters are given in Table 7.11
@@ -4094,7 +4097,7 @@ Once the elastoplastic parameters have been fit, the Lemaitre damage parameter $
 %As before, 50 values are sampled at constant intervals for the range given in Table 7.12.
 To do this, 50 values are sampled in the range in Table \ref{tab:material_model_calibration_lemaitre}.
 For the classic and proposed Lemaitre laws, tensile test simulations are conducted for each value of $S_0$, with the elastoplastic parameters held constant at the previously found optimal values.
-As before, the results with the minimum difference from this \emph{global} sampling are then further optimised using the \emph{local} Nelder-Mead method \cite{luersen_globalized_2004} to refine the material parameters (Table \ref{tab:material_model_calibration_lemaitre}).
+As before, the parameter sets with the minimum difference from this \emph{global} sampling are then further optimised using the \emph{local} Nelder-Mead method \cite{luersen_globalized_2004} to refine the material parameters (Table \ref{tab:material_model_calibration_lemaitre}).
 %The parameters that minimise the objective function (equation \ref{eqn:damageObjFunction}) are then further optimised using the Nelder-Mead method.
 %The objective function to be minimised is given in equation \ref{eqn:damageObjFunction}.
 %For this objective function, simulated force values that are lower than the experimental values are punished. This is to ensure a solution is not obtained that performs well in the latter-middle part of the deformation path (engineering strain between ~7\% and ~9\%) but leads to an unrealistically high amount of necking (``1" in Figure 7.12).
@@ -4176,36 +4179,36 @@ For all of the cases simulated here, the damage is at a maximum towards the cent
 As an example, the predicted damage distribution for the case where $r=36\%,\ \alpha=6^{\circ}$ using the classic Lemaitre damage evolution equation is shown in Figure \ref{fig:wire_draw_damage_lemaitre}.
 The greatest damage occurs at the centre of the wire because this is where the triaxiality and, relatedly, the positive stress tensor are greatest.
 %The relationship between the triaxiality $\eta$ and the positive stress tensor $\tau^+$ will be further explored later in this section.
-The evolution of the equivalent plastic strain, triaxiality and damage for a given cell near the wire axis is provided in Figure \ref{fig:wire_draw_other_results}.
+The evolution of the triaxiality and axial (xx) component of the plastic strain increment in the active deformation zone is shown in Figure \ref{fig:wire_draw_other_results}.
 %This cell is located at the centre of the wire and has a cell centre $1.66\ mm$ to the right of the wire inlet at the initial time step.
-It can be observed that the damage evolution primarily occurs with the increase in triaxiality towards the latter stage of its plastic straining.
+It can be observed that the damage evolution primarily occurs with the increase in triaxiality towards the latter stages of the plastic straining.
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.7\textwidth]{./Figures/SimulationAndAnalysis/compare36_12/36_6Damage.png}
+	\includegraphics[width=0.8\textwidth]{./Figures/SimulationAndAnalysis/compare36_12/36_6Damage2.png}
 	\caption{Distribution of damage for $r=36\%,\ \alpha=6^{\circ}$}
 	\label{fig:wire_draw_damage_lemaitre}
 \end{center}
 \end{figure}
 \begin{figure}[htbp]
 	\centering
-	\subfigure[Positve stress tensor]
-	{
-%		\label{airbus}
-		\includegraphics[width=0.3\textwidth]{./Figures/SimulationAndAnalysis/compare36_12/36_6tauPositive.png}
-	}
-	\qquad
+%	\subfigure[Positve stress tensor]
+%	{
+%%		\label{airbus}
+%		\includegraphics[width=0.4\textwidth]{./Figures/SimulationAndAnalysis/compare36_12/36_6tauPositive2.png}
+%	}
+%	\qquad
   	\subfigure[Triaxiality $\eta$]
 	{
 %		\label{boeing}
-		\includegraphics[width=0.3\textwidth]{./Figures/SimulationAndAnalysis/compare36_12/36_6Triaxiality.png}
+		\includegraphics[width=0.48\textwidth]{./Figures/SimulationAndAnalysis/compare36_12/36_6Triaxiality2}
 	}
-        \qquad
+%        \qquad
   	\subfigure[Axial (xx) component of the plastic strain increment tensor]
 	{
 %		\label{boeing}
-		\includegraphics[width=0.3\textwidth]{./Figures/SimulationAndAnalysis/compare36_12/36_6Dpxx.png}
+		\includegraphics[width=0.48\textwidth]{./Figures/SimulationAndAnalysis/compare36_12/36_6Dpxx2}
 	}	
-	\caption{Predicted distribution of fields for the $r=36\%,\ \alpha=6^{\circ}$ wire drawing case}
+	\caption{Predicted distribution of triaxiality and axial component of the plastic strain increment tensor in the active deformation zone for the $r=36\%,\ \alpha=6^{\circ}$ wire drawing case}
 	\label{fig:wire_draw_other_results}
 \end{figure}
 
@@ -4221,11 +4224,12 @@ It can be observed that the damage evolution primarily occurs with the increase 
 %%%%
 \subsubsection{Fracture Prediction}
 %%%%
-To determine whether a fracture is predicted to occur, the accumulated damage at the wire centre axis is compared with the critical damage $D_c$ (Figure \ref{fig:final_damage}).
+To determine whether a fracture is predicted to occur, the accumulated damage at the wire axis is compared with the critical damage $D_c$ (Figure \ref{fig:final_damage}).
 Fracture can be expected to occur when the quantity $\sfrac{D}{D_c}$ becomes greater than or equal to 1.
 Figure \ref{fig:final_damage} shows that both the classic and the proposed formulations of the Lemaitre model are reasonably consistent with the experimental results.
 The classic model accurately predicts fracture for the $20\%$ reduction cases but overpredicts fracture in the $36\%$ reduction cases.
 The novel Lemaitre-based model slightly underpredicts fracture in both the $20\%$ and $36\%$ reduction cases, with a value for $D$ that is 90.4\% and 90.8\% of $D_c$, respectively.
+Nonetheless, both models produce good predictive capabilities, with the novel approach being slightly closer to the experimental data.
 \begin{figure}[htbp]
 	\centering
 		\subfigure[$20\%$ Reduction]
@@ -4375,7 +4379,7 @@ The main conclusions of the work are:
 	\item Lemaitre-type models are more appropriate for predicting damage in wire drawing processes than current formulations of GTN and phase field models.
 	\item A proposed incorporation of triaxiality dependency to the Lemaitre $S$ parameter improves the model's predictive capabilities for wire drawing.
 	\item When incorporating a non-local damage approach, limiting the effective damage parameter is important.
-	\item Care must be taken when scaling the Rhie-Chow stabilisation term in regions of damage and plasticity to minimise mesh and time step errors;
+	\item Care must be taken when scaling the Rhie-Chow stabilisation term in regions of damage and plasticity to minimise mesh and time step errors.
 	\item A combined global-local optimisation is suitable for calibrating elastoplastic and damage parameters from experimental test data.
 \end{itemize}
 
@@ -4421,299 +4425,324 @@ Additionally, the authors want to acknowledge project affiliates, Bekaert, throu
 \begin{appendices}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Appendix: Single Cell Verifications} \label{app:one_cell}
+\section{Single Cell Verifications} \label{app:one_cell}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+This appendix presents single-cell uni-axial tension tests for the Lemaitre, GTN and phase field models implemented in the solids4foam toolbox for OpenFOAM.
+These verifications provide confidence in the current implementations.
+The geometry consists of a $1\times1\times1$ mm cube, where a displacement is applied to the positive y face in the positive y direction; shear tractions on the loading surface are set to zero.
+Three symmetry planes are employed, and the remaining two surfaces are traction-free.
+%The elements used in the solids4Foam toolbox have previously been validated through a patch test \cite{cardiff_patch_nodate}.
+%In this test case, a displacement is applied in the $y$ direction to the top boundary of the element.
 
-To add a further point of comparison, the non-local Lemaitre damage model was also implemented in Abaqus/Standard, a commercial finite element-based software. This was implemented through a user subroutine (UMAT). The Abaqus software has an inbuilt GTN model that we can also use to compare with.
-
-To implement the diffusion equation for the non-local Lemaitre damage model, the approach laid out in \citet{azinpour_simple_2018} is employed in this work. In \citet{azinpour_simple_2018}, the authors use the Abaqus' software ability to solve the steady-state heat conduction diffusion equation in coupled temperature-displacement problems. 
+The results are compared with values from literature, analytical theory and finite element software Abaqus.
+The Abaqus software has an inbuilt GTN model but does not have a non-local Lemaitre model.
+Consequently, for this work, a non-local Lemaitre damage model was implemented in Abaqus through a user subroutine (UMAT).
+The approach laid out in \citet{azinpour_simple_2018} is employed to implement the non-local Lemaitre damage model's diffusion equation.
+This approach exploits Abaqus' ability to solve the steady-state heat conduction diffusion equation in coupled temperature-displacement problems:
 \begin{equation}
-    q=-k\mathrm{\nabla}^2T
+    k\mathrm{\nabla}^2T + Q = 0
 \end{equation}
-where $q$ is the source term, $k$ is the material's conductivity and  $T$ is the temperature.
-
-This equation is made compatible with the non-local gradient equation as shown in table 5.1.
-
-\begin{table}[ht]
+where $k$ is the thermal conductivity, $T$ is the temperature, and $Q$ is a volumetric source term.
+This heat equation is made compatible with the non-local gradient equation, as shown in Table \ref{tab:diffusion_equation_comparison}.
+\begin{table}[htb]
 	\centering
-\resizebox{\textwidth}{!}{\begin{tabular}{ccccc} \hline
+%	\resizebox{\textwidth}{!}{\begin{tabular}{lllll} \hline
+		\begin{tabular}{lllll} \hline
 			Field & Field variable & Diffusion coefficient & Flux term & Source term \\ \hline 
-			Temperature & $T$ & $k$ & $\nabla^2T$ & q \\
+			Temperature & $T$ & $k$ & $\nabla^2T$ & Q \\
 			Non-local damage & $\bar{D}$ & $l^{2}_c$ & $\nabla^2D$ &  $\bar{D}-D$\\
             \hline
-		\end{tabular}}
+%		\end{tabular}}
+		\end{tabular}
 	\caption{Analogous set-up of the heat equation and non-local gradient equation}
 	\label{tab:diffusion_equation_comparison}
 \end{table}
 
 
 
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.4\textwidth]{./figures/finiteVolumeImplementation/cubeCase.png}
-\caption{one element case}
-\label{fig:deforming body}
-\end{center}
-\end{figure}
+%\begin{figure}[htb]
+%\begin{center}
+%	\includegraphics[width=0.4\textwidth]{./figures/finiteVolumeImplementation/cubeCase.png}
+%\caption{one element case}
+%\label{fig:deforming body}
+%\end{center}
+%\end{figure}
 
-In order to verify the implementation of these models, tests are conducted on an element of geometry $1\ \text{mm}\times1\ \text{mm}\times1\ \text{mm}$ (Figure 5.1). The elements used in the solids4Foam toolbox have previously been validated through a patch test \cite{cardiff_patch_nodate}. In this test case, a displacement is applied in the $y$ direction to the top boundary of the element.
 
 %%%%%%%%%%%%
-\subsection{Lemaitre model}
+\subsection{Lemaitre Model}
 %%%%%%%%%%%%
-
+A displacement of $0.2$ mm is applied with mechanical properties described in Table \ref{tab:material_properties_one_elem_lemaitre}.
+These mechanical properties are taken from \citet{autay_numerical_2018}.
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $200$ GPa \\
-			Poisson's ratio & $v$ & $0.3$   \\
-			Lemaitre damage denominator & $S_0$ & $0.5$ MPa  \\
-			Lemaitre damage exponent & $b$ & 1.0  \\
-			Hardening law & $\sigma_y$ & $200+10^3\times{\bar{\varepsilon}}^p$ MPa  \\
+		\begin{tabular}{llll} \hline
+			Property & Symbol & Value & Units  \\ \hline 
+			Young's modulus & $E$ & $200$ & GPa \\
+			Poisson's ratio & $v$ & $0.3$ & -  \\
+			Lemaitre damage denominator & $S_0$ & $0.5$ &  MPa  \\
+			Lemaitre damage exponent & $b$ & 1.0 & - \\
+			Hardening law & $\sigma_y$ & $200+10^3{\bar{\varepsilon}}^p$ &  MPa  \\
 			\hline
 		\end{tabular}
 	\caption{Material properties for Lemaitre one cell test}
-	\label{tab:material_properties}
+	\label{tab:material_properties_one_elem_lemaitre}
 \end{table}
 
-A displacement of $0.2\ mm$ is applied with mechanical properties described in Table 5.2. These mechanical properties are taken from \citet{autay_numerical_2018}.
-
-The results gained from simulations in OpenFOAM and Abaqus are compared with the analytical relationships derived in \citet{doghri_numerical_1995} in Figure 5.2. The analytically derived relationship for the damage $D$ as a function of the equivalent plastic strain ${\bar{\varepsilon}}^p$ is given by
-
-\begin{equation}
-(1-D)^2=1-\frac{\sigma_{y0}^2}{3 E S_0} \frac{\sigma_{y0}}{h}\left[\left(1+\frac{h}{\sigma_{y0}} {\bar{\varepsilon}}^p\right)^3-1\right] R_v
-\end{equation}
-
-where $\sigma_{y0}$ and $h$ are constants in the hardening law $\sigma_{y0}+h({\bar{\varepsilon}}^p)$. $R_v$ is given by:
-\begin{equation}
-    R_v=\frac{2}{3}(1+v)+3(1-2v)(\eta)
-\end{equation}
-where the triaxiality $\eta=0.33$ for a uniaxial tensile test.
-
-The analytical relationship for the equivalent stress $\sigma_{eq}$ is also provided 
-\begin{equation}
-    \sigma_{eq}=(1-D)(\sigma_{y0}+h({\bar{\varepsilon}}^p))
-\end{equation}
-
+The predicted damage and equivalent stress vs equivalent plastic strain from the OpenFOAM simulations are compared with values from Abaqus and analytical theory \citep{doghri_numerical_1995} in Figure \ref{fig:lemaitre_one_elem_force}.
+It can be observed that the damage increases exponentially with respect to the equivalent plastic strain.
+This is because, with the material constant $b=1$, the damage increases with the square of the effective von Mises equivalent stress.
+ %(equation \ref{eqn:classicY}).
 \begin{figure}[htbp]
 	\centering
-		\subfigure[Damage vs. equivalent plastic strain] {\label{airbus}\includegraphics[width=0.8\textwidth]{./figures/finiteVolumeImplementation/EpsPEQ_Damage.png}}
-		\subfigure[Equivalent stress vs. equivalent plastic strain] {\label{boeing} \includegraphics[width=0.8\textwidth]{./figures/finiteVolumeImplementation/EpsPEQ_EquivStress.png}}	
-	\caption{Comparison between OpenFOAM, Abaqus and analytically derived relationships}
-	\label{label_for_entire_figure}
+		\subfigure[Damage vs equivalent plastic strain]
+		{
+			\includegraphics[width=0.45\textwidth]{./figures/finiteVolumeImplementation/EpsPEQ_Damage.png}
+		}
+		\subfigure[Equivalent stress vs. equivalent plastic strain]
+		{
+			\includegraphics[width=0.45\textwidth]{./figures/finiteVolumeImplementation/EpsPEQ_EquivStress.png}
+		}
+	\caption{Comparison of the predicted forces for the Lemaitre model from OpenFOAM, Abaqus and analytical theory}
+	\label{fig:lemaitre_one_elem_force}
 \end{figure}
 
+The analytically derived relationship for the damage $D$ as a function of the equivalent plastic strain ${\bar{\varepsilon}}^p$ is given by
+\begin{equation}
+	(1-D)^2=1-\frac{\sigma_{y0}^2}{3 E S_0} \frac{\sigma_{y0}}{h}\left[\left(1+\frac{h}{\sigma_{y0}} {\bar{\varepsilon}}_p\right)^3-1\right] \left[ \frac{2}{3}(1+v)+3(1-2v)\eta \right]
+\end{equation}
+where $\sigma_{y0}$ and $h$ are constants in the hardening law $\sigma_{y0}+h({\bar{\varepsilon}}^p)$, and the triaxiality $\eta=0.33$ for a uniaxial tensile test.
+%$R_v$ is given by:
+%\begin{equation}
+%    R_v=\frac{2}{3}(1+v)+3(1-2v)\eta
+%\end{equation}
+%where the triaxiality $\eta=0.33$ for a uniaxial tensile test.
+The analytical relationship for the equivalent stress $\sigma_{v}$ is also provided:
+\begin{equation}
+    \sigma_{v}=(1-D)\left[\sigma_{y0}+h({\bar{\varepsilon}}_p)\right]
+\end{equation}
 
 
-It can be observed that the damage increases in an exponential manner with respect to the equivalent plastic strain. This is due to the fact that with the material constant $b=1$, the Damage increases with the square of the effective von Mises equivalent stress (equation \ref{eqn:classicY}).
-
-The plastic strain in the $Y$ direction $\varepsilon^p_{yy}$ is also given as a function of the equivalent plastic strain ${\bar{\varepsilon}}^p$ and compared with the results obtained by \citet{doghri_numerical_1995} (Figure 5.3).
-
-\begin{figure}[htb]
+The component of plastic strain in the loading direction ($\varepsilon_p^{yy})$ can also be plotted as a function of the equivalent plastic strain ${\bar{\varepsilon}}_p$ and compared with the results obtained by \citet{doghri_numerical_1995} (Figure \ref{fig:lemaitre_one_element_ep}).
+\begin{figure}[htbp]
 \begin{center}
-	\includegraphics[width=0.9\textwidth]{./figures/finiteVolumeImplementation/plasticStrainMult.png}
-\caption{Plastic strain (YY) vs. equivalent plastic strain}
-\label{fig:EqStrain_EqStress}
+	\includegraphics[width=0.45\textwidth]{./figures/finiteVolumeImplementation/plasticStrainMult.png}
+	\caption{Axial component of plastic strain (YY) vs. equivalent plastic strain}
+	\label{fig:lemaitre_one_element_ep}
 \end{center}
 \end{figure}
-\FloatBarrier
 
 
 %%%%%%%%%%%%
-\subsection{GTN model}
+\subsection{GTN Model}
 %%%%%%%%%%%%
-
+This section compares the results for the GTN model implemented in OpenFOAM with those obtained from the inbuilt GTN model in Abaqus.
+Table \ref{tab:material_properties_GTN_one_elem} displays the material properties used.
+The GTN model in Abaqus does not allow for the inclusion of porous failure criteria (Equation \ref{eqn:GTNCoalescence}) in Abaqus/Standard, so this feature of the GTN model was neglected. 
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $200$ GPa \\
-			Poisson's ratio & $v$ & $0.3$   \\
-			q1 & $q1$ & $1.5$  \\
-		    q2 & $q2$ & $1$  \\
-		    q3 & $q3$ & $2.25$  \\
-		    Initial porosity & $f_0$ & $0.002$  \\
-		    Mean & $\varepsilon_n$ & $0.3$  \\
-		    Standard deviation & $S_n$ & $0.1$  \\
-		    Volume fraction & $f_N$ & $0.2$  \\
-			Hardening law & $\sigma_y$ & $400+300\times{\bar{\varepsilon}}^p$ MPa  \\
+		\begin{tabular}{lllll} \hline
+			Property & Symbol & Value & Units  \\ \hline 
+			Young's modulus & $E$ & $200$ & GPa \\
+			Poisson's ratio & $v$ & $0.3$ &-   \\
+			$q_1$ & $q_1$ & $1.5$  &- \\
+		    $q_2$ & $q_2$ & $1$ &-  \\
+		    $q_3$ & $q_3$ & $2.25$ &-  \\
+		    Initial porosity & $f_0$ & $0.002$ &-  \\
+		    Mean & $\varepsilon_n$ & $0.3$  &- \\
+		    Standard deviation & $S_n$ & $0.1$ &-  \\
+		    Volume fraction & $f_N$ & $0.2$  &- \\
+			Hardening law & $\sigma_y$ & $400+300{\bar{\varepsilon}}_p$  & MPa  \\
 			\hline
 		\end{tabular}
 	\caption{Material properties for GTN one cell test}
-	\label{tab:material_properties}
+	\label{tab:material_properties_GTN_one_elem}
 \end{table}
 
-In this section, the results for the GTN model implemented in OpenFOAM are compared with those obtained from the inbuilt GTN model in Abaqus. The material properties used are displayed in Table 5.3. The GTN model in Abaqus does not allow for the inclusion of porous failure criteria (equation \ref{eqn:GTNCoalescence}) in Abaqus/Standard so this feature of the GTN model was neglected. The results are compared in Figure 5.4. 
-
-It is clear that there is strong agreement between Abaqus and the OpenFoam implementation. It is notable that the rate of porosity growth declines towards the latter stages of the deformation in Figure 5.4 a). This is due to the fact that the porosity growth due to the nucleation of voids is assumed to follow a Gaussian distribution (equation \ref{eqn:nucleatonA}). As will be discussed in chapter \ref{ch:Simulations and Analysis}, this assumption is unlikely to be an accurate description of material behaviour. 
-
+The results are shown in Figure \ref{fig:one_elem_GTN_results}. 
+Notably, the rate of porosity growth declines towards the latter stages of the deformation.
+This is because the porosity growth due to the nucleation of voids is assumed to follow a Gaussian distribution.
+As discussed in the article's main body, this assumption is unlikely to accurately describe real material behaviour. 
 \begin{figure}[htbp]
 	\centering
-		\subfigure[Porosity vs. displacement] {\label{airbus}\includegraphics[width=0.6\textwidth]{./figures/GTNCompare/displacement_f.png}}
-		
-		\subfigure[Equivalent stress vs. displacement ] {\label{boeing} \includegraphics[width=0.6\textwidth]{./figures/GTNCompare/displacement_sigmaEq.png}}
-		
-		\subfigure[Plastic strain in the Y direction vs. Equivalent plastic strain] {\label{boeing} \includegraphics[width=0.6\textwidth]{./Figures/GTNCompare/EpsPEq_epsPY.png}}
-		
-		\caption{Comparison between OpenFOAM and Abaqus}
-	\label{label_for_entire_figure}
+		\subfigure[Porosity vs. displacement]
+		{
+		\includegraphics[width=0.45\textwidth]{./figures/GTNCompare/displacement_f.png}
+		}
+		\subfigure[Equivalent stress vs. displacement ]
+		{
+		\includegraphics[width=0.45\textwidth]{./figures/GTNCompare/displacement_sigmaEq.png}
+		}
+		\subfigure[Plastic strain in the Y direction vs. Equivalent plastic strain]
+		{
+		\includegraphics[width=0.45\textwidth]{./Figures/GTNCompare/EpsPEq_epsPY.png}
+		}
+		\caption{Comparison between the OpenFOAM and Abaqus predictions for the GTN model one cell test}
+	\label{fig:one_elem_GTN_results}
 \end{figure}
 
-\FloatBarrier
 
 %%%%%%%%%%%%
-\subsection{Phase field fracture}
+\subsection{Phase Field Model}
 %%%%%%%%%%%%
+Table \ref{tab:material_properties_PF_one_elem} lists the material parameters for the phase field model one-cell test.
 \begin{table}[htb]
 	\centering
-		\begin{tabular}{cccc} \hline
-			Property & Symbol & Value  \\ \hline 
-			Young's modulus & $E$ & $68.8$ GPa \\
-			Poisson's ratio & $v$ & $0.33$   \\
-			Critical fracture energy & $G_c$ & $138\times10^6$ $J/m^2$ \\
-   		Plastic work threshold & $w_0$ & $10^6$ $J$ \\
-			Characteristic length & $l$ & $2$ m   \\
-			Hardening law & $\sigma_y$ & $320+688\times{\bar{\varepsilon}}^p$ MPa  \\
+		\begin{tabular}{lllll} \hline
+			Property & Symbol & Value & Units \\ \hline 
+			Young's modulus & $E$ & $68.8$ & GPa \\
+			Poisson's ratio & $v$ & $0.33$  & - \\
+			Critical fracture energy & $G_c$ & $138\times10^6$ &  J/m$^2$ \\
+   		Plastic work threshold & $w_0$ & $1$ &  $MPa$ \\
+			Characteristic length & $l$ & $2$ & m   \\
+			Hardening law & $\sigma_y$ & $320+688{\bar{\varepsilon}}_p$ & MPa  \\
 			\hline
 		\end{tabular}
-	\caption{Material properties for phase field fracture one cell test}
-	\label{tab:material_properties}
+	\caption{Material properties for the phase field model one cell test}
+	\label{tab:material_properties_PF_one_elem}
 \end{table}
 
-Here the results obtained from a one-cell test are compared with those obtained by \citet{borden_phase-field_2016} in Figure 5.5. 
-
+Figure \ref{fig:one_elem_PF_results} compares the phase field model one-cell test results with those obtained by \citet{borden_phase-field_2016}.
+In this test case, the cell undergoes a rapid loss of load-carrying capacity.
+This is because after the plastic work threshold is exceeded, there is a rapid increase in the plastic strain energy contribution to the crack-driving force $\mathcal{H}$ and, therefore, growth of the phase field variable $d$.
+%The combination of this and the fact that the crack degradation function ($g_e(d)=(1-d)^2$) is proportional to the square of the phase field leads to the swift reduction in the equivalent stress.
 \begin{figure}[htbp]
 	\centering
-		\subfigure[Plastic strain vs. total strain] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeImplementation/phaseField/displacement_EpsPYY.png}}
-		
-		\subfigure[Equivalent stress vs. total strain] {\label{boeing} \includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeImplementation/phaseField/displacement_sigmaEq.png}}
-		
-		\caption{Comparison between OpenFOAM and \cite{borden_phase-field_2016}}
-	\label{label_for_entire_figure}
+		\subfigure[Equivalent plastic strain vs. the $YY$ component of the total strain]
+		{
+		\includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeImplementation/phaseField/displacement_EpsPYY.png}
+		}
+		\subfigure[Equivalent stress vs. the $YY$ component of the total strain]
+		{
+		\includegraphics[width=0.45\textwidth]{./Figures/finiteVolumeImplementation/phaseField/displacement_sigmaEq.png}
+		}
+		\caption{Comparison between OpenFOAM and \citet{borden_phase-field_2016} predictions for the phase field model one cell test}
+	\label{fig:one_elem_PF_results}
 \end{figure}
 
-In this test case, the cell undergoes a rapid loss of load-carrying capacity (Figure 5.6). This is due to the fact that after the plastic work threshold is exceeded, there is a rapid increase in the plastic strain energy contribution to the crack-driving force $\mathcal{H}$ and therefore growth of the phase field variable $d$. The combination of this and the fact that the crack degradation function is proportional to the square of the phase field ( $g_e(d)=(1-d)^2$ ) leads to the swift reduction in the equivalent stress. 
+%\begin{figure}[htbp]
+%	\centering
+%		\subfigure[Crack degradation function g(d) vs. total strain]
+%		{
+%		\includegraphics[width=0.45\textwidth]{./figures/finiteVolumeImplementation/phaseField/displacement_degredationFucntion.png}
+%		}
+%		\subfigure[Phase field (d) vs. total strain]
+%		{
+%		\includegraphics[width=0.45\textwidth]{./figures/finiteVolumeImplementation/phaseField/displacement_phaseField.png}
+%		}
+%		\caption{Evolution of the phase field damage variable $d$ and the crack degradation function for the one cell test}
+%	\label{fig:one_elem_PF_results2}
+%\end{figure}
 
-\begin{figure}[htbp]
-	\centering
-		\subfigure[Crack degradation function g(d) vs. total strain] {\label{airbus}\includegraphics[width=0.8\textwidth]{./figures/finiteVolumeImplementation/phaseField/displacement_degredationFucntion.png}}
-		
-		\subfigure[Phase field (d) vs. total strain] {\label{boeing} \includegraphics[width=0.8\textwidth]{./figures/finiteVolumeImplementation/phaseField/displacement_phaseField.png}}
-		
-		\caption{Evolution of d and the crack degradation Function}
-	\label{label_for_entire_figure}
-\end{figure}
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Phase Field Model Updated-to-Total Lagrangian Transformation}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Given that the mesh is moved to the updated configuration after each time step, the non-local equation is solved with respect to this updated mesh configuration. However, sometimes it may be preferred to solve the non-local equation with respect to the initial mesh configuration.
-
-It's worth noting however that the results from the non-local equation will differ if the non-local gradient equation is solved with respect to the initial configuration $\Omega_o$. If the non-local equation is solved with respect to the updated configuration, then in tension the non-local damage will tend towards the local damage as the distance between the cell centres will increase. Conversely, in compressive states, the distances between cell centres will decrease leading to greater diffusion in the region of a damaged cell. In order to illustrate this, simulations on a one-dimensional bar of length $10mm$ were performed. An imperfection is placed at the centre of the bar so that here the local damage $D=1.0$. In all other cells $D=0$. Both 20\% compressive and tensile strains were applied. It can be seen in Figure \ref{fig:compressiveTensileNonLocalDamage} how the distribution of the non-local damage is therefore altered as the bar undergoes tension and compression 
-
-\begin{figure}[htb]
-\begin{center}
-	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/compressiveTensileDamage.png}
-\caption{Non-local damage along the original bar length}
-\label{fig:compressiveTensileNonLocalDamage}
-\end{center}
-\end{figure}
-
-It remains a matter of debate in the literature as to whether solving this equation with respect to the initial or updated configuration is preferable \cite{geers_strongly_2003}. \citet{steinmann_formulation_nodate} has argued that the fact that the non-local damage will tend towards the local damage (in an object undergoing tensile loading) is an argument for solving with respect to the initial configuration to ensure that the mesh independence of the solution remains strong. However, he also noted that this may not be physically realistic as it is not likely the case that a material's non-local properties are completely independent of its deformation path.
-
-In order to ensure that solving the non-local gradient equation with respect to the initial configuration is possible, within the context of an updated Lagrangian solid model, a mathematical and algorithmic approach was developed in this work. This approach allows for the solving of the non-local gradient equation with respect to the initial configuration within the context of an updated Lagrangian solid model framework.
-
-To begin, the strong integral form of the non-local equation with respect to the initial configuration is stated:
-
-\begin{equation}
-\label{eqn:stronFormNonLocal_URef}
-\int_{\mathrm{\Omega}_o}D\ d\mathrm{\Omega}_o-\int_{\mathrm{\Omega}_o}\bar{D}\ d\mathrm{\Omega}_o+\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \bb{n}_o\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_o=0
-\end{equation}
-
-Given the definition of the volume change $J$, the volume in the updated configuration can be related to the initial volume:
-\begin{equation}
-\label{eqn:refVolJac}
-    J^{-1}_nV_u=V_o
-\end{equation}
-where $J_n$ is the volume change from the previous time step.
-Nanson's formula is employed to describe the updated $\Gamma_u$ area vector in terms of the initial area vector $\Gamma_o$:
-\begin{equation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Phase Field Model Updated-to-Total Lagrangian Transformation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Given that the mesh is moved to the updated configuration after each time step, the non-local equation is solved with respect to this updated mesh configuration. However, sometimes it may be preferred to solve the non-local equation with respect to the initial mesh configuration.
+%
+%It's worth noting however that the results from the non-local equation will differ if the non-local gradient equation is solved with respect to the initial configuration $\Omega_o$. If the non-local equation is solved with respect to the updated configuration, then in tension the non-local damage will tend towards the local damage as the distance between the cell centres will increase. Conversely, in compressive states, the distances between cell centres will decrease leading to greater diffusion in the region of a damaged cell. In order to illustrate this, simulations on a one-dimensional bar of length $10mm$ were performed. An imperfection is placed at the centre of the bar so that here the local damage $D=1.0$. In all other cells $D=0$. Both 20\% compressive and tensile strains were applied. It can be seen in Figure \ref{fig:compressiveTensileNonLocalDamage} how the distribution of the non-local damage is therefore altered as the bar undergoes tension and compression 
+%
+%\begin{figure}[htb]
+%\begin{center}
+%	\includegraphics[width=0.65\textwidth]{./Figures/damageModels/compressiveTensileDamage.png}
+%\caption{Non-local damage along the original bar length}
+%\label{fig:compressiveTensileNonLocalDamage}
+%\end{center}
+%\end{figure}
+%
+%It remains a matter of debate in the literature as to whether solving this equation with respect to the initial or updated configuration is preferable \cite{geers_strongly_2003}. \citet{steinmann_formulation_nodate} has argued that the fact that the non-local damage will tend towards the local damage (in an object undergoing tensile loading) is an argument for solving with respect to the initial configuration to ensure that the mesh independence of the solution remains strong. However, he also noted that this may not be physically realistic as it is not likely the case that a material's non-local properties are completely independent of its deformation path.
+%
+%In order to ensure that solving the non-local gradient equation with respect to the initial configuration is possible, within the context of an updated Lagrangian solid model, a mathematical and algorithmic approach was developed in this work. This approach allows for the solving of the non-local gradient equation with respect to the initial configuration within the context of an updated Lagrangian solid model framework.
+%
+%To begin, the strong integral form of the non-local equation with respect to the initial configuration is stated:
+%
+%\begin{equation}
+%\label{eqn:stronFormNonLocal_URef}
+%\int_{\mathrm{\Omega}_o}D\ d\mathrm{\Omega}_o-\int_{\mathrm{\Omega}_o}\bar{D}\ d\mathrm{\Omega}_o+\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \bb{n}_o\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_o=0
+%\end{equation}
+%
+%Given the definition of the volume change $J$, the volume in the updated configuration can be related to the initial volume:
+%\begin{equation}
+%\label{eqn:refVolJac}
+%    J^{-1}_nV_u=V_o
+%\end{equation}
+%where $J_n$ is the volume change from the previous time step.
+%Nanson's formula is employed to describe the updated $\Gamma_u$ area vector in terms of the initial area vector $\Gamma_o$:
+%\begin{equation}
+%%\label{eqn:updatedInitialNanson}
+%    \bb{\Gamma_u}=J_n\bb{F}_n^{-T}\cdot\bb{\Gamma}_0
+%\end{equation}
+%The initial area vector $\Gamma_o$ can then be rewritten in terms of the updated area vector $\Gamma_u$:
+%\begin{equation}
 %\label{eqn:updatedInitialNanson}
-    \bb{\Gamma_u}=J_n\bb{F}_n^{-T}\cdot\bb{\Gamma}_0
-\end{equation}
-The initial area vector $\Gamma_o$ can then be rewritten in terms of the updated area vector $\Gamma_u$:
-\begin{equation}
-\label{eqn:updatedInitialNanson}
-    J^{-1}_n\bb{F}_n^{T}\cdot\bb{\Gamma_u}=\bb{\Gamma}_0
-\end{equation}
-
-Using equation \ref{eqn:refVolJac}, the first two volume integral terms in equation \ref{eqn:updatedInitialNanson} can be given in terms of the updated configuration as:
-\begin{equation}
-\int_{\mathrm{\Omega}_o}D\ d\mathrm{\Omega}_o=\int_{\mathrm{\Omega}_u}J^{-1}_nD\ d\mathrm{\Omega}_u
-\end{equation}
-\begin{equation}
-\int_{\mathrm{\Omega}_o}\bar{D}\ d\mathrm{\Omega}_o=\int_{\mathrm{\Omega}_u}J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u
-\end{equation}
-
-Gauss' theorem can then be used to reformulate the gradient term within the third term of equation \ref{eqn:stronFormNonLocal_URef}:
-\begin{equation}
-\label{eqn:reformulatedGradientThirdTerm}
-\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \bb{n}_o\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_o=\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \bb{n}_o\cdot\left(\oint_{\mathrm{\Gamma}_o}\bb{n}_o\bar{D}\ d\mathrm{\Gamma}_o\right)}\ d\mathrm{\Gamma}_o
-\end{equation}
-The term on the right-hand side of equation \ref{eqn:reformulatedGradientThirdTerm} can then be reformulated in terms of the updated configuration by combining it with equation \ref{eqn:updatedInitialNanson} to give
-%\begin{equation}
-%	\oint_{\Gamma_o}{{l_c}^2\ \bb{n}_o\cdot\left(\oint_{\Gamma_o}\bb{n}_o\bar{D}\ d\Gamma_o\right)}\d\Gamma_o
-%	=
-%	\oint_{\Gamma_u}{{l_c}^2 J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\cdot\left(\oint_{\Gamma_u}J^{-1}_n\bb{F}_n^{T}\cdot\bb{n}_u\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u
+%    J^{-1}_n\bb{F}_n^{T}\cdot\bb{\Gamma_u}=\bb{\Gamma}_0
 %\end{equation}
-
-The full equation to be solved is therefore 
+%
+%Using equation \ref{eqn:refVolJac}, the first two volume integral terms in equation \ref{eqn:updatedInitialNanson} can be given in terms of the updated configuration as:
 %\begin{equation}
-%\label{eqn:fullUpdatedRefNonLocal}
-%\int_{\mathrm{\Omega}_u} J^{-1}_n\D\ d\mathrm{\Omega}_u
-%-
-%\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u
-%+
-%\oint_{\Gamma_u}{{l_c}^2 \left(J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\right)\cdot\left(\oint_{\Gamma_u}\left(J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\right)\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u=0
+%\int_{\mathrm{\Omega}_o}D\ d\mathrm{\Omega}_o=\int_{\mathrm{\Omega}_u}J^{-1}_nD\ d\mathrm{\Omega}_u
 %\end{equation}
-
-\textbf{Algorithmic approach}
-
-Equation \ref{eqn:fullUpdatedRefNonLocal} is solved as shown in equation \ref{eqn:fullUpdatedRefNonLocalToBESolved}, with the second and third terms added in to aid with convergence. The divergence, gradient and Laplacian terms are discretised using the Gauss linear scheme \cite{noauthor_openfoam_2015}. A user-defined number of outer iterations are performed around this equation. The code for its implementation is provided in Appendix C.
-
-\begin{eqnarray}
-\label{eqn:fullUpdatedRefNonLocalToBESolved}
-\underbrace{\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u}_{\text {implicit}} &-& \underbrace{\oint_{\mathrm{\Gamma}_u}{\bb{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \bar{D}}\right)}\ d\mathrm{\Gamma}_u}_{\text {implicit }} \notag \\
-    &+&\underbrace{\oint_{\mathrm{\Gamma}_u}{\bb{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \bar{D}}\right)}\ d\mathrm{\Gamma}_u}_{\text {explicit }} \notag \\
-    &-&\underbrace{\oint_{\Gamma_u}{{l_c}^2 \left(J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\right)\cdot\left(\oint_{\Gamma_u}\left(J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\right)\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u}_{\text {explicit }} \notag \\
-    &=& \underbrace{\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u}_{\text {explicit}}
-\end{eqnarray}
-
-\subsection{Validation of updated-Lagrangian to reference approach}
-
-In this section, the implementation of the approach described in section \ref{Updated-Lagrangian to reference development} is verified. This is done by simulating each of case a and case b (from section \ref{rhieChowExplorationCases}) in the following three ways 
-\begin{itemize}
-    \item With an updated Lagrangian solid model
-    \item With a total Lagrangian solid model
-    \item with an updated Lagrangian solid model and the non-local damage gradient equation solved with respect to the initial configuration 
-\end{itemize}
-
-The force-displacement curves for these simulations are given in Figure \ref{UpdatedToReferenceComaprison}. The results of the UL to reference approach and the total Lagrangian approach line up well. However, in Figure 6.17 a, a slight discrepancy can be observed which given that very fine time-steps and meshes are used for these simulations is unrelated to discritisation error (Appendix A.1). Is unclear why this exists. It may be due to slight differences in the discretisation techniques - in the UL to reference approach the divergence of the gradient of the non-local damage variable $\bar{D}$ is solved for, whereas in the total Lagrangian approach the option in OpenFOAM to solve the Laplacian directly is used. Some differences in the Rhie-Chow effects between the total-Lagrangian and updated-Lagrangian approach may also contribute.
-
-\begin{figure}[htbp]
-	\centering
-		\subfigure[Flat notched bar - case a] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/bordenLagCompare_ForceDisp.png}}
-		
-		\subfigure[Notched round bar - case b] {\label{boeing} \includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/axiLagCompare_ForceDisp.png}}
-		
-		\caption{Comparison of approaches}
-	\label{UpdatedToReferenceComaprison}
-\end{figure}
-\FloatBarrier
-
+%\begin{equation}
+%\int_{\mathrm{\Omega}_o}\bar{D}\ d\mathrm{\Omega}_o=\int_{\mathrm{\Omega}_u}J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u
+%\end{equation}
+%
+%Gauss' theorem can then be used to reformulate the gradient term within the third term of equation \ref{eqn:stronFormNonLocal_URef}:
+%\begin{equation}
+%\label{eqn:reformulatedGradientThirdTerm}
+%\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \bb{n}_o\cdot\mathrm{\nabla}\mathrm{\bar{D}}}\ d\mathrm{\Gamma}_o=\oint_{\mathrm{\Gamma}_o}{{l_c}^2\ \bb{n}_o\cdot\left(\oint_{\mathrm{\Gamma}_o}\bb{n}_o\bar{D}\ d\mathrm{\Gamma}_o\right)}\ d\mathrm{\Gamma}_o
+%\end{equation}
+%The term on the right-hand side of equation \ref{eqn:reformulatedGradientThirdTerm} can then be reformulated in terms of the updated configuration by combining it with equation \ref{eqn:updatedInitialNanson} to give
+%%\begin{equation}
+%%	\oint_{\Gamma_o}{{l_c}^2\ \bb{n}_o\cdot\left(\oint_{\Gamma_o}\bb{n}_o\bar{D}\ d\Gamma_o\right)}\d\Gamma_o
+%%	=
+%%	\oint_{\Gamma_u}{{l_c}^2 J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\cdot\left(\oint_{\Gamma_u}J^{-1}_n\bb{F}_n^{T}\cdot\bb{n}_u\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u
+%%\end{equation}
+%
+%The full equation to be solved is therefore 
+%%\begin{equation}
+%%\label{eqn:fullUpdatedRefNonLocal}
+%%\int_{\mathrm{\Omega}_u} J^{-1}_n\D\ d\mathrm{\Omega}_u
+%%-
+%%\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u
+%%+
+%%\oint_{\Gamma_u}{{l_c}^2 \left(J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\right)\cdot\left(\oint_{\Gamma_u}\left(J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\right)\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u=0
+%%\end{equation}
+%
+%\textbf{Algorithmic approach}
+%
+%Equation \ref{eqn:fullUpdatedRefNonLocal} is solved as shown in equation \ref{eqn:fullUpdatedRefNonLocalToBESolved}, with the second and third terms added in to aid with convergence. The divergence, gradient and Laplacian terms are discretised using the Gauss linear scheme \cite{noauthor_openfoam_2015}. A user-defined number of outer iterations are performed around this equation. The code for its implementation is provided in Appendix C.
+%
+%\begin{eqnarray}
+%\label{eqn:fullUpdatedRefNonLocalToBESolved}
+%\underbrace{\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u}_{\text {implicit}} &-& \underbrace{\oint_{\mathrm{\Gamma}_u}{\bb{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \bar{D}}\right)}\ d\mathrm{\Gamma}_u}_{\text {implicit }} \notag \\
+%    &+&\underbrace{\oint_{\mathrm{\Gamma}_u}{\bb{n}_u\cdot\mathrm{\nabla}\left(\mathrm{\Delta \bar{D}}\right)}\ d\mathrm{\Gamma}_u}_{\text {explicit }} \notag \\
+%    &-&\underbrace{\oint_{\Gamma_u}{{l_c}^2 \left(J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\right)\cdot\left(\oint_{\Gamma_u}\left(J^{-1}_n\bb{F}_n^{T}\cdot \bb{n}_u\right)\bar{D}\ d\Gamma_u\right)}\ d\Gamma_u}_{\text {explicit }} \notag \\
+%    &=& \underbrace{\int_{\mathrm{\Omega}_u} J^{-1}_n\bar{D}\ d\mathrm{\Omega}_u}_{\text {explicit}}
+%\end{eqnarray}
+%
+%\subsection{Validation of updated-Lagrangian to reference approach}
+%
+%In this section, the implementation of the approach described in section \ref{Updated-Lagrangian to reference development} is verified. This is done by simulating each of case a and case b (from section \ref{rhieChowExplorationCases}) in the following three ways 
+%\begin{itemize}
+%    \item With an updated Lagrangian solid model
+%    \item With a total Lagrangian solid model
+%    \item with an updated Lagrangian solid model and the non-local damage gradient equation solved with respect to the initial configuration 
+%\end{itemize}
+%
+%The force-displacement curves for these simulations are given in Figure \ref{UpdatedToReferenceComaprison}. The results of the UL to reference approach and the total Lagrangian approach line up well. However, in Figure 6.17 a, a slight discrepancy can be observed which given that very fine time-steps and meshes are used for these simulations is unrelated to discritisation error (Appendix A.1). Is unclear why this exists. It may be due to slight differences in the discretisation techniques - in the UL to reference approach the divergence of the gradient of the non-local damage variable $\bar{D}$ is solved for, whereas in the total Lagrangian approach the option in OpenFOAM to solve the Laplacian directly is used. Some differences in the Rhie-Chow effects between the total-Lagrangian and updated-Lagrangian approach may also contribute.
+%
+%\begin{figure}[htbp]
+%	\centering
+%		\subfigure[Flat notched bar - case a] {\label{airbus}\includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/bordenLagCompare_ForceDisp.png}}
+%		
+%		\subfigure[Notched round bar - case b] {\label{boeing} \includegraphics[width=0.8\textwidth]{./Figures/finiteVolumeCharacteristics/axiLagCompare_ForceDisp.png}}
+%		
+%		\caption{Comparison of approaches}
+%	\label{UpdatedToReferenceComaprison}
+%\end{figure}
+%\FloatBarrier
+%
 
 
 
