@@ -2932,14 +2932,14 @@ The reason for this is unclear but could be related to the differences in plasti
 		\subfigure[Non-local damage vs displacement]
 		{
 			%\label{airbus}
-			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_damageNonLocal.png}
+			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_damageNonLocal2}
 		}
 		\subfigure[Equivalent plastic strain vs displacement]
 		{
 			%\label{boeing}
-			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/borden/disp_EpsPEq.png}
+			\includegraphics[width=0.41\textwidth]{./Figures/LemaitreCompare/borden/disp_EpsPEq2}
 		}
-	\caption{Damage and plastic strain predictions for the flat notched bar case using the Lemaitre model}
+	\caption{Damage (non-local) and plastic strain predictions for the flat notched bar case using the Lemaitre model}
 	\label{fig:lemaitre_point_values_flat}
 \end{figure}
 
@@ -3373,7 +3373,7 @@ Consistent with the Lemaitre cases, the Abaqus simulation has convergence issues
 %As noted above, the segregated solution procedure likely contributes to the superior convergence abilities of the OpenFOAM simulations.
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.6\textwidth]{./Figures/GTNCompare/forceDispGTN.jpg}
+	\includegraphics[width=0.5\textwidth]{./Figures/GTNCompare/forceDispGTN.jpg}
 	\caption{Predicted force vs displacement for the notched round bar case using the GTN model, compared with predictions from Abaqus.}
 	\label{fig:axi_GTN_forceDisp}
 \end{center}
@@ -3573,8 +3573,7 @@ The die elastic parameters (Table \ref{tab:die_draw_material_properties}) corres
 	\label{tab:die_draw_material_properties}
 \end{table}
 
-%A back tension (\hl{how much?}) is applied to the wire upstream boundary, while a
-A total drawing displacement of 30 mm is applied to the downstream wire boundary over 150 ms, allowing quasi-steady-state conditions to be reached.
+A back tension of 20 MPa is applied to the wire upstream boundary, while a total drawing displacement of 30 mm is applied to the downstream wire boundary over 150 ms, allowing quasi-steady-state conditions to be reached.
 Frictional contact (Coulomb coefficient of 0.1) is assumed between the wire and die contact surfaces.
 All other die surfaces are assumed to have a zero displacement condition, mimicking the steel casings typically used.
 %The loading conditions are summarised in Table \ref{tab:wire_draw_BCs}.
@@ -3914,7 +3913,7 @@ Table \ref{tab:roh_draw_series} summarises the experimental drawing test data av
 
 A $30$ mm long wire was used for drawing simulations, aside from the cases where $r=36\%$, $\alpha=4^{\circ}$ and $r=20\%$, $\alpha=2^{\circ}$.
 In these cases, a longer 50 mm wire was used to ensure minimum upstream and downstream boundary effects.
-The die and wire geometry is summarised in Table \ref{tab:drawing_series_die_geom}.
+Table \ref{tab:drawing_series_die_geom} summarises the die and wire geometry.
 %the loading conditions and wire geometry given in Table \ref{} are used.
 An average cell width of $0.25$ mm was found to be sufficient to minimise mesh errors.
 %achieve a consistent solution for the drawing simulations (Appendix F2).
@@ -3923,7 +3922,7 @@ The coefficient of friction was taken as $\mu = 0.08$, as determined in \citet{r
 Neither the die's specific geometry nor the die's material properties are specified in \citet{roh_process_2021}, so a conical die is assumed here with die material parameters taken from \citet{clancy_improving_2019}, corresponding to tungsten carbide.
 %The material properties for both die and wire are given in Tables 7.17 and 7.18.
 A total drawing displacement of 30 mm is applied to the wire downstream boundary in increments of 0.1 mm with a time step size of 0.5 ms (the total simulation time was 150 ms).
-%A back tension of \hl{XXXX} was applied to the wire upstream boundary.
+A back tension of 20 MPa was applied to the wire upstream boundary.
 %All other die surfaces are assumed to have a zero displacement condition \hl{check}.
 As before, the damage can only evolve after a drawing displacement of $2$ mm to avoid localisation in the initial time steps.
 %\begin{table}[htb]
@@ -4592,7 +4591,7 @@ Table \ref{tab:material_properties_PF_one_elem} lists the material parameters fo
 			Young's modulus & $E$ & $68.8$ & GPa \\
 			Poisson's ratio & $v$ & $0.33$  & - \\
 			Critical fracture energy & $G_c$ & $138\times10^6$ &  J/m$^2$ \\
-   		Plastic work threshold & $w_0$ & $1$ &  $MPa$ \\
+   		Plastic work threshold & $w_0$ & $1$ &  MPa \\
 			Characteristic length & $l$ & $2$ & m   \\
 			Hardening law & $\sigma_y$ & $320+688{\bar{\varepsilon}}_p$ & MPa  \\
 			\hline
