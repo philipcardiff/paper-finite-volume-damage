@@ -3054,7 +3054,9 @@ The predicted reaction forces at the loading boundaries (Figures \ref{fig:plasti
 It is worth noting that the reaction forces for both the \citet{clancy_improving_2019} implementation and the implementation in this work (which both use the logarithmic strain) are slightly less than the \citet{cardiff_lagrangian_2017}  and Abaqus predictions in the latter stages of the deformation.
 These differences have been found to remain as the mesh spacing and time step are reduced, ruling out discretisation error as the cause.
 Although the reason for these subtle differences is unclear, the lack of mathematical equivalence between the logarithmic and Green/Jaumann strain approaches may be the cause.
-Similarly, the use of the Jaumann objective rate in Abaqus \cite{soyarslan_finite_2010} may also contribute to the subtle differences.
+Similarly, the use of the Jaumann objective rate in Abaqus \cite{soyarslan_finite_2010} may also contribute to the subtle differences, as it is known to exhibit unphysical stress oscillations at large shear deformations.
+Although it is outside the scope of the current study, implementing a similar Jaumann rate formulation in OpenFOAM is one approach for checking this hypothesis.
+For the purposes of benchmarking in the current work, these subtle differences are considered acceptable.
 %in contrast to the logarithmic and Green strain approaches used in OpenFOAM.
 \begin{figure}[htbp]
 	\centering
@@ -3790,6 +3792,9 @@ Consistent with the Lemaitre cases, the Abaqus simulation has convergence issues
 %%%%
 The predicted porosity and equivalent plastic strain at the neck's centre are compared with Abaqus's predictions in Figure \ref{fig:axi_GTN_pointResults}.
 Porosity and plastic strain increase smoothly up to the point at which the crack propagates, after which their values significantly increase.
+The differences between the current OpenFOAM formulation and the Abaqus formulation are more pronounced here, after the onset of necking.
+The GTN model in Abaqus is once again based on a Jaumann-rate plasticity formulation, which may be one reason for the observed differences.
+%appears to use the same plasticity formulation as the other Abaqus simulations so the same reasoning behind explaining observed differences in Lemaitre/Plasticity models would hold: \url{https://classes.engineering.wustl.edu/2009/spring/mase5513/abaqus/docs/v6.6/books/usb/default.htm?startat=pt05ch18s02abm23.html}
 \begin{figure}[htb]
 	\centering
 		\subfigure[Porosity vs displacement]
