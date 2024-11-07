@@ -1486,10 +1486,13 @@ Assuming a linear variation of $\bar{D}$ within cell $P$, the mid-point rule is 
 \begin{eqnarray}
 	\int_{\Omega_u} \bar{D} \, d \Omega_u &\approx& \bar{D}_P \Omega_{u_P} 
 \end{eqnarray}
+This term is treated implicitly with the resulting linear system matrix coefficient contribution being $\Omega_{u_P}$ on the diagonal.
+
 Similarly, the right-hand side term is approximated using the mid-point rule:
 \begin{eqnarray}
 	\int_{\Omega_u} D \, d \Omega_u &\approx& D_P \Omega_{u_P} 
 \end{eqnarray}
+where this term is treated in a deferred correction manner, where $ D_P \Omega_{u_P} $ is added to the linear system source.
 
 The surface integral term (second on the left-hand side) is discretised by assuming a linear various of the integrand over the face and applying the mid-point rule about the face centre $f$:
 \begin{eqnarray}
@@ -1497,16 +1500,34 @@ The surface integral term (second on the left-hand side) is discretised by assum
 		&=&
 		\sum_{f \in N_f} \int_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left( l_c^2 \nabla \bar{D} \right) \,  d\mathrm{\Gamma}_u \notag \\
 		&\approx&
-		\sum_{f \in N_f} l_{c^2}^f \left|\boldsymbol{\Delta}_{u_f}\right|\left(\frac{\bar{D}_{N_f} - \bar{D}_P}{\left|\bb{d}_f\right|}\right)\left|\bb{\Gamma}_{u_f}\right| \notag \\
-		    &&+ \sum_{f \in N_f} l_{c^2}^f \; \bb{k}_{u_f} \cdot
-		    \left[
-		    \boldsymbol{\nabla} \left(\bar{D} \right)
-		    \right]_f
+		\sum_{f \in N_f} l_c^2 \left|\boldsymbol{\Delta}_{u_f}\right|\left(\frac{\bar{D}_{N_f} - \bar{D}_P}{\left|\bb{d}_f\right|}\right)\left|\bb{\Gamma}_{u_f}\right| \notag \\
+		    &&+ \sum_{f \in N_f} l_c^2 \; \bb{k}_{u_f} \cdot
+		    \left(  \boldsymbol{\nabla} \bar{D}   \right)_f
 		    \left|\bb{\Gamma}_{u_f}\right|
 \end{eqnarray}
 
+The first term on the right-hand side is treated implicitly (coefficients in the linear system matrix) and the second term is treated in a deferred correction manner (contributes to the linear system source) using values from the previous outer (Picard) iteration.
 This equation is solved with zero-flux Neumann boundary conditions on all boundaries, that is,  $\bb{n} \cdot \nabla \bar{D} = 0$.
+Consequently, the contributions coming from boundary faces are dropped.
 
+For each computational cell, the resulting algebraic equation becomes:
+\begin{eqnarray}
+	\left(
+		\Omega_{u_P}
+		+ \sum_{f \in N_f}
+		\frac{l_c^2 \left|\boldsymbol{\Delta}_{u_f} \right| \left| \bb{\Gamma}_{u_f} \right|}{\left|\bb{d}_f\right|}
+	\right) \bar{D}_P
+	- \sum_{f \in N_f}
+	\frac{l_c^2 \left|\boldsymbol{\Delta}_{u_f}\right| \left|\bb{\Gamma}_{u_f} \right|}{\left|\bb{d}_f\right|} \bar{D}_{N_f}
+	&=&
+	D_P \Omega_{u_P}
+	+ \sum_{f \in N_f} l_c^2 \; \bb{k}_{u_f} \cdot   \left(  \boldsymbol{\nabla} \bar{D}   \right)_f   \left|\bb{\Gamma}_{u_f}\right| \notag \\
+\end{eqnarray}
+in terms of the unknown non-local damage at the centres of cell $P$ and the neighbouring cells $N_f$.
+A similar algebraic equation is formed for each cell in the mesh and assembled into a system of linear equations.
+This equation is iteratively solved once per outer (Picard) iteration resulting in an implicit discretisation that is balanced at convergence of the outer loop.
+The resulting sparse matrix is strongly diagonally dominant due to the inclusion of the $\Omega_{u_P}$, ensuring rapid convergence of the iterative linear solver.
+In the limit of $l_c$ going to zero, the system of equations become decoupled and $\bar{D}_P = D_P$ as expected.
 
 
 \paragraph{Effective Non-Local Damage} \label{sec:effNonLocalDam}
@@ -2601,6 +2622,32 @@ where
 %\end{equation}
 
 Similar to the non-local equations in the Lemaitre and GTN models, in this work, the phase field equation (Equation \ref{eqn:phaseFieldEquation}) is discretised using the described cell-centred finite volume method, and zero-flux Neumann boundary conditions.
+To facilitate the cell-centred finite volume method, we express the phase field equation in integral form:
+\begin{eqnarray}
+	%\frac{G_c}{2l} \left(d - 4 l^2 \bb{\nabla}^2 d \right) = \mathcal{H} \\
+	\int_{\Omega_u} d \, d \Omega_u
+	- \oint_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left(  4 l^2 \nabla d \right) \,  d\mathrm{\Gamma}_u
+	 &=&  \int_{\Omega_u} \frac{2l}{G_c} \mathcal{H} \, d \Omega_u
+\end{eqnarray}
+where both sides have been multipled by $\frac{2l}{G_c}$ and the divergence theorem has been used to express the diffusion term (second on the left-hand side) in terms of a surface integral.
+
+This equation is applied to each cell and discretised in the same fashion as described for the the non-local damage equation (Equation \ref{eqn:nonLocalEquationIntegral}), where the terms on the left-hand side are discretised implicitly and the term on the right is treated in a deferred correction manner.
+The resulting algebraic equation for each computational cell becomes:
+\begin{eqnarray}
+	\left(
+		\Omega_{u_P}
+		+ \sum_{f \in N_f}
+		\frac{4 l^2 \left|\boldsymbol{\Delta}_{u_f} \right| \left| \bb{\Gamma}_{u_f} \right|}{\left|\bb{d}_f\right|}
+	\right) d_P
+	- \sum_{f \in N_f}
+	\frac{4 l^2 \left|\boldsymbol{\Delta}_{u_f}\right| \left|\bb{\Gamma}_{u_f} \right|}{\left|\bb{d}_f\right|} d_{N_f}
+	&=&
+	\frac{2l}{G_c} \mathcal{H} \Omega_{u_P}
+	+ \sum_{f \in N_f} l_c^2 \; \bb{k}_{u_f} \cdot   \left(  \boldsymbol{\nabla} d   \right)_f   \left|\bb{\Gamma}_{u_f}\right| \notag \\
+\end{eqnarray}
+in terms of the unknown phase field variable at the centres of cell $P$ and the neighbouring cells $N_f$.
+Like in the case of the non-local damage equation, this algebraic equation is formed for each cell in the mesh and assembled into a system of linear equations, which is iteratively solved once per outer (Picard) iteration.
+
 
 
 \subsubsection{Computational Procedure}
@@ -3789,6 +3836,7 @@ In both cases, a drawing displacement of $45$ mm is applied over $150$ ms.
 Figure \ref{fig:benchmarkLayersForces} compares the predicted drawing force (force in the axial direction on the wire downstream boundary) as a function of time for the layer addition-removal and traditional (no remeshing) approaches.
 After the startup phase ($< 20$ ms), the drawing forces are seen to closely agree for both approaches.
 The oscillations in force come from the mesh resolution effects on the contact procedure and are seen to reduce as the mesh is refined.
+After $100$ ms, the oscillations are seen to reduce in the layer addition-removal approach, which is attributed to the wire axial cell widths approximately matching the axial distance travelled each time step.
 Near the end time ($> 140$ ms), the predicted forces from the Lagrangian (no remeshing) approach are seen to drop, due to the boundary effects fromt he approaching wire upstream boundary.
 \begin{figure}[htb]
 	\centering
