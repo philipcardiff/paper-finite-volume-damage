@@ -1081,100 +1081,9 @@ For each cell at every outer (Picard) iteration, the stress $\bb{\sigma}^{[m+1]}
 %\end{equation}
 %This is solved implicitly using the Newton–Raphson method for $\Delta \gamma$ , the stress tensor and the plastic strain tensor are then updated based on this value.
 
-The adopted stress calculation algorithm \citep{de_souza_neto_computational_2008} is summarised in Algorithm \ref{alg:stressAlg}.
-
-\begin{algorithm}[htb] \label{alg:stressAlg} \footnotesize
-\SetAlgoLined
-(i) Update deformation gradients for a given incremental displacement
-
-\begin{equation}
-  \bb{f}^{[m+1]} = \bb{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
-\end{equation}
-
-\begin{equation}
-  \bb{F}^{[m+1]} = \bb{f}^{[m+1]} \bb{F}^{[m]}  \nonumber
-\end{equation}
-
-\begin{equation}
-  J^{[m+1]} = \text{det} \left( \bb{F}^{[m+1]} \right) \nonumber
-\end{equation}
-
-(ii) Compute trial elastic state
-\begin{equation}
-\bb{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
-\end{equation}
-\begin{equation}
-\bb{B}_{e}^{\text{trial}} = \bb{f}^{[m+1]}  \bb{B}_{e}^{[m]} \left(\bb{f}^{[m+1]} \right)^{T}\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\varepsilon}_{e}^{\text{trial}} = \frac{1}{2} \ln\left(\textbf{B}_{e}^{\text{trial}} \right) \nonumber
-\end{equation}
-\begin{equation}
-\bar{\varepsilon}^{\text{trial}}_p = \bar{\varepsilon}^{[m]}_p \nonumber
-\end{equation}
-\begin{equation}
-\sigma_{v}^{\text{trial}} = \sqrt{\sfrac{3}{2}} \, || 2 \mu \, \text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})|| \nonumber
-\end{equation}
-\begin{equation}
-\Phi^{\text{trial}} =  \sigma_{v}^{\text{trial}} - \sigma_{y}(\bar{\varepsilon}^{\text{trial}}_p) \nonumber 
-\end{equation}
-  \eIf{$\Phi^{\text{trial}} > 0$}{
-   Go to step (iii) to solve for $\Delta\bar{\varepsilon}_p$
-   }{
-   $\Delta\bar{\varepsilon}_p = 0$ and go to step (iv)
-  }
-
-(iii) Use the Newton-Raphson method to solve the yield function for $\Delta\bar{\varepsilon}_p$:
-\begin{equation}
-	\sigma_{v}^{\text{trial}} 
-	- 3\mu \Delta\bar{\varepsilon}_p
-	-\sigma_{y}(\bar{\varepsilon}^{[m]}_p + \Delta\bar{\varepsilon}_p) = 0 \nonumber
-\end{equation}
-
-(iv) Update the constitutive variables and deviatoric stress
-\begin{equation}
-	\boldsymbol{\varepsilon}_{e}^{[m+1]}
-	=
-	\boldsymbol{\varepsilon}_{e}^{\text{trial}}
-	- \sqrt{\sfrac{3}{2}} \; \Delta\bar{\varepsilon}_p
-	\frac{\text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})}{||\boldsymbol{\varepsilon}_{e}^{\text{trial}}||}
-	\nonumber
-\end{equation}
-\begin{equation}
-	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta\bar{\varepsilon}_p \nonumber
-\end{equation}
-
-\begin{equation}
-	\hat{p} = -\frac{\kappa}{J^{[m+1]}} \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
-\end{equation}
-
-\begin{equation}
-%	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \bb{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
-	\boldsymbol{s}^{[m+1]}
-	=
-	(\sfrac{1}{J^{[m+1]}}) \, 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
-\end{equation}
-
-(v)
-   \eIf{Solve pressure equation}{
-   Implicitly solve the pressure Poisson's equation:
-\begin{equation}
-	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = \hat{p} - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \nonumber
-\end{equation}
-   }{
-\begin{equation}
-	p^{[m+1]} = \hat{p} \nonumber
-\end{equation}
-  }
+The adopted stress calculation algorithm \citep{de_souza_neto_computational_2008} is summarised in Appendix \ref{app:stressCalcAlg}. %Algorithm \ref{alg:stressAlg}.
 
 
-(vi) Update the true (Cauchy) stress
-\begin{equation}
-	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
-\end{equation}
-
-\caption{Large strain $J_2$ (von Mises) isotropic elastoplastic stress calculation algorithm \citep{de_souza_neto_computational_2008} }
-\end{algorithm}
 
 
 
@@ -1674,7 +1583,7 @@ Note that the overall solution algorithm is still implicit in time.
 
 %\paragraph{Overall Stress Calculation Procedure}
 
-This stress calculation procedure for the Lemaitre damage model using the proposed effective non-local damage model is summarised in Algorithm \ref{alg:lemaitre}.
+This stress calculation procedure for the Lemaitre damage model using the proposed effective non-local damage model is summarised in Appendix \ref{app:stressCalcAlg}. %Algorithm \ref{alg:lemaitre}.
 This approach reverts to the \emph{classic} non-local damage Lemaitre procedure with three changes:
 \begin{enumerate}[label=(\alph*)]
 	\item The effective non-local damage $\bar{D}_\text{eff}$ is set always equal to the non-local damage $\bar{D}$ -- modification to step (viii);
@@ -1699,133 +1608,6 @@ The impact of the proposed effective non-local damage approach is examined in Se
 %\end{equation}
 %where $S$ can be a function of $\eta$ and $\xi$ as described above.
 %In addition, $D$ is explicitly bound to be less than of equal to $D_c$.
-
-\begin{algorithm}[htbp] \label{alg:lemaitre} \footnotesize
-\SetAlgoLined
-(i) Update deformation gradients for a given incremental displacement
-
-\begin{equation}
-  \bb{f}^{[m+1]} = \bb{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
-\end{equation}
-\begin{equation}
-  \bb{F}^{[m+1]} = \bb{f}^{[m+1]} \bb{F}^{[m]}  \nonumber
-\end{equation}
-\begin{equation}
-  J^{[m+1]} = \text{det} \left( \bb{F}^{[m+1]} \right) \nonumber
-\end{equation}
-
-(ii) Compute trial elastic state
-\begin{equation}
-\bb{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
-\end{equation}
-\begin{equation}
-\bb{B}_{e}^{\text{trial}} = \bb{f}^{[m+1]}  \bb{B}_{e}^{[m]}  \left(\bb{f}^{[m+1]}\right)^{T}\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\varepsilon}_{e}^{\text{trial}} = \frac{1}{2} \ln(\textbf{B}_{e}^{\text{trial}}) \nonumber
-\end{equation}
-\begin{equation}
-\bar{\varepsilon}^{\text{trial}}_p = \bar{\varepsilon}^{[m]}_p \nonumber
-\end{equation}
-\begin{equation}
-\sigma_{v}^{\text{trial}} = \sqrt{\sfrac{3}{2}} \, || 2\mu\ \text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})|| \nonumber
-\end{equation}
-\begin{equation}
-%\Phi^{\text{trial}} =  \frac{\sigma_{v}^{\text{trial}}}{1 - \bar{D}^{[m]}} - \sigma_{y}(\bar{\varepsilon}^{\text{trial}}_p) \nonumber 
-\Phi^{\text{trial}} =  \sigma_{v}^{\text{trial}} - \sigma_{y}(\bar{\varepsilon}^{\text{trial}}_p) \nonumber 
-\end{equation}
-  \eIf{$\Phi^{\text{trial}} > 0$}{
-   Go to step (iii) to solve for $\Delta\bar{\varepsilon}_p$
-   }{
-   $\Delta\bar{\varepsilon}_p = 0$ and go to step (iv)
-  }
-
-(iii) Use the Newton-Raphson method to solve the yield function for $\Delta\bar{\varepsilon}_p$:
-\begin{equation}
-	\sigma_{v}^{\text{trial}} 
-	- \frac{ 3\mu \Delta\bar{\varepsilon}_p }{1 - \bar{D}^{[m+1]}_{\text{eff}\,[i]}}
-	-\sigma_{y}(\bar{\varepsilon}^{[m]}_p + \Delta\bar{\varepsilon}_p) = 0 \nonumber
-\end{equation}
-
-(iv) Update constitutive variables and deviatoric stress
-\begin{equation}
-	\boldsymbol{\varepsilon}_{e}^{[m+1]}
-	=
-	\boldsymbol{\varepsilon}_{e}^{\text{trial}}
-	- \sqrt{\frac{3}{2}} \; \frac{ \Delta\bar{\varepsilon}_p}{1 - \bar{D}^{[m+1]}_{\text{eff}\,[i]}}
-	\frac{\text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})}{||\boldsymbol{\varepsilon}_{e}^{\text{trial}}||}
-	\nonumber
-\end{equation}
-\begin{equation}
-	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta\bar{\varepsilon}_p \nonumber
-\end{equation}
-
-\begin{equation}
-	\hat{p} = -\left(1 - \bar{D}^{[m+1]}_{\text{eff}\,[i]}\right) \frac{\kappa}{J^{[m+1]}} \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
-\end{equation}
-
-\begin{equation}
-%	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \bb{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
-	\boldsymbol{s}^{[m+1]}
-	=
-	\left(1 - \bar{D}^{[m+1]}_{\text{eff}\,[i]}\right) \frac{1}{J^{[m+1]}}  \, 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
-\end{equation}
-
-(v)
-   \eIf{Solve pressure equation}{
-   Implicitly solve the pressure Poisson's equation:
-\begin{equation}
-	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = \hat{p} - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \nonumber
-\end{equation}
-   }{
-\begin{equation}
-	p^{[m+1]} = \hat{p} \nonumber
-\end{equation}
-  }
-
-
-(vi) Update the true (Cauchy) stress
-\begin{equation}
-	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
-\end{equation}
-
-(vii) Update the local damage (use the modified form for $Y$ if $h > 0$)
-%\ref{eq:triaxCutoff} and \ref{eq:damageLimit}
-\begin{equation} % note: flip sign from Andrew's thesis, as Andrew assume p = hyd(sigma), whereas we assume p = -hyd(sigma)
-	D^{[m+1]}_{[i+1]}  =
-	\begin{cases}
-		D^{[m]} &
-		\text { if } \eta \leq -\frac{1}{3} \text{ or } \bar{D}^{[m+1]}_{\text{eff}\,[i]} \geq D_c \\
-		D^{[m]} + \frac{\dot{\bar{\varepsilon}}_p}{1 - D^{[m+1]}_{[i]}}\left(\frac{-Y}{S(\eta,\xi)}\right)^b
-%		\text{max} \left[ D^{[m]} + \frac{\dot{\bar{\varepsilon}}_p}{1 - D^{[m+1]}_{[i]}}\left(\frac{-Y}{S(\eta,\xi)}\right)^b, \; D_c \right]
-		& 
-		\text { if } \eta>-\frac{1}{3} \text{ and }  \bar{D}^{[m+1]}_{\text{eff}\,[i]} < D_c
-	\end{cases}  \nonumber
-\end{equation}
-
-(vii) Implicitly solve diffusion equation for non-local damage
-\begin{equation}
-	\bar{D}^{[m+1]} -  l_c^2 \bb{\nabla}^2 \bar{D}^{[m+1]} = D^{[m+1]}_{[i+1]} \nonumber
-\end{equation}
-  
-(viii) Update the effective damage
-\begin{equation}
-	\bar{D}^{[m+1]}_{\text{eff}\,[i+1]}  =
-	\begin{cases}
-		\bar{D}^{[m+1]} &
-		\text { if }  \bar{D}^{[m+1]} \leq D_c \\
-		0.99	& 
-		\text { if }  \bar{D}^{[m+1]} > D_c
-	\end{cases}  \nonumber
-\end{equation}
-%\begin{equation}
-%	\bar{D}^{[m+1]} = \text{max} \left( \bar{D}^{[m+1]} , D_c \right) \nonumber
-%\end{equation}
-
-\caption{Effective non-local damage Lemaitre model stress calculation algorithm}
-\end{algorithm}
-\normalsize
-
 
 %\hl{Add alg below into main alg}
 %\begin{algorithm}[htbp] \label{alg:effectiveNonLocalDamage}
@@ -2229,7 +2011,7 @@ As before, this equation can be discretised using the described cell-centred fin
 
 %\hl{Philip reminder: make notation consistent for tensor multiplication}\\
 For the GTN model, the elastoplasticity stress calculation is extended to determine porosity $f$ in addition to stress and plastic strain.
-The adopted computational algorithm is shown in Algorithm \ref{alg:GTN}.
+The adopted computational algorithm is shown in Appendix \ref{app:stressCalcAlg}. %Algorithm \ref{alg:GTN}.
 As in the Lemaitre computational procedure, we propose a deferred correction algorithm to solve the system of equations:
 Equations \ref{eqn:GTN1}, \ref{eqn:GTN2} and \ref{eqn:GTN3} are solved implicitly for the variables ${\varepsilon}_\text{vol}$, ${\varepsilon}_\text{dev}$ and $\overline{{\varepsilon}}_p$ using a Newon-Raphson method, while the porosity $f$ (Equation \ref{eqn:GTN4}) is calculated in a deferred-correction manner.
 Once again, the overall procedure is implicit in time.
@@ -2328,144 +2110,6 @@ Once again, the overall procedure is implicit in time.
 
 %Where ${f}^{[m+1]}^{i+1}$ is the porosity for the current iteration and $f^{[m+1]}^i$ is the porosity from the previous iteration. The effective porosity $f^{*i+1}^{[m+1]}$ is then calculated according to equation \ref{eqn:GTNCoalescence}.
 %This procedure is provided in Algorithm 5.
-
-\begin{algorithm}[htbp] \label{alg:GTN} \footnotesize
-\SetAlgoLined
-(i) Update deformation gradients for a given incremental displacement
-
-\begin{equation}
-  \bb{f}^{[m+1]} = \bb{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
-\end{equation}
-\begin{equation}
-  \bb{F}^{[m+1]} = \bb{f}^{[m+1]} \bb{F}^{[m]}  \nonumber
-\end{equation}
-\begin{equation}
-  J^{[m+1]} = \text{det} \left( \bb{F}^{[m+1]} \right) \nonumber
-\end{equation}
-
-(ii) Compute trial elastic state
-\begin{equation}
-	\bb{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
-\end{equation}
-\begin{equation}
-\bb{B}^{\text{trial}}_e =\bb{f}^{[m+1]}\bb{B}_{e}^{[m]} \left(\bb{f}^{[m+1]} \right)^{T}\nonumber
-\end{equation}
-\begin{equation}
-\boldsymbol{\varepsilon}_e^{\text{trial}}=\frac{1}{2} \ln\left[\textbf{B}^{\text{trial}}_e \right]\nonumber
-\end{equation}
-%\begin{equation} % Philip: what is this used for?
-%\bar{\varepsilon}^{p}_{\text{trial}}=\bar{\varepsilon}_{p}^{[m]}\nonumber
-%\end{equation}
-\begin{equation}
-	p^{\text{trial}} = -\kappa \, \text{tr}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})\nonumber
-\end{equation}
-\begin{equation}
-	\bb{s}^{\text{trial}}=2 \mu \, \text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})\nonumber
-\end{equation}
-\begin{equation}
-	\sigma^{\text{trial}}_v = \sqrt{\sfrac{3}{2}} \, ||  2\mu \, \text{dev}(\boldsymbol{\varepsilon}^{e}_{\text{trial}})|| \nonumber
-\end{equation}
-\begin{equation}
-    \bb{n}=\frac{3}{2}\frac{\bb{s}^{\text{\text{trial}}}}{\sigma_v^{\text{trial}}}\nonumber
-\end{equation}
-\begin{equation}
-	\Phi^{\text{trial}} = 
-	\left(\frac{\sigma_v^{\text{trial}}}{\sigma_{y}}\right)^{2}
-	+ q_{1}f_{*[i]}^{[m+1]} \cosh\left(\frac{3q_{2}p^{\text{trial}}}{2\sigma_{y}}\right)
-	-\left(1 + q_{3}{f_{*[i]}^{[m+1]}}^2\right)\nonumber
-\end{equation}
-  \eIf{$\Phi^{\text{trial}}>0$}{
-   Go to step (iii)
-   }{
-   set $\Delta \varepsilon_\text{vol} = \Delta \varepsilon_\text{dev} = \Delta \bar{\varepsilon}_p = 0$ and $\Delta \bb{\varepsilon}_p = \bb{0}$. Go to step (iv)
-  }
-
-(iii) Enter small strain return map and solve the system of equations (Equations 49-51) for $\Delta {\varepsilon}^{[m+1]}_h$, $\Delta {\varepsilon}^{[m+1]}_q$ and $\Delta \overline{{\varepsilon}}^p_{[m+1]}$
-
-
-(iv) Update the constitutive variables
-\begin{equation}
-	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta \bar{\varepsilon}_p \nonumber
-\end{equation}
-\begin{equation}
-	\bb{\varepsilon}_p^{[m+1]} = \bb{\varepsilon}_p^{[m]} +\Delta \bb{\varepsilon}_p \nonumber
-\end{equation}
-\begin{equation}
-	\boldsymbol{\varepsilon}_{e}^{[m+1]} = \boldsymbol{\varepsilon}^{\text{trial}}
-	- (\sfrac{1}{3}) \Delta {\varepsilon}^{[m+1]}_\text{vol} \, \bb{I}
-	- \Delta {\varepsilon}^{[m+1]}_\text{dev} \, \bb{n}\nonumber
-\end{equation}
-\begin{equation}
-	\hat{p} = \left(\sfrac{1}{J^{[m+1]}} \right) \left(p_{\text {trial }} + \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}} \right)
-\end{equation}
-\begin{equation}
-	\boldsymbol{s}^{[m+1]} =
-	\left(\sfrac{1}{J^{[m+1]}}\right)
-	\left[
-%	 	\left(
-%			p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}}
-%		\right)\bb{I}
-%		+
-		\sfrac{2}{3} \left(\sigma_v^{\text {trial }} - 3 \mu \Delta \varepsilon^{[m+1]}_\text{dev} \right) \bb{n}
-	\right] \nonumber
-\end{equation}
-%\begin{equation}
-%\boldsybol{\tau}^{[m+1]}=\left(q_{trial}-3\mu\Delta \boldsymbol{\varepsilon}^{[m+1]}^q\left(\frac{3\bb{s}_{trial}}{2q_{trial}}\right)\right)+\left(p_{trial}-K\Delta\varepsilon^{h}^{[m+1]}\right)\nonumber
-%\end{equation}
-
-%\begin{equation}
-%\boldsymbol{\sigma}^{[m+1]}=\frac{1}{J}\boldsymbol{\tau}^{[m+1]}\nonumber
-%\end{equation}
-
-%(v) Implicitly solve the pressure Poisson's equation:
-%\begin{equation}
-%	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} =
-%%	-\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right]
-%	\frac{1}{J}\left(p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}} \right)
-%	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \\
-%\end{equation}
-(v)
-   \eIf{Solve pressure equation}{
-   Implicitly solve the pressure Poisson's equation:
-\begin{equation}
-	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = \hat{p} - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right)
-\end{equation}
-   }{
-\begin{equation}
-	p^{[m+1]} = \hat{p}
-\end{equation}
-  }
-
-
-(vi) Update the true (Cauchy) stress
-\begin{equation}
-	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
-\end{equation}
-
-
-(vii) Calculate the porosity $f_{[i+1]}^{[m+1]}$ and the effective porosity $f_{*[i+1]}^{[m+1]}$:
-\begin{equation}
-	f^{[m+1]} = f^{[m]} + \left(1 - f^{[m+1]}_{[i]}\right) \, \text{tr}\left(\dot{\boldsymbol{\varepsilon}}^{[m+1]}_p\right)
-	+ A \dot{\bar{\varepsilon}}^{[m+1]}_p
-%	+ k_w f\frac{1 - \xi^2 }{\sigma_v^{[m+1]}} \,\text{dev}(\bb{\sigma}^{[m+1]}):{\dot{\boldsymbol{\varepsilon}}}_p^{[m+1]}
-\end{equation}
-\begin{equation}
-	f^{*[m+1]} =
-	\left\{
-	\begin{array}{ll}
-		f^{[m+1]}  & \text { if } f^{[m+1]}  \leq f_c \\
-		f_c + \left(f^{[m+1]} - f_c\right) \frac{f_u - f_c}{f_f - f_c} & \text { if } f^{[m+1]}  > f_c
-	\end{array}\right.
-\end{equation}
-
-
-(viii) Implicitly solve non-local porosity equation:
-\begin{equation}
-	\bar{f}^{[m+1]} -  l_c^2 \bb{\nabla}^2 \bar{f}^{[m+1]} = f^{[m+1]}
-\end{equation}
-
-\caption{GTN damage model stress calculation algorithm}
-\end{algorithm}
 
 
 
@@ -2722,128 +2366,7 @@ Like in the case of the non-local damage equation, this algebraic equation is fo
 Like the Lemaitre and GTN procedures, a deferred-correction procedure is adopted here to incorporate the phase (damage) evolution equation.
 Within each outer iteration, the elastoplastic quantities are calculated using the latest available phase field variable $d^{[m+1]}_{[i]}$ from the previous outer iteration $i$.
 Subsequently, the phase field equation (Equation \ref{eqn:phaseFieldEquation}) is solved using the latest available stress and strain fields.
-The algorithm for the phase field stress calculation procedure is given in Algorithm \ref{alg:phaseField}.
-
-\begin{algorithm}[htbp] \label{alg:phaseField} \footnotesize
-\SetAlgoLined
-(i) Update deformation gradients for a given incremental displacement
-
-\begin{equation}
-  \bb{f}^{[m+1]} = \bb{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
-\end{equation}
-\begin{equation}
-  \bb{F}^{[m+1]} = \bb{f}^{[m+1]} \bb{F}^{[m]}  \nonumber
-\end{equation}
-\begin{equation}
-  J^{[m+1]} = \text{det} \left( \bb{F}^{[m+1]} \right) \nonumber
-\end{equation}
-
-(ii) Compute trial elastic state
-\begin{equation}
-	\bb{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
-\end{equation}
-\begin{equation}
-	\bb{B}^{\text{trial}}_e = \bb{f}^{[m+1]}\bb{B}^{[m]}_e \left(\bb{f}^{[m+1]}\right)^{T}\nonumber
-\end{equation}
-\begin{equation}
-	\boldsymbol{\varepsilon}^{\text{trial}}_e = \frac{1}{2} \ln \left(\textbf{B}^{\text{trial}}_e \right) \nonumber
-\end{equation}
-%\begin{equation}
-%\bar{\varepsilon}^{p}_{trial}=\bar{\varepsilon}_{p}^{[m]}\nonumber
-%\end{equation}
-\begin{equation}
-	\sigma_v^{\text{trial}} =
-	\left(1 - d_{[i]}^{[m+1]2} \right) \sqrt{\sfrac{3}{2}} \, || 2\mu \, \text{dev}(\bb{\varepsilon}_e)|| \nonumber
-\end{equation}
-\begin{equation}
-	\Phi^{\text{trial}} =
-	\sigma_v^{\text{trial}}
-	- \left(1 - d_{[i]}^{[m+1]2} \right) \, \sigma_{y}\left(\bar{\varepsilon}_p^{[m]} \right) \nonumber 
-\end{equation}
-\eIf{$\Phi_{\text{trial}}>0$}{
-   Go to step (iii) to solve for $\Delta \bar{\varepsilon}_p$
-   }{
-   $\Delta\bar{\varepsilon}_p = 0$ and go to step (iv)
-  }
-
-(iii) Use the Newton-Raphson to solve the yield equation for the equivalent plastic strain increment $\Delta\bar{\varepsilon}_p$:
-\begin{equation}
-	\sigma_v^{\text{trial}}
-	- \left(1 - d_{[i]}^{[m+1]2} \right) 3 \mu\Delta\bar{\varepsilon}_p
-	- \left(1 - d_{[i]}^{[m+1]2} \right) \sigma_{y}(\bar{\varepsilon}_{p}^{[m]} + \Delta\bar{\varepsilon}_p)
-	= 0 \nonumber
-\end{equation}
-
-
-(iv) Update the constitutive variables
-\begin{equation}
-	\boldsymbol{\varepsilon}_{e}^{[m+1]} =
-		\bb{\varepsilon}_{e}^{\text{trial}}
-		- \sqrt{\sfrac{3}{2}} \, \Delta \bar{\varepsilon}_p 
-		\frac{\text{dev}(\bb{\varepsilon}_{e}^{\text{trial}})}{\||\bb{\varepsilon}_{e}^{\text{trial}}||}
-		\nonumber
-\end{equation}
-%\begin{equation}
-%	\boldsymbol{\tau}^{[m+1]}=g_e(d)\bb{D}^e:\boldsymbol{\varepsilon}_{e}^{[m+1]}\ 
-%	%Must incorporate section 4.5.4
-%\nonumber
-%\end{equation}
-\begin{equation}
-	\hat{p} = -\left(\sfrac{\kappa}{J^{[m+1]}} \right)\; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
-\end{equation}
-\begin{equation}
-%	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \bb{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
-	\boldsymbol{s}^{[m+1]}
-	=
-	\left[1 - \left(d^{[m+1]}_{[i]}\right)^2 \right] (\sfrac{1}{J^{[m+1]}}) \, 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
-\end{equation}
-\begin{equation}
-	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta \bar{\varepsilon}_p \nonumber
-\end{equation}
-%\begin{equation}
-%	\bb{\varepsilon}_p^{[m+1]} = \bb{\varepsilon}_p^{[m]} +\Delta \bb{\varepsilon}_p \nonumber
-%\end{equation}
-
-
-
-%(v) Implicitly solve the pressure Poisson's equation:
-%\begin{equation}
-%	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} =
-%	-\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right]
-%	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \\
-%\end{equation}
-(v)
-   \eIf{Solve pressure equation}{
-   Implicitly solve the pressure Poisson's equation:
-\begin{equation}
-	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = \hat{p} - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \nonumber
-\end{equation}
-   }{
-\begin{equation}
-	p^{[m+1]} = \hat{p} \nonumber
-\end{equation}
-  }
-
-(vi) Update the true (Cauchy) stress
-\begin{equation}
-	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
-\end{equation}
-
-
-(vi) Solve the phase field equation for $d$:
-\begin{equation}
-	\frac{G_c}{2l}\left(d^{[m+1]} -4l^2 \bb{\nabla}^2 d^{[m+1]} \right) =
-	\mathcal{H}^{[m+1]}_{[i]} %\left(\underline{\mathrm{x}},t\right)
-	 \nonumber
-\end{equation}
-
-\caption{Phase field damage model stress calculation algorithm}
-\end{algorithm}
-
-
-
-
-
+The algorithm for the phase field stress calculation procedure is given in Appendix \ref{app:stressCalcAlg}. %Algorithm \ref{alg:phaseField}.
 
 
 
@@ -4976,6 +4499,519 @@ Additionally, the authors want to acknowledge project affiliates, Bekaert, throu
 \newpage
 
 \begin{appendices}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Stress Calculation Algorithms} \label{app:stressCalcAlg}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Isotropic Elastoplasticity}
+ 
+\begin{algorithm}[htb] \label{alg:stressAlg} \footnotesize
+\SetAlgoLined
+(i) Update deformation gradients for a given incremental displacement
+
+\begin{equation}
+  \bb{f}^{[m+1]} = \bb{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
+\end{equation}
+
+\begin{equation}
+  \bb{F}^{[m+1]} = \bb{f}^{[m+1]} \bb{F}^{[m]}  \nonumber
+\end{equation}
+
+\begin{equation}
+  J^{[m+1]} = \text{det} \left( \bb{F}^{[m+1]} \right) \nonumber
+\end{equation}
+
+(ii) Compute trial elastic state
+\begin{equation}
+\bb{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
+\end{equation}
+\begin{equation}
+\bb{B}_{e}^{\text{trial}} = \bb{f}^{[m+1]}  \bb{B}_{e}^{[m]} \left(\bb{f}^{[m+1]} \right)^{T}\nonumber
+\end{equation}
+\begin{equation}
+\boldsymbol{\varepsilon}_{e}^{\text{trial}} = \frac{1}{2} \ln\left(\textbf{B}_{e}^{\text{trial}} \right) \nonumber
+\end{equation}
+\begin{equation}
+\bar{\varepsilon}^{\text{trial}}_p = \bar{\varepsilon}^{[m]}_p \nonumber
+\end{equation}
+\begin{equation}
+\sigma_{v}^{\text{trial}} = \sqrt{\sfrac{3}{2}} \, || 2 \mu \, \text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})|| \nonumber
+\end{equation}
+\begin{equation}
+\Phi^{\text{trial}} =  \sigma_{v}^{\text{trial}} - \sigma_{y}(\bar{\varepsilon}^{\text{trial}}_p) \nonumber 
+\end{equation}
+  \eIf{$\Phi^{\text{trial}} > 0$}{
+   Go to step (iii) to solve for $\Delta\bar{\varepsilon}_p$
+   }{
+   $\Delta\bar{\varepsilon}_p = 0$ and go to step (iv)
+  }
+
+(iii) Use the Newton-Raphson method to solve the yield function for $\Delta\bar{\varepsilon}_p$:
+\begin{equation}
+	\sigma_{v}^{\text{trial}} 
+	- 3\mu \Delta\bar{\varepsilon}_p
+	-\sigma_{y}(\bar{\varepsilon}^{[m]}_p + \Delta\bar{\varepsilon}_p) = 0 \nonumber
+\end{equation}
+
+(iv) Update the constitutive variables and deviatoric stress
+\begin{equation}
+	\boldsymbol{\varepsilon}_{e}^{[m+1]}
+	=
+	\boldsymbol{\varepsilon}_{e}^{\text{trial}}
+	- \sqrt{\sfrac{3}{2}} \; \Delta\bar{\varepsilon}_p
+	\frac{\text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})}{||\boldsymbol{\varepsilon}_{e}^{\text{trial}}||}
+	\nonumber
+\end{equation}
+\begin{equation}
+	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta\bar{\varepsilon}_p \nonumber
+\end{equation}
+
+\begin{equation}
+	\hat{p} = -\frac{\kappa}{J^{[m+1]}} \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+\end{equation}
+
+\begin{equation}
+%	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \bb{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
+	\boldsymbol{s}^{[m+1]}
+	=
+	(\sfrac{1}{J^{[m+1]}}) \, 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+\end{equation}
+
+(v)
+   \eIf{Solve pressure equation}{
+   Implicitly solve the pressure Poisson's equation:
+\begin{equation}
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = \hat{p} - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \nonumber
+\end{equation}
+   }{
+\begin{equation}
+	p^{[m+1]} = \hat{p} \nonumber
+\end{equation}
+  }
+
+
+(vi) Update the true (Cauchy) stress
+\begin{equation}
+	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
+\end{equation}
+
+\caption{Large strain $J_2$ (von Mises) isotropic elastoplastic stress calculation algorithm \citep{de_souza_neto_computational_2008} }
+\end{algorithm}
+
+
+
+
+
+\subsection{Lemaitre Damage Model}
+
+
+
+\begin{algorithm}[htbp] \label{alg:lemaitre} \footnotesize
+\SetAlgoLined
+(i) Update deformation gradients for a given incremental displacement
+
+\begin{equation}
+  \bb{f}^{[m+1]} = \bb{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
+\end{equation}
+\begin{equation}
+  \bb{F}^{[m+1]} = \bb{f}^{[m+1]} \bb{F}^{[m]}  \nonumber
+\end{equation}
+\begin{equation}
+  J^{[m+1]} = \text{det} \left( \bb{F}^{[m+1]} \right) \nonumber
+\end{equation}
+
+(ii) Compute trial elastic state
+\begin{equation}
+\bb{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
+\end{equation}
+\begin{equation}
+\bb{B}_{e}^{\text{trial}} = \bb{f}^{[m+1]}  \bb{B}_{e}^{[m]}  \left(\bb{f}^{[m+1]}\right)^{T}\nonumber
+\end{equation}
+\begin{equation}
+\boldsymbol{\varepsilon}_{e}^{\text{trial}} = \frac{1}{2} \ln(\textbf{B}_{e}^{\text{trial}}) \nonumber
+\end{equation}
+\begin{equation}
+\bar{\varepsilon}^{\text{trial}}_p = \bar{\varepsilon}^{[m]}_p \nonumber
+\end{equation}
+\begin{equation}
+\sigma_{v}^{\text{trial}} = \sqrt{\sfrac{3}{2}} \, || 2\mu\ \text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})|| \nonumber
+\end{equation}
+\begin{equation}
+%\Phi^{\text{trial}} =  \frac{\sigma_{v}^{\text{trial}}}{1 - \bar{D}^{[m]}} - \sigma_{y}(\bar{\varepsilon}^{\text{trial}}_p) \nonumber 
+\Phi^{\text{trial}} =  \sigma_{v}^{\text{trial}} - \sigma_{y}(\bar{\varepsilon}^{\text{trial}}_p) \nonumber 
+\end{equation}
+  \eIf{$\Phi^{\text{trial}} > 0$}{
+   Go to step (iii) to solve for $\Delta\bar{\varepsilon}_p$
+   }{
+   $\Delta\bar{\varepsilon}_p = 0$ and go to step (iv)
+  }
+
+(iii) Use the Newton-Raphson method to solve the yield function for $\Delta\bar{\varepsilon}_p$:
+\begin{equation}
+	\sigma_{v}^{\text{trial}} 
+	- \frac{ 3\mu \Delta\bar{\varepsilon}_p }{1 - \bar{D}^{[m+1]}_{\text{eff}\,[i]}}
+	-\sigma_{y}(\bar{\varepsilon}^{[m]}_p + \Delta\bar{\varepsilon}_p) = 0 \nonumber
+\end{equation}
+
+(iv) Update constitutive variables and deviatoric stress
+\begin{equation}
+	\boldsymbol{\varepsilon}_{e}^{[m+1]}
+	=
+	\boldsymbol{\varepsilon}_{e}^{\text{trial}}
+	- \sqrt{\frac{3}{2}} \; \frac{ \Delta\bar{\varepsilon}_p}{1 - \bar{D}^{[m+1]}_{\text{eff}\,[i]}}
+	\frac{\text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})}{||\boldsymbol{\varepsilon}_{e}^{\text{trial}}||}
+	\nonumber
+\end{equation}
+\begin{equation}
+	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta\bar{\varepsilon}_p \nonumber
+\end{equation}
+
+\begin{equation}
+	\hat{p} = -\left(1 - \bar{D}^{[m+1]}_{\text{eff}\,[i]}\right) \frac{\kappa}{J^{[m+1]}} \; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+\end{equation}
+
+\begin{equation}
+%	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \bb{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
+	\boldsymbol{s}^{[m+1]}
+	=
+	\left(1 - \bar{D}^{[m+1]}_{\text{eff}\,[i]}\right) \frac{1}{J^{[m+1]}}  \, 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+\end{equation}
+
+(v)
+   \eIf{Solve pressure equation}{
+   Implicitly solve the pressure Poisson's equation:
+\begin{equation}
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = \hat{p} - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \nonumber
+\end{equation}
+   }{
+\begin{equation}
+	p^{[m+1]} = \hat{p} \nonumber
+\end{equation}
+  }
+
+
+(vi) Update the true (Cauchy) stress
+\begin{equation}
+	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
+\end{equation}
+
+(vii) Update the local damage (use the modified form for $Y$ if $h > 0$)
+%\ref{eq:triaxCutoff} and \ref{eq:damageLimit}
+\begin{equation} % note: flip sign from Andrew's thesis, as Andrew assume p = hyd(sigma), whereas we assume p = -hyd(sigma)
+	D^{[m+1]}_{[i+1]}  =
+	\begin{cases}
+		D^{[m]} &
+		\text { if } \eta \leq -\frac{1}{3} \text{ or } \bar{D}^{[m+1]}_{\text{eff}\,[i]} \geq D_c \\
+		D^{[m]} + \frac{\dot{\bar{\varepsilon}}_p}{1 - D^{[m+1]}_{[i]}}\left(\frac{-Y}{S(\eta,\xi)}\right)^b
+%		\text{max} \left[ D^{[m]} + \frac{\dot{\bar{\varepsilon}}_p}{1 - D^{[m+1]}_{[i]}}\left(\frac{-Y}{S(\eta,\xi)}\right)^b, \; D_c \right]
+		& 
+		\text { if } \eta>-\frac{1}{3} \text{ and }  \bar{D}^{[m+1]}_{\text{eff}\,[i]} < D_c
+	\end{cases}  \nonumber
+\end{equation}
+
+(vii) Implicitly solve diffusion equation for non-local damage
+\begin{equation}
+	\bar{D}^{[m+1]} -  l_c^2 \bb{\nabla}^2 \bar{D}^{[m+1]} = D^{[m+1]}_{[i+1]} \nonumber
+\end{equation}
+  
+(viii) Update the effective damage
+\begin{equation}
+	\bar{D}^{[m+1]}_{\text{eff}\,[i+1]}  =
+	\begin{cases}
+		\bar{D}^{[m+1]} &
+		\text { if }  \bar{D}^{[m+1]} \leq D_c \\
+		0.99	& 
+		\text { if }  \bar{D}^{[m+1]} > D_c
+	\end{cases}  \nonumber
+\end{equation}
+%\begin{equation}
+%	\bar{D}^{[m+1]} = \text{max} \left( \bar{D}^{[m+1]} , D_c \right) \nonumber
+%\end{equation}
+
+\caption{Effective non-local damage Lemaitre model stress calculation algorithm}
+\end{algorithm}
+\normalsize
+
+
+
+
+
+
+
+\subsection{GTN Damage Model}
+
+
+
+\begin{algorithm}[htbp] \label{alg:GTN} \footnotesize
+\SetAlgoLined
+(i) Update deformation gradients for a given incremental displacement
+
+\begin{equation}
+  \bb{f}^{[m+1]} = \bb{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
+\end{equation}
+\begin{equation}
+  \bb{F}^{[m+1]} = \bb{f}^{[m+1]} \bb{F}^{[m]}  \nonumber
+\end{equation}
+\begin{equation}
+  J^{[m+1]} = \text{det} \left( \bb{F}^{[m+1]} \right) \nonumber
+\end{equation}
+
+(ii) Compute trial elastic state
+\begin{equation}
+	\bb{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
+\end{equation}
+\begin{equation}
+\bb{B}^{\text{trial}}_e =\bb{f}^{[m+1]}\bb{B}_{e}^{[m]} \left(\bb{f}^{[m+1]} \right)^{T}\nonumber
+\end{equation}
+\begin{equation}
+\boldsymbol{\varepsilon}_e^{\text{trial}}=\frac{1}{2} \ln\left[\textbf{B}^{\text{trial}}_e \right]\nonumber
+\end{equation}
+%\begin{equation} % Philip: what is this used for?
+%\bar{\varepsilon}^{p}_{\text{trial}}=\bar{\varepsilon}_{p}^{[m]}\nonumber
+%\end{equation}
+\begin{equation}
+	p^{\text{trial}} = -\kappa \, \text{tr}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})\nonumber
+\end{equation}
+\begin{equation}
+	\bb{s}^{\text{trial}}=2 \mu \, \text{dev}(\boldsymbol{\varepsilon}_{e}^{\text{trial}})\nonumber
+\end{equation}
+\begin{equation}
+	\sigma^{\text{trial}}_v = \sqrt{\sfrac{3}{2}} \, ||  2\mu \, \text{dev}(\boldsymbol{\varepsilon}^{e}_{\text{trial}})|| \nonumber
+\end{equation}
+\begin{equation}
+    \bb{n}=\frac{3}{2}\frac{\bb{s}^{\text{\text{trial}}}}{\sigma_v^{\text{trial}}}\nonumber
+\end{equation}
+\begin{equation}
+	\Phi^{\text{trial}} = 
+	\left(\frac{\sigma_v^{\text{trial}}}{\sigma_{y}}\right)^{2}
+	+ q_{1}f_{*[i]}^{[m+1]} \cosh\left(\frac{3q_{2}p^{\text{trial}}}{2\sigma_{y}}\right)
+	-\left(1 + q_{3}{f_{*[i]}^{[m+1]}}^2\right)\nonumber
+\end{equation}
+  \eIf{$\Phi^{\text{trial}}>0$}{
+   Go to step (iii)
+   }{
+   set $\Delta \varepsilon_\text{vol} = \Delta \varepsilon_\text{dev} = \Delta \bar{\varepsilon}_p = 0$ and $\Delta \bb{\varepsilon}_p = \bb{0}$. Go to step (iv)
+  }
+
+(iii) Enter small strain return map and solve the system of equations (Equations 49-51) for $\Delta {\varepsilon}^{[m+1]}_h$, $\Delta {\varepsilon}^{[m+1]}_q$ and $\Delta \overline{{\varepsilon}}^p_{[m+1]}$
+
+
+(iv) Update the constitutive variables
+\begin{equation}
+	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta \bar{\varepsilon}_p \nonumber
+\end{equation}
+\begin{equation}
+	\bb{\varepsilon}_p^{[m+1]} = \bb{\varepsilon}_p^{[m]} +\Delta \bb{\varepsilon}_p \nonumber
+\end{equation}
+\begin{equation}
+	\boldsymbol{\varepsilon}_{e}^{[m+1]} = \boldsymbol{\varepsilon}^{\text{trial}}
+	- (\sfrac{1}{3}) \Delta {\varepsilon}^{[m+1]}_\text{vol} \, \bb{I}
+	- \Delta {\varepsilon}^{[m+1]}_\text{dev} \, \bb{n}\nonumber
+\end{equation}
+\begin{equation}
+	\hat{p} = \left(\sfrac{1}{J^{[m+1]}} \right) \left(p_{\text {trial }} + \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}} \right)
+\end{equation}
+\begin{equation}
+	\boldsymbol{s}^{[m+1]} =
+	\left(\sfrac{1}{J^{[m+1]}}\right)
+	\left[
+%	 	\left(
+%			p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}}
+%		\right)\bb{I}
+%		+
+		\sfrac{2}{3} \left(\sigma_v^{\text {trial }} - 3 \mu \Delta \varepsilon^{[m+1]}_\text{dev} \right) \bb{n}
+	\right] \nonumber
+\end{equation}
+%\begin{equation}
+%\boldsybol{\tau}^{[m+1]}=\left(q_{trial}-3\mu\Delta \boldsymbol{\varepsilon}^{[m+1]}^q\left(\frac{3\bb{s}_{trial}}{2q_{trial}}\right)\right)+\left(p_{trial}-K\Delta\varepsilon^{h}^{[m+1]}\right)\nonumber
+%\end{equation}
+
+%\begin{equation}
+%\boldsymbol{\sigma}^{[m+1]}=\frac{1}{J}\boldsymbol{\tau}^{[m+1]}\nonumber
+%\end{equation}
+
+%(v) Implicitly solve the pressure Poisson's equation:
+%\begin{equation}
+%	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} =
+%%	-\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right]
+%	\frac{1}{J}\left(p_{\text {trial }} - \kappa \Delta \varepsilon^{[m+1]}_{\text{vol}} \right)
+%	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \\
+%\end{equation}
+(v)
+   \eIf{Solve pressure equation}{
+   Implicitly solve the pressure Poisson's equation:
+\begin{equation}
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = \hat{p} - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right)
+\end{equation}
+   }{
+\begin{equation}
+	p^{[m+1]} = \hat{p}
+\end{equation}
+  }
+
+
+(vi) Update the true (Cauchy) stress
+\begin{equation}
+	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
+\end{equation}
+
+
+(vii) Calculate the porosity $f_{[i+1]}^{[m+1]}$ and the effective porosity $f_{*[i+1]}^{[m+1]}$:
+\begin{equation}
+	f^{[m+1]} = f^{[m]} + \left(1 - f^{[m+1]}_{[i]}\right) \, \text{tr}\left(\dot{\boldsymbol{\varepsilon}}^{[m+1]}_p\right)
+	+ A \dot{\bar{\varepsilon}}^{[m+1]}_p
+%	+ k_w f\frac{1 - \xi^2 }{\sigma_v^{[m+1]}} \,\text{dev}(\bb{\sigma}^{[m+1]}):{\dot{\boldsymbol{\varepsilon}}}_p^{[m+1]}
+\end{equation}
+\begin{equation}
+	f^{*[m+1]} =
+	\left\{
+	\begin{array}{ll}
+		f^{[m+1]}  & \text { if } f^{[m+1]}  \leq f_c \\
+		f_c + \left(f^{[m+1]} - f_c\right) \frac{f_u - f_c}{f_f - f_c} & \text { if } f^{[m+1]}  > f_c
+	\end{array}\right.
+\end{equation}
+
+
+(viii) Implicitly solve non-local porosity equation:
+\begin{equation}
+	\bar{f}^{[m+1]} -  l_c^2 \bb{\nabla}^2 \bar{f}^{[m+1]} = f^{[m+1]}
+\end{equation}
+
+\caption{GTN damage model stress calculation algorithm}
+\end{algorithm}
+
+
+
+
+\subsection{Phase Field Model}
+
+
+
+\begin{algorithm}[htbp] \label{alg:phaseField} \footnotesize
+\SetAlgoLined
+(i) Update deformation gradients for a given incremental displacement
+
+\begin{equation}
+  \bb{f}^{[m+1]} = \bb{I} + \left[ \bb{\nabla}(\Delta\textbf{u}) \right]^T \nonumber
+\end{equation}
+\begin{equation}
+  \bb{F}^{[m+1]} = \bb{f}^{[m+1]} \bb{F}^{[m]}  \nonumber
+\end{equation}
+\begin{equation}
+  J^{[m+1]} = \text{det} \left( \bb{F}^{[m+1]} \right) \nonumber
+\end{equation}
+
+(ii) Compute trial elastic state
+\begin{equation}
+	\bb{B}_{e}^{[m]} = \exp\left({2\boldsymbol{\varepsilon}_{e}^{[m]}}\right) \nonumber
+\end{equation}
+\begin{equation}
+	\bb{B}^{\text{trial}}_e = \bb{f}^{[m+1]}\bb{B}^{[m]}_e \left(\bb{f}^{[m+1]}\right)^{T}\nonumber
+\end{equation}
+\begin{equation}
+	\boldsymbol{\varepsilon}^{\text{trial}}_e = \frac{1}{2} \ln \left(\textbf{B}^{\text{trial}}_e \right) \nonumber
+\end{equation}
+%\begin{equation}
+%\bar{\varepsilon}^{p}_{trial}=\bar{\varepsilon}_{p}^{[m]}\nonumber
+%\end{equation}
+\begin{equation}
+	\sigma_v^{\text{trial}} =
+	\left(1 - d_{[i]}^{[m+1]2} \right) \sqrt{\sfrac{3}{2}} \, || 2\mu \, \text{dev}(\bb{\varepsilon}_e)|| \nonumber
+\end{equation}
+\begin{equation}
+	\Phi^{\text{trial}} =
+	\sigma_v^{\text{trial}}
+	- \left(1 - d_{[i]}^{[m+1]2} \right) \, \sigma_{y}\left(\bar{\varepsilon}_p^{[m]} \right) \nonumber 
+\end{equation}
+\eIf{$\Phi_{\text{trial}}>0$}{
+   Go to step (iii) to solve for $\Delta \bar{\varepsilon}_p$
+   }{
+   $\Delta\bar{\varepsilon}_p = 0$ and go to step (iv)
+  }
+
+(iii) Use the Newton-Raphson to solve the yield equation for the equivalent plastic strain increment $\Delta\bar{\varepsilon}_p$:
+\begin{equation}
+	\sigma_v^{\text{trial}}
+	- \left(1 - d_{[i]}^{[m+1]2} \right) 3 \mu\Delta\bar{\varepsilon}_p
+	- \left(1 - d_{[i]}^{[m+1]2} \right) \sigma_{y}(\bar{\varepsilon}_{p}^{[m]} + \Delta\bar{\varepsilon}_p)
+	= 0 \nonumber
+\end{equation}
+
+
+(iv) Update the constitutive variables
+\begin{equation}
+	\boldsymbol{\varepsilon}_{e}^{[m+1]} =
+		\bb{\varepsilon}_{e}^{\text{trial}}
+		- \sqrt{\sfrac{3}{2}} \, \Delta \bar{\varepsilon}_p 
+		\frac{\text{dev}(\bb{\varepsilon}_{e}^{\text{trial}})}{\||\bb{\varepsilon}_{e}^{\text{trial}}||}
+		\nonumber
+\end{equation}
+%\begin{equation}
+%	\boldsymbol{\tau}^{[m+1]}=g_e(d)\bb{D}^e:\boldsymbol{\varepsilon}_{e}^{[m+1]}\ 
+%	%Must incorporate section 4.5.4
+%\nonumber
+%\end{equation}
+\begin{equation}
+	\hat{p} = -\left(\sfrac{\kappa}{J^{[m+1]}} \right)\; \text{tr}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+\end{equation}
+\begin{equation}
+%	\boldsymbol{\sigma}^{[m+1]} = \frac{1}{J} \bb{D}^e:\boldsymbol{\varepsilon}^{e} \nonumber
+	\boldsymbol{s}^{[m+1]}
+	=
+	\left[1 - \left(d^{[m+1]}_{[i]}\right)^2 \right] (\sfrac{1}{J^{[m+1]}}) \, 2\mu \;\text{dev}\left(\boldsymbol{\varepsilon}_{e}^{[m+1]}\right) \nonumber
+\end{equation}
+\begin{equation}
+	\bar{\varepsilon}_p^{[m+1]} = \bar{\varepsilon}_p^{[m]} + \Delta \bar{\varepsilon}_p \nonumber
+\end{equation}
+%\begin{equation}
+%	\bb{\varepsilon}_p^{[m+1]} = \bb{\varepsilon}_p^{[m]} +\Delta \bb{\varepsilon}_p \nonumber
+%\end{equation}
+
+
+
+%(v) Implicitly solve the pressure Poisson's equation:
+%\begin{equation}
+%	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} =
+%	-\frac{\kappa}{2} \left[\left(J^{[m+1]}\right)^{2} - 1\right]
+%	- \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \\
+%\end{equation}
+(v)
+   \eIf{Solve pressure equation}{
+   Implicitly solve the pressure Poisson's equation:
+\begin{equation}
+	p^{[m+1]} - \mathbb{D} \bb{\nabla}^2 p^{[m+1]} = \hat{p} - \bb{\nabla} \cdot \left( \mathbb{D} \bb{\nabla} p^{[m+1]}_{[i]} \right) \nonumber
+\end{equation}
+   }{
+\begin{equation}
+	p^{[m+1]} = \hat{p} \nonumber
+\end{equation}
+  }
+
+(vi) Update the true (Cauchy) stress
+\begin{equation}
+	\boldsymbol{\sigma}^{[m+1]} = \boldsymbol{s}^{[m+1]} -  p^{[m+1]}\textbf{I} \nonumber
+\end{equation}
+
+
+(vi) Solve the phase field equation for $d$:
+\begin{equation}
+	\frac{G_c}{2l}\left(d^{[m+1]} -4l^2 \bb{\nabla}^2 d^{[m+1]} \right) =
+	\mathcal{H}^{[m+1]}_{[i]} %\left(\underline{\mathrm{x}},t\right)
+	 \nonumber
+\end{equation}
+
+\caption{Phase field damage model stress calculation algorithm}
+\end{algorithm}
+
+
+
+
+
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Single Cell Verifications} \label{app:one_cell}
