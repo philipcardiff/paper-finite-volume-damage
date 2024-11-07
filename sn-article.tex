@@ -714,19 +714,22 @@ Since the displacements are calculated at the cell centres, a linear least-squar
 
 The procedures have been implemented and publicly shared within the solids4foam toolbox \citep{Cardiff2018, Tukovic2018} of the open-source OpenFOAM software.
 
-Algorithm \ref{alg:solAlg} shows an overview of the solution algorithm.
+Algorithm \ref{alg:solAlg} shows an overview of the solution algorithm, where the outer (Picard) iteration loop is indicated.
+Within each outer (Picard) iteration, the segregated discretised governing equation momentum equation is solved using an iterative solver, requiring \emph{inner} iterations.
+Similarly, the pressure, porosity, non-local and phase field equations, if any, are also solved using an iterative linear solver, which requires inner iterations.
+
 \begin{algorithm}[htb] \label{alg:solAlg}
 \SetAlgoLined
 \text{\textbf{for all} time steps \textbf{do}} \\
-\ \ \text{       \textbf{while} convergence not reached \textbf{do}} 
+\ \ \text{       \textbf{while} convergence not reached \textbf{do}}  \texttt{\# Start of the outer (Picard) iteration loop}
 \ \text{       - Discrete governing system (Equation 4) for each cell, using Equations 5-10, in terms of $\Delta\bb{u}$}
-\ \text{       - Assemble the discretised  equations for all cells into three scalar linear systems (Equation 17)}
+\ \text{       - Assemble the discretised equations for all cells into three scalar linear systems (Equation 17)}
 \ \text{       - Solve the three scalar linear systems in terms of cell-centred displacement increments $\Delta\bb{u}$}
 \  \text{      - Update the kinematics: $\bb{\nabla}(\bb{\Delta} \bb{u})$, $\bb{F}$, $J$, $\bb{f}$, $j$ } \\
 \  \text{      - Update the stress ($\bb{\sigma}$) at the cell-centres using the chosen material law; optionally, solve the}
 \  \text{         pressure equation.} \\
 \  \text{      - Update the Rhie-Chow stabilisation: $\hat{\mathcal{D}}_{\text{Rhie-Chow}}$ } \\
-\ \ \text{       \textbf{end while}} \\
+\ \ \text{       \textbf{end while}} \texttt{\# End of the outer (Picard) iteration loop} \\
 \ \ \text{      - Interpolate cell-centre displacement increments to the vertices}
 \ \ \text{      - Move the mesh to the deformed configuration using the vertex displacement increments,}
 \ \ \text{         incorporating layer addition/removal (Section 2.4)}
@@ -1545,7 +1548,7 @@ A deferred (defect) algorithm is developed in this work to solve Equations \ref{
 At every outer iteration, the plastic increment is solved implicitly, with the value for the damage variable fixed from the previous outer iteration.
 The damage rate equation (Equation \ref{eq:lem_damage}) is then solved in a deferred-correction manner using the damage from the previous iteration $D_{[i]}$, where $[i]$ indicates the previous outer iteration and $[i+1]$ indicates the current outer iteration.
 This approach avoids using a $2 \times 2$ matrix (or an even higher dimension matrix if one were to solve for anisotropic plasticity or plasticity incorporating kinematic hardening) that would be needed if both the damage and the plastic increment were solved for simultaneously.
-By not requiring the solution of plasticity and damage simultaneously, the mathematics are simplified when solving for more complex formulations of the Lemaitre damage and non-local damage evolution.
+%By not requiring the solution of plasticity and damage simultaneously, the mathematics are simplified when solving for more complex formulations of the Lemaitre damage and non-local damage evolution.
 In addition, the proposed approach aligns with the philosophy of the overall segregated solution procedure.
 Within each time step, $D^{[m+1]}_{[i]}$ converges to $D^{[m+1]}_{[i+1]}$.
 Note that the overall solution algorithm is still implicit in time.
@@ -2198,7 +2201,7 @@ The approach from \citet{ambati_phase-field_2015} involves incorporating a plast
 %
 %\subsection{Model Formulation}
 
-In this work, the approach form \citet{borden_phase-field_2016} is chosen to be most suitable, given the large plastic strains expected in wire drawing.
+In this work, the approach from \citet{borden_phase-field_2016} is chosen to be most suitable, given the large plastic strains expected in wire drawing.
 The strong differential form of the phase field equation is given by:
 %, by incorporating a plastic degradation function, it displays a more physically realistic fracture behaviour.
 %Following the work of \citet{borden_phase-field_2016}  the 
