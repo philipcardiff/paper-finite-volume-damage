@@ -151,16 +151,16 @@ By improving understanding of how and why fracture occurs, products and processe
 
 A computational model for ductile fracture should predict several features, such as the stress and strain distribution, damage origination and propagation, and the resulting loss of load-carrying capacity. %- making coupled damage models of interest for this work.
 %% Review of damage models
-In the review of \citet{besson_continuum_2010}, fracture models were classified into global and local approaches.
+In the review of \citet{besson_continuum_2010}, fracture models were classified into global and local approaches (more commonly referred to as “discrete” and “smeared” or “sharp” and “diffuse” in the literature).
 The Rice $J$-integral model is the canonical global approach; however, this approach suffers from limitations, such that it cannot predict crack initiation and propagation, and the $J$-integral is also not a material property as it strongly depends on the specimen geometry \cite{hackett_experimental_1993}.
 These problems were rectified by the $J$-$Q$ integral approach; however, this approach, in turn, has the limitation that it does not apply to complex geometries \cite{odowd_family_1991}.
 Further developments in this family of models, such as the critical crack tip opening displacement or crack tip opening angle, share the same limitations \cite{james_effect_2003, mahmoud_effect_2003}.
-These models have been implemented in finite element solvers with remeshing techniques needed to model the crack propagation.
+These models have been implemented in finite element solvers with remeshing techniques needed to model the crack propagation, though eXtended Finite Element Method (X-FEM) strategies have been designed to mitigate the need for remeshing.
 
-The limitations of the global approach have led to the development of local approaches.
+The limitations of the global (discrete) approach have led to the development of local (smeared) approaches.
 These methods characterise the fracture zone in more physical detail.
 These models can, in turn, be split into surface models (cohesive zone models), where fracture occurs on a surface, and volume models, where damage or degradation occurs in a volume.
-A limitation of cohesive zone models is that they often require a pre-defined crack path and typically exhibit strong mesh dependency.
+Cohesive zone models have found widespread use, and may or may not require a pre-defined crack path and exhibit mesh dependency depending on the implementation.
 With these limitations in mind, this work focuses on the volume or \emph{continuum} damage mechanics approaches, stemming from the work of Lemaitre \cite{lemaitre_continuous_1985, lemaitre_engineering_2005}, and micro-mechanical approaches, as originally proposed by Gurson-Tvergaard-Needleman (GTN) \cite{gurson_continuum_1977, tvergaard_analysis_1984}.
 A review of these approaches is left to Section \ref{sec:constitutive_laws}.
 Within the past 15 years, an alternative volume ductile damage model has emerged, known as the phase field model approach \cite{ambati_phase-field_2015, borden_phase-field_2016, miehe_phase_2016, dittmann_variational_2018, samaniego_phase-field_2021}. This approach involves diffusing the sharp crack over a continuum.
