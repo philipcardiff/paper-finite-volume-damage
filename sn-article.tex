@@ -13,7 +13,7 @@
 %%\documentclass[default,iicol]{sn-jnl}% Default with double column layout
 
 %%%% Standard Packages
-%%<additional latex packages, if required can be included here>
+%%<additional latex packages, if required, can be included here>
 
 \setlength{\parskip}{\baselineskip}
 
@@ -376,6 +376,7 @@ The resulting conservation equation (Equation \ref{eqn:MomentumImplicitExplicit}
 \end{eqnarray}
 The $\boldsymbol{u}^{[m-1]}$ term is discretised in a similar fashion, noting that $\boldsymbol{u}^{[m]} = \boldsymbol{u}^{[m-1]} + \Delta \boldsymbol{u}$ in Equation \ref{eqn:MomentumImplicitExplicit}.
 In the cases examined in this work, inertial effects are relatively small, so temporal accuracy is not a concern.
+All dependent variables must be specified at the initial time.
 
 %\item
  The surface forces Laplacian term (first term on the right-hand side of Equation \ref{eqn:MomentumImplicitExplicit}) is discretised using central differencing with over-relaxed non-orthogonal correction \cite{demirdzic_finite_1993, jasak_application_2000, cardiff_development_2014, cardiff_large_2014, cardiff_lagrangian_2017}:
@@ -419,16 +420,144 @@ The cell-centre gradients $\bb{\nabla}\left(\mathrm{\Delta}\bb{u}\right)$ are de
 %\end{itemize}
 
 
-%\subsection{Initial and boundary conditions}
+\subsection{Boundary conditions}
+Boundary conditions are enforced through modification of the discretised expressions on boundary faces.
+Five classes of boundary conditions are employed in the current work (prescribed displacement, prescribed traction, symmetry plane, axisymmetric/wedge, frictional contact) as described below.
+An additional boundary condition where the normal component of the displacement is prescribed and the shear traction is zero is also used; the discretisation of this condition employs the prescribed displacement condition in the boundary normal direction and the traction condition ins the tangential direction.
+%\begin{itemize}
+%	\item Prescribed displacement,
+%	\item Prescribed traction,
+%	\item Symmetry,
+%	\item Axisymmetric (wedge),
+%	\item Frictional contact.
+%\end{itemize}
+%This enforcement of these five conditions is described below.
 
-All dependent variables must be specified at the initial time.
-Boundary conditions must be applied to the faces that coincide with the boundary of the solution domain.
-The discretised expressions on boundary faces are modified to account for either the known displacement components in Dirichlet conditions or the known traction for Neumann conditions.
+\paragraph{Prescribed displacement}
+The displacement boundary condition, a Dirichlet condition, may be constant in time or time-varying and fixes the value of $\bb{u}$ at the centre of a boundary face.
+The corresponding displacement increment at the boundary face $\Delta \bb{u}_b = \bb{u}^{[m+1]} - \bb{u}^{m}$ is substituted into the calculation of the surface normal gradient term in Equation \ref{eq:diffusion}.
+The resulting contribution of a boundary face $b$ to the discretised diffusion term becomes:
+\begin{eqnarray} \label{eq:diffusionBC}
+	\int_{\mathrm{\Gamma}_{u_b}}
+	K_{imp} \bb{n}_{u_b} \cdot\nabla\left(\Delta\bb{u}\right) d\mathrm{\Gamma}_{u_b}
+	&\approx&
+	K_{imp}^b \left|\boldsymbol{\Delta}_{u_b}\right|\left(\frac{\Delta \bb{u}_{b} - \Delta \bb{u}_P}{\left|\bb{d}_b\right|}\right)\left|\bb{\Gamma}_{u_b}\right| \notag \\
+	    &&+ K_{imp}^b \; \bb{k}_{u_b} \cdot
+	    \left[
+	    \boldsymbol{\nabla} \left(\mathrm{\Delta}\bb{u}\right)
+	    \right]_P
+	    \left|\bb{\Gamma}_{u_b}\right|
+\end{eqnarray}
+where $\bb{d}_b$ connects the centre of cell $P$ with the boundary face centre in the updated configuration, and the non-orthogonal correction vector $\bb{k}_{u_b} = (\textbf{I} - \bb{n}\bb{n}) \cdot \bb{d}_b$.
+
+
+
+\paragraph{Prescribed traction}
+The traction boundary condition, constant in time or time-varying, is implemented as a Neumann condition where the normal gradient, $\bb{g}_b \equiv \bb{n} \cdot \boldsymbol{\nabla} \left(\mathrm{\Delta}\bb{u}\right)$, of the displacement increment is specified on the boundary face.
+The specified normal boundary gradient, may be directly substituted into the discretised diffusion term, Equation \ref{eq:diffusion}:
+\begin{eqnarray}
+	\int_{\mathrm{\Gamma}_{u_b}}
+	K_{imp} \bb{n}_{u_b} \cdot\nabla \left(\Delta\bb{u}\right) d\mathrm{\Gamma}_{u_b}
+	&\approx&
+	K_{imp}^b \, \bb{g}_b \left|\bb{\Gamma}_{u_f}\right|
+\end{eqnarray}
+
+The normal gradient, $\bb{g}_b$, which corresponds to the specified boundary traction, $\bb{T}_b$, is determined from the expression for the discretised boundary traction as
+\begin{eqnarray} \label{eq:tracBC}
+	\bb{T}_b &=& \bb{n}_b \cdot \boldsymbol{\sigma}_b \notag \\
+		&=& K_{imp}^b \, \bb{g}_b + \bb{n}_b \cdot \boldsymbol{\sigma}_b - K_{imp}^b \bb{n}_b \cdot \left[\nabla \left(\Delta\bb{u}\right) \right]_b
+\end{eqnarray}
+which is rearranged to give $\bb{g}_b$:
+\begin{eqnarray} \label{eq:snGradTrac}
+	\bb{g}_b &=&
+		\frac{\bb{T}_b -  \bb{n}_b \cdot \boldsymbol{\sigma}_b - K_{imp}^b \bb{n}_b \cdot \left[ \nabla \left(\Delta\bb{u}\right) \right]_b}{K_{imp}^b}
+\end{eqnarray}
+
+At each outer (Picard) iteration, $\bb{g}_b$ is explicitly updated according to Equation \ref{eq:snGradTrac}, where all terms on the right-hand side are evaluated using the latest available values.
+At convergence within each time step, the $K_{imp}^b \, \bb{g}_b$ and $K_{imp}^b \bb{n}_b \cdot (\nabla \phi)_b$ terms in Equation \ref{eq:tracBC} cancel out and the traction condition is enforced.
+It is also worth noting that substitution of Equation \ref{eq:snGradTrac} into discretised diffusion term results in the contribution to the source of the entire linear system being the force on the face.
+If the value of $\Delta \bb{u}_b$ is needed at the face $b$, it is obtained by extrapolating from the adjacent cell centre ($\Delta \bb{u}_P$) as
+\begin{eqnarray}
+	\left(\bb{\Delta} \bb{u}\right)_b &=&
+		 \left(\bb{\Delta} \bb{u}\right)_P
+		 + (\bb{n}_b \cdot \bb{d}_b) g_b
+		 + \left[ \left(\textbf{I} - \bb{n}_b \bb{n}_b \right) \cdot \bb{d}_b \right] \cdot \left[\nabla \left(\bb{\Delta} \bb{u}\right)\right]_P
+\end{eqnarray}
+%using $\bb{g}_b$ and, if needed, $\bb{k}_{u_b}$ and $\left[\boldsymbol{\nabla} \left(\mathrm{\Delta}\bb{u}\right)\right]_P$.
+
+
+\paragraph{Symmetry plane}
+The symmetry plane is a mixed condition, where the normal component is a Dirichlet condition and the tangential component is a Neumann condition.
+The component of the dependent variable normal to the boundary is zero and the shear/tangential traction is zero.
+For boundary faces on a symmetry plane, the mirror reflection $\left(\bb{\Delta} \bb{u}\right)_N$ of the $\left(\bb{\Delta} \bb{u}\right)_P$ can be obtained as
+\begin{eqnarray}
+	\left(\bb{\Delta} \bb{u}\right)_N &=& \bb{R}_m \cdot \left(\bb{\Delta} \bb{u}\right)_P \notag \\
+		&=& \left(\textbf{I} - 2 \bb{n}_b \bb{n}_b \right) \cdot \left(\bb{\Delta} \bb{u}\right)_P
+\end{eqnarray}
+where $\bb{R}_m$ is termed the reflection tensor.
+The discretisation in Equation \ref{eq:diffusion} takes the same form with the mirror reflected values used at boundary faces on the symmetry plane.
+The $\bb{d}_b$ vector at a symmetry plane boundary face is calculated as
+\begin{eqnarray}
+	 \bb{d}_b &=& \bb{R}_m \cdot \bb{C}_P - \bb{C}_P
+\end{eqnarray}
+where $\bb{C}_P$ is the positional vector of the centre of cell $P$.
+This means that symmetry planes are orthogonal by defintion and the non-orthogonal correction (second term on the right-hand side of Equation \ref{eq:diffusion}) drops out.
+Further details on the implementation of symmetry planes in segregated cell-centred finite volume formulations can be found in \citet{Demirdzic2022}.
+
+In the approach adopted here, displacement increment values on the symmetry planes are calculated as
+\begin{eqnarray}
+	\left(\bb{\Delta} \bb{u}\right)_b = \frac{\left(\bb{\Delta} \bb{u}\right)_P^* + \left(\bb{\Delta} \bb{u}\right)_N^*}{2}
+\end{eqnarray}
+where cell-centred values corrected for mesh skewness errors are
+\begin{eqnarray}
+	 \left(\bb{\Delta} \bb{u}\right)_P^* &=&
+	 	\left(\bb{\Delta} \bb{u}\right)_P + \left[ (\textbf{I} - \bb{n}\bb{n}) \cdot \bb{d}_b \right] \cdot \left[ \bb{\nabla} \left(\bb{\Delta} \bb{u}\right) \right]_P \\
+	 \left(\bb{\Delta} \bb{u}\right)_N^* &=& \bb{R}_m \cdot \left(\bb{\Delta} \bb{u}\right)_P^*
+\end{eqnarray}
+
+
+
+\paragraph{Axisymmetric (wedge)}
+Axisymmetry problems are approached by constructing a wedge-shaped slice of the domain \citep{greenshieldsweller2022}, where a small wedge angle (e.g., 1$^\circ$) is adopted to minimise geometry errors.
+Axisymmetric conditions are applied to the two sloping sides of the wedge.
+%This approach is the standard approach for simulating axisymmetric cases in the OpenFOAM software \citep{greenshieldsweller2022}.
+Similar to the symmetry condition, the axisymmetric condition replaces the neighbouring displacement increment value $\left(\bb{\Delta} \bb{u}\right)_N$ at a axismmetric boundary face in Equation \ref{eq:diffusion} with the equivalent reflected value.
+Unlike the symmetry condition, the reflection on an axisymmetric boundary comes from a rotation about the axis:
+\begin{eqnarray}
+	\left(\bb{\Delta} \bb{u}\right)_N &=& \bb{R}_c \cdot \left(\bb{\Delta} \bb{u}\right)_P
+\end{eqnarray}
+where $\bb{R}_c = \bb{R}_f \bb{R}_f$ is the rotation tensor that rotates values on the centre plane (centre plane of the wedge-shapred slice) to the equivalent location on a neighbouring adjacent wedge centre plane.
+The $\bb{R}_f$ tensor, which rotates values on the centre plane to the sloping side of the domain boundary, is calculated according to the Euler-Rodrigues rotation formula \citep{greenshieldsweller2022, rodrigues1815attraction}
+\begin{eqnarray}
+	\bb{R}_f = (\bb{n}_c \cdot \bb{n}_f) \mathbf{I} + \left[1 - (\bb{n}_c \cdot \bb{n}_f) \right] \bb{n}_a \bb{n}_a + \bb{n}_f \bb{n}_c - \bb{n}_c \bb{n}_f
+\end{eqnarray}
+where $\bb{n}_a = (\bb{n}_c \times \bb{n}_f)/|\bb{n}_c \times \bb{n}_f)|$ is the unit axis direction, $\bb{n}_c$ is the unit normal of the centre plane, and $\bb{n}_f$ is the unit normal of the sloping side of the domain boundary.
+
+Similar to the symmetry plane, the displacement increment values on the sloping wedge boundary planes are calculated as
+\begin{eqnarray}
+	\left(\bb{\Delta} \bb{u}\right)_b =
+		\bb{R}_f \cdot
+		\left\{
+			\left(\bb{\Delta} \bb{u}\right)_P + \bb{k}_b  \cdot \left[ \bb{\nabla} \left(\bb{\Delta} \bb{u}\right) \right]_P 
+		\right\}
+\end{eqnarray}
+where, once again, the second term within the brackets on the right-hand side corrects for mesh skewness.
+The $\bb{k}_b$ correction vector is calculated as
+\begin{eqnarray}
+	 \bb{k}_b &=& \bb{C}_b - \bb{R}_f \cdot \bb{C}_P
+\end{eqnarray}
+and represents the vector from the cell centre $\bb{C}_P$ rotated to the sloping wedge patch and the face centre $\bb{C}_b$ at the patch.
+
+
+\paragraph{Frictional contact}
+Coulomb friction contact boundaries are handled using an iterative penalty method, as described previously by the authors \citep{cardiff_lagrangian_2017, cardiff_development_2012}.
+From an implementation perspective, the contact boundaries are a special type of prescribed traction condition where the traction distribution is re-calculated every solution outer (Picard) iteration according to a penalty law formulation.
+More recent extensions of this approach have been proposed by Batisti\'{c} et al.\ \citep{Batistic2022, Batistic2023}, including segment-to-segment and implicit approaches, but these are not used in the current work.
+
+% account for either the known displacement components in Dirichlet conditions or the known traction for Neumann conditions.
 %Mixed condition conditions, such as symmetry planes, treated each component as 
 %The expressions for diffusion fluxes and sources remain valid for a Dirichlet boundary condition, but the user-specified boundary value is used in place of the neighbouring cell-centre value.
 %On boundaries where Neumann boundary conditions are specified, the boundary fluxes are added to the source term, and the variable values at the boundary are extrapolated from the internal domain using the specified boundary gradient. This process is explained in more detail in \cite{jasak_application_2000}.
-Coulomb friction contact boundaries are handled using an iterative penalty method, as described previously \citep{cardiff_lagrangian_2017, cardiff_development_2012}.
-More recent segment-to-segment finite volume contact procedures could also be used \citep{Batistic2022, Batistic2023}.
 %This method involves measuring the penetration between intersecting cells, calculating penalty forces, and applying them as a Neumann boundary condition. This approach, which was developed for OpenFOAM \cite{cardiff_development_2012}, has also been expanded by the same authors to include the effects of Coulomb friction \cite{cardiff_lagrangian_2017}, which is the friction assumption used in the simulations in this thesis.
 
 
@@ -624,6 +753,10 @@ Figure \ref{fig:layerAddition} schematically outlines the step involved in the l
 
 Following the layer addition and removal mesh motion algorithm, solution and derived field data at the newly added cell centres are mapped from the field data stored at the upstream boundary.
 This mapping approach assumes field data to have a zero gradient in the upstream direction; this assumption is valid if the upstream and downstream are chosen sufficiently far from the \emph{active} deformation zone.
+
+The presented layer addition-removal procedure is agnostic to the mathematical boundary conditions used at the upstream and downstream boundaries.
+As is demonstrated in drawing simulations, a velocity (or equivalent displacement increment) is prescribed at the downstream boundary, where the tangential traction is zero, while traction (back tension) is applied to the upstream boundary.
+However, other conditions can be used; for example, in rolling simulations, tractions may be applied to both upstream (back tension) and downstream (front tension) boundaries.
 
 \textbf{Note on parallelisation}: The proposed solution algorithm has been implemented in the open-source toolbox OpenFOAM, where multi-CPU-core parallelisation on distributed memory systems is achieved through the domain decomposition approach.
 To simplify the implementation of the non-trivial topological mesh changes (addition or removal of cells) in parallel, domain decomposition approaches are limited to decomposing the workpiece into streamwise columns of cells (Figure \ref{fig:layerAdditionParallel}).
@@ -1334,13 +1467,45 @@ This is related to the local damage variable $D$ through the implicit diffusion 
 	\bar{D} -  l_c^2 \bb{\nabla}^2 \bar{D} = D
 \end{equation}
 where $l_c$ is a characteristic length scale which controls the area over which the local damage is diffused.
-This equation can be viewed as a smoothing equation ($\bar{D}$ is a spatially smoothed version of $D$), which has the effect of mitigating the mesh dependency. This equation is solved with zero-flux Neumann boundary conditions on all boundaries, that is,  $\bb{n} \cdot \nabla \bar{D} = 0$.
+This equation can be viewed as a smoothing equation ($\bar{D}$ is a spatially smoothed version of $D$), which has the effect of mitigating the mesh dependency.
 %\begin{equation}
 %    \nabla \bar{D}\cdot\textbf{n}=0 
 %\end{equation}
-The terms in Equation \ref{eqn:nonLocalEquation} are discretised using the cell-centred finite volume method, similar to the pressure equation (Equation \ref{eq:pressureEqn}).
-
+%The terms in Equation \ref{eqn:nonLocalEquation} are discretised using the cell-centred finite volume method, similar to the pressure equation (Equation \ref{eq:pressureEqn}).
 %The Algorithm for incorporating the non-local damage is provided in Algorithm 4. As can be seen, the procedure is very similar to that in the local Lemaitre damage model. Algorithm 4 is provided to clarify how the non-local damage is coupled with the elasto-plastic model and the steps involved prior to solving the non-local damage gradient equation.
+To discretise this equation using the cell-centred finite volume method, we express it in integral form:
+\begin{eqnarray} \label{eqn:nonLocalEquationIntegral}
+	\int_{\Omega_u} \bar{D} \, d \Omega_u
+	- \oint_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left( l_c^2 \nabla \bar{D} \right) \,  d\mathrm{\Gamma}_u
+	 &=&  \int_{\Omega_u} D \, d \Omega_u
+\end{eqnarray}
+where the divergence theorem has been used to express the diffusion term (second on the left-hand side) in terms of a surface integral.
+
+
+Assuming a linear variation of $\bar{D}$ within cell $P$, the mid-point rule is used to approximate the first term on the left-hand side of Equation \ref{eqn:nonLocalEquationIntegral}:
+\begin{eqnarray}
+	\int_{\Omega_u} \bar{D} \, d \Omega_u &\approx& \bar{D}_P \Omega_{u_P} 
+\end{eqnarray}
+Similarly, the right-hand side term is approximated using the mid-point rule:
+\begin{eqnarray}
+	\int_{\Omega_u} D \, d \Omega_u &\approx& D_P \Omega_{u_P} 
+\end{eqnarray}
+
+The surface integral term (second on the left-hand side) is discretised by assuming a linear various of the integrand over the face and applying the mid-point rule about the face centre $f$:
+\begin{eqnarray}
+	\oint_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left( l_c^2 \nabla \bar{D} \right) \,  d\mathrm{\Gamma}_u
+		&=&
+		\sum_{f \in N_f} \int_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left( l_c^2 \nabla \bar{D} \right) \,  d\mathrm{\Gamma}_u \notag \\
+		&\approx&
+		\sum_{f \in N_f} l_{c^2}^f \left|\boldsymbol{\Delta}_{u_f}\right|\left(\frac{\bar{D}_{N_f} - \bar{D}_P}{\left|\bb{d}_f\right|}\right)\left|\bb{\Gamma}_{u_f}\right| \notag \\
+		    &&+ \sum_{f \in N_f} l_{c^2}^f \; \bb{k}_{u_f} \cdot
+		    \left[
+		    \boldsymbol{\nabla} \left(\bar{D} \right)
+		    \right]_f
+		    \left|\bb{\Gamma}_{u_f}\right|
+\end{eqnarray}
+
+This equation is solved with zero-flux Neumann boundary conditions on all boundaries, that is,  $\bb{n} \cdot \nabla \bar{D} = 0$.
 
 
 
@@ -2991,7 +3156,7 @@ This interaction can result in a significant coupling in the tangent stiffness m
 		}
 		\subfigure[Flat notched bar]
 		{
-			\includegraphics[height=0.35\textwidth]{./Figures/LemaitreCompare/borden/bordenDispForce2}
+			\includegraphics[height=0.345\textwidth]{./Figures/LemaitreCompare/borden/bordenDispForce3}
 		}
 		\caption{Reaction force predictions using the Lemaitre damage model}
 	\label{fig:lemaitre_forces}
@@ -3007,7 +3172,7 @@ The reason for this is unclear but could be related to the differences in plasti
 	\centering
 		\subfigure[Non-local damage vs displacement]
 		{
-			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_damageNonLocal3}
+			\includegraphics[width=0.4\textwidth]{./Figures/LemaitreCompare/axiCompare/disp_damageNonLocal4}
 		}
 		\subfigure[Equivalent plastic strain vs displacement]
 		{
@@ -3434,11 +3599,11 @@ The benefit of the developed scheme can be further seen in Section \ref{sec:chev
 	\centering
 		\subfigure[Notched round bar]
 		{
-		\includegraphics[height=0.4\textwidth]{./Figures/effectiveNonLocalDamage/eff_disp_damageNonLocalAxi2}
+		\includegraphics[height=0.4\textwidth]{./Figures/effectiveNonLocalDamage/eff_disp_damageNonLocalAxi3}
 		}
 		\subfigure[Flat notched bar]
 		{
-		\includegraphics[height=0.4\textwidth]{./Figures/effectiveNonLocalDamage/eff_disp_damageNonLocalBorden2}
+		\includegraphics[height=0.4\textwidth]{./Figures/effectiveNonLocalDamage/eff_disp_damageNonLocalBorden3}
 		}
 	\caption{Non-local damage predictions for the notched round bar and flat notched bar cases using the Lemaitre model and the effective non-local damage approach}
 	\label{fig:effectDamagPointValue}
@@ -3542,7 +3707,7 @@ Consistent with the Lemaitre cases, the Abaqus simulation has convergence issues
 %As noted above, the segregated solution procedure likely contributes to the superior convergence abilities of the OpenFOAM simulations.
 \begin{figure}[htb]
 \begin{center}
-	\includegraphics[width=0.5\textwidth]{./Figures/GTNCompare/forceDispGTN.jpg}
+	\includegraphics[width=0.5\textwidth]{./Figures/GTNCompare/forceDispGTN2}
 	\caption{Predicted force vs displacement for the notched round bar case using the GTN model, compared with predictions from Abaqus.}
 	\label{fig:axi_GTN_forceDisp}
 \end{center}
@@ -3614,6 +3779,48 @@ It is worth noting that the normalised stress reported by \citet{borden_phase-fi
 %\subsubsection{Stresses, Strains and Damage}
 %\hl{No comparisons in the thesis: check references to see what can be compared}
 
+\subsection{Benchmarking the Layer Addition-Removal Remeshing Procedure}
+%%%%
+As a final benchmark, the proposed layer addition-removal remeshing procedure is compared with the traditional Lagrangian approach (no remeshing) for a wire drawing case where no damage accumulation is assumed.
+Here, the wire drawing setup is the same as described in Section \ref{sec:wireDrawingDamageComparison}, except no damage model is employed.
+In the layer addition-removal case, the wire length is keep constant at $L_w = 30$ mm, while in the traditional Lagrangian approach $L_w = 60$ mm.
+In both cases, a drawing displacement of $45$ mm is applied over $150$ ms.
+
+Figure \ref{fig:benchmarkLayersForces} compares the predicted drawing force (force in the axial direction on the wire downstream boundary) as a function of time for the layer addition-removal and traditional (no remeshing) approaches.
+After the startup phase ($< 20$ ms), the drawing forces are seen to closely agree for both approaches.
+The oscillations in force come from the mesh resolution effects on the contact procedure and are seen to reduce as the mesh is refined.
+Near the end time ($> 140$ ms), the predicted forces from the Lagrangian (no remeshing) approach are seen to drop, due to the boundary effects fromt he approaching wire upstream boundary.
+\begin{figure}[htb]
+	\centering
+		\subfigure[Drawing forces]
+		{
+			\includegraphics[width=0.7\textwidth]{./Figures/compareForcesNoLayers.pdf}
+		}
+	\label{fig:benchmarkLayersForces}
+\end{figure}
+
+Figures \ref{fig:benchmarkLayersPeeq}(a) and (b) compares the predicted epsilon plastic strain distribution at the $t = 100$ ms and $t = 150$ ms respectively for both approaches, where the layer addition-removal results are shown on the top and the Lagrangian (no remeshing) results are reflected on the bottom.
+The plastic strain fields are seen to be qualitatitively similar in both approaches at $t = 100$ ms.
+At $t = 150$ ms, minor changes can be seen in the Lagrangian (no remeshing) approach due to the proximity of the wire upstream boundary.
+\begin{figure}[htb]
+	\centering
+		\subfigure[Equivalent plastic strain distribution at 100 ms for the layer addition-removal (upper) and Lagrangian (lower) approaches]
+		{
+			\includegraphics[width=\textwidth]{./Figures/comparePeeqNoLayersT100ms}
+		}
+		\subfigure[Equivalent plastic strain distribution at 150 ms for the layer addition-removal (upper) and Lagrangian (lower) approaches]
+		{
+			\includegraphics[width=\textwidth]{./Figures/comparePeeqNoLayersT150ms}
+		}
+		\caption{Comparison of the predictions from the layer addition-removal remeshing procedure and the traditional Lagrangian (no remeshing) procedure}
+	\label{fig:benchmarkLayersPeeq}
+\end{figure}
+
+The clock time for the layer addition-removal aproach is 279 s, while it was 783 s for the Lagrangian (no remeshing) approach, highlighting that doubling number of wire cells more than doubled the clock time ($\times 2.8$ in this case).
+
+This benchmark case demonstrates that the proposed layer addition-removal approach achieves it goal of reducing the computational time, while still delivering the same predictions.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 \section{Wire Drawing Simulations} \label{sec:wire_drawing}
@@ -3677,6 +3884,105 @@ The final wire diameter tends to be marginally larger than the die outlet diamet
 
 %%%%
 \subsection{Comparison of Damage Models for Wire Drawing}
+%%%%
+In wire drawing, fracture typically originates in the centre of the specimen due to the combination of triaxiality and plastic strain \cite{gonzalez_assessment_2018, norasethasopon_prediction_2008, hoffmanner_selection_1971, choi_study_2010}.
+To compare the ability of the damage models to predict this type of damage, a \emph{typical} wire drawing pass is considered, with a reduction ratio $r$ of 10\% and a semi-angle $\alpha$ of $6^{\circ}$ \cite{roh_process_2021}.
+This case is not expected to display \emph{catastrophic} fracture; however, damage accumulation is envisaged.
+The simulations are performed as 2-D axisymmetric with a structured quadrilateral mesh.
+An average cell width of $0.4$ mm is employed, which has been found to minimise mesh errors.
+Table \ref{tab:wire_Draw_geom} summarises the geometry and mesh parameters.
+%This case examines the ability of the developed damage models (Lemaitre, GTN, phase field) to predict damage in a wire drawing process.
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{llll} \hline
+		    %Loading Conditions \\ \hline 
+		    Quantity & Symbol & Value & Units \\
+		    \hline
+		    Die inlet diameter & $\phi_i$ & $16$ & mm \\
+		    Die outer diameter & $\phi_o$ & $20$ & mm \\
+	      	    Die outlet diameter & $d_o$ & $12.33$ & mm \\
+	            Die semi-angle & $\alpha$ &  $6$ & $^{\circ}$ \\
+		    Wire length & $L_w$ & $30$ & mm \\
+		    Wire initial diameter & $d_i$ & $13$ & mm \\
+%     	            Die average cell width & & $0.4$ & mm \\
+%	            Wire average cell width & & $0.4$ & mm \\
+			\hline
+		\end{tabular}
+	\caption{Die and wire geometry for comparing damage modelling approaches. Refer to Figure \ref{fig:wireDrawing} for interpretation of the parameters.}
+	\label{tab:wire_Draw_geom}
+\end{table}
+
+The wire elastoplastic material parameters, typical of a high-carbon steel, are given in Table \ref{tab:wire_draw_material_properties} \citep{clancy_improving_2019}.
+A modified Voce Law \cite{cao_modelling_2014} (Equation \ref{eqn:modifiedVoce}) is chosen to describe the plastic hardening law, as Cao \cite{cao_modelling_2014} found that this law accurately described the hardening behaviour of high carbon steel in tensile, torsion and compression tests.
+\begin{equation} \label{eqn:modifiedVoce}
+    \sigma_y=\sigma_{0} + (\sigma_{\infty} - \sigma_{0} + k\bar{\varepsilon}_p)(1 - e^{-\beta\bar{\varepsilon}_p})
+\end{equation}
+%Aside from this, the parameters taken for the GTN, phase field and Lemaitre damage model are somewhat arbitrary and are mainly chosen for illustrative purposes.
+%The chosen damage parameters have not been calibrated to specific experiments, but have been chosen to demonstrate the abaility of the damage laws.
+% values of these parameters will not affect the area of the wire where damage or fracture is predicted to occur but rather the level of damage or porosity that accumulates.
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{lllll} \hline
+			Term  & Value & Units  \\ \hline 
+			Young's modulus & 200  & GPa \\
+			Poisson's ratio & 0.3 & -  \\
+			%Hardening law & $689+(1340-689+250\,\bar{\varepsilon}_p)(1-e^{-32.82\,\bar{\varepsilon}_p})$ & MPa  \\
+			$\sigma_0$ & $689$ & MPa  \\
+			$\sigma_\infty$ & $1340$ & MPa  \\
+			$k$ & $250$ & MPa  \\
+			$\beta$ & $32.82$ & -  \\
+			\hline
+		\end{tabular}
+	\caption{Wire elastoplastic material parameters, where the hardening behaviour is given by Equation \ref{eqn:modifiedVoce}}
+	\label{tab:wire_draw_material_properties}
+\end{table}
+The die elastic parameters (Table \ref{tab:die_draw_material_properties}) correspond to tungsten carbide, as is typically used for drawing die nibs.
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{llll} \hline
+			Term  & Value & Units \\ \hline 
+            		Young's modulus & 600 & GPa \\
+			Poisson's ratio & 0.22 & -  \\
+			\hline
+		\end{tabular}
+	\caption{Die elastic material parameters}
+	\label{tab:die_draw_material_properties}
+\end{table}
+
+A back tension of 20 MPa is applied to the wire upstream boundary, while a total drawing displacement of 45 mm is applied to the downstream wire boundary over 150 ms, allowing quasi-steady-state conditions to be reached.
+Frictional contact (Coulomb coefficient of 0.1) is assumed between the wire and die contact surfaces.
+All other die surfaces are assumed to have a zero displacement condition, mimicking the steel casings typically used.
+%The loading conditions are summarised in Table \ref{tab:wire_draw_BCs}.
+The pressure equation approach described in Section \ref{sec:pressureApproach} is used for all wire drawing cases presented here, where the Rhie-Chow pressure scale factor was set as $\mathcal{R}_p = 100$.
+The Eulerian-type mesh layer addition and removal procedure (Section \ref{sec:euler_BCs}) is employed at the wire upstream and 
+downstream boundaries.
+In the modelling approach adopted here, the entire length of the wire starts at the initial diameter, resulting in an overlap with the die.
+In the first time step, the contact procedure `pushes' the wire back, enforcing the contact constraints.
+This procedure has been found to reach quasi-steady-state drawing conditions efficiently; however,
+it can lead to convergence issues when incorporating damage, particularly in cases with large reduction ratios and high die angles. % which will be encountered in section 7.3.
+%The high amount of deformation in this region of the wire in contact with the die in the initial time steps may lead to a large amount of damage accruing and an unstable numerical solution.
+This issue is ameliorated here by allowing the damage to evolve only after a user-specified drawing displacement, chosen here as $2$ mm.
+%\begin{table}[htb]
+%	\centering
+%		\begin{tabular}{lllll} \hline
+%		    %Loading Conditions \\ \hline 
+%		    Quantity & Symbol & Value & Units \\
+%		    \hline
+%		    Applied total displacement & - & $30$ & mm \\
+%		    Total simulation time & - & 150 & ms \\
+%		    Time step & $\Delta t$ & $1$ & ms \\
+%		    %Displacement increment  & - & $0.2$ & mm   \\
+%		    Friction coefficient & $\mu$ & $0.1$ & - \\
+%		    \hline
+%		\end{tabular}
+%	\caption{Loading conditions for wire drawing case}
+%	\label{tab:wire_draw_BCs}
+%\end{table}
+%%%%
+
+
+%%%%
+\subsection{Comparison of Damage Models for Wire Drawing} \label{sec:wireDrawingDamageComparison}
 %%%%
 In wire drawing, fracture typically originates in the centre of the specimen due to the combination of triaxiality and plastic strain \cite{gonzalez_assessment_2018, norasethasopon_prediction_2008, hoffmanner_selection_1971, choi_study_2010}.
 To compare the ability of the damage models to predict this type of damage, a \emph{typical} wire drawing pass is considered, with a reduction ratio $r$ of 10\% and a semi-angle $\alpha$ of $6^{\circ}$ \cite{roh_process_2021}.
