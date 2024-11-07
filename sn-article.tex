@@ -267,6 +267,7 @@ The deformation gradient is defined as $\bb{F} = \textbf{I} + (\boldsymbol{\nabl
 %where subscript $u$ indicates quantities in the updated configuration.
 The \emph{relative} deformation gradient is given in terms of the displacement increment as $\bb{f}=\textbf{I} + \left[\bb{\nabla}(\Delta \bb{u}) \right]^T$ and the relative Jacobian as $j = \text{det}(\bb{f})$.
 
+The conservation of linear momentum in integral form (Equations \ref{eqn:totalLagFormulation} and \ref{eqn:updatedLagFormulation}) can equally be applied to entire domain or a sub-region of it such as a computational cell, as is the basis of the cell-centred finite formulation presented below.
 Although the total Lagrangian approach is a viable option for wire drawing, the current work adopts the updated Lagrangian approach as developing Eulerian-type upstream and downstream conditions (Section \ref{sec:euler_BCs}) is conceptually easier in an updated Lagrangian formulation.
 
 The definition of the true stress in Equations \ref{eqn:totalLagFormulation} and \ref{eqn:updatedLagFormulation} comes from the constitutive law, as is described in Section \ref{sec:constitutive_laws}.
@@ -307,7 +308,8 @@ The proposed solution discretisation follows closely the approach of \citet{card
 %    \item $P$ and $N$ are joined by the vector $\bb{d}_{f}$
 %\end{itemize}
 
-To facilitate the use of a segregated solution algorithm, the surface forces term (term on the right-hand side of Equation \ref{eqn:updatedLagFormulation}) is split into explicit and implicit components:
+The employed finite volume discretisation begins by applying the governing conservation equation (Equation \ref{eqn:updatedLagFormulation}) to each cell in the mesh.
+To facilitate the use of a segregated solution algorithm, and the surface forces term (term on the right-hand side of Equation \ref{eqn:updatedLagFormulation}) is split into explicit and implicit components:
 \begin{eqnarray} \label{eqn:MomentumImplicitExplicit}
 %	\underbrace{\int_{\Omega_u} \frac{\partial}{\partial t}\left(\rho_u \frac{\partial\left(\boldsymbol{u}^{[m-1]}+\Delta \boldsymbol{u}\right)}{\partial t}\right) \mathrm{d} \Omega_u}_{\text {implicit }}
 	\int_{\mathrm{\Omega_u}} \frac{\partial }{\partial t} \left( \rho_u \frac{\partial \bb{u} }{\partial t} \right) d\mathrm{\Omega}_u
@@ -322,8 +324,9 @@ To facilitate the use of a segregated solution algorithm, the surface forces ter
  }_{\text {explicit }}  %\notag \\
 % &&+ \; \mathcal{D}_{\text {Rhie-Chow }} 
 \end{eqnarray}
-where the first term on the right-hand side (Laplacian term) is treated implicitly, and the second and third terms on the right-hand side are treated in a deferred correction manner.
-Here, by implicit, we mean that the term contributes coefficients to the resulting linear(-ised) system of equations, while the deferred terms will contribute only to the source of the system of linear equations.
+where the first term on the right-hand side (Laplacian term) is treated implicitly, and the second and third terms on the right-hand side are treated in a explicit manner.
+Here, by implicit, we mean that the term contributes coefficients to the resulting linear(-ised) system of equations.
+In contrast, here, by explicit we mean that the terms are treated in a deferred correction manner; that is, they are evaluated using the latest available values; consequently, the explicit terms contribute only to the source of the system of linear equations.
 The overall procedure is implicit in time in that the time step size is not constrained by the Courant–Friedrichs–Lewy condition.
 From a deferred (or defect) correction perspective, this Laplacian term can be considered an approximate compact-stencil linearisation of the surface stress term.
 This allows the coupled vector system to be temporarily decoupled into three scalar component equations.
@@ -381,8 +384,8 @@ All dependent variables must be specified at the initial time.
 %\item
  The surface forces Laplacian term (first term on the right-hand side of Equation \ref{eqn:MomentumImplicitExplicit}) is discretised using central differencing with over-relaxed non-orthogonal correction \cite{demirdzic_finite_1993, jasak_application_2000, cardiff_development_2014, cardiff_large_2014, cardiff_lagrangian_2017}:
 \begin{eqnarray} \label{eq:diffusion}
-	\oint_{\mathrm{\Gamma}_u}
-	K_{imp} \bb{n}_u\cdot\nabla\left(\Delta\bb{u}\right) d\mathrm{\Gamma}_u
+	\underbrace{\oint_{\mathrm{\Gamma}_u}
+	K_{imp} \bb{n}_u\cdot\nabla\left(\Delta\bb{u}\right) d\mathrm{\Gamma}_u }_{\text {implicit }}
 	&\approx&
 	\sum_{f \in N_f} K_{imp}^f \left|\boldsymbol{\Delta}_{u_f}\right|\left(\frac{\Delta \bb{u}_{N_f} - \Delta \bb{u}_P}{\left|\bb{d}_f\right|}\right)\left|\bb{\Gamma}_{u_f}\right| \notag \\
 	    &&+ \sum_{f \in N_f} K_{imp}^f \; \bb{k}_{u_f} \cdot
@@ -399,7 +402,7 @@ The first term on the right-hand side is treated implicitly, while the second te
 %	\item
  The remaining surface force terms (second and third terms on the right-hand side of Equation \ref{eqn:MomentumImplicitExplicit}) are discretised by assuming that they vary linearly across the face as follows \cite{noauthor_openfoam_2015}:
 \begin{equation}
-	\oint_{\mathrm{\Gamma_u}}(j\bb{f}^{-T}\cdot{\bb{n}_u)\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma_u}
+	\underbrace{ \oint_{\mathrm{\Gamma_u}}(j\bb{f}^{-T}\cdot{\bb{n}_u)\cdot\boldsymbol{\sigma}}\ d\mathrm{\Gamma_u}  }_{\text {explicit}}
 %	&=& \sum_{F}\int_{\mathrm{\Gamma_{uf}}}(j\bb{f}^{-T}\cdot{\bb{n}_u)\cdot\boldsymbol{\sigma}}d\Gamma_{uf}
 	\approx 
 	\sum_{f \in N_f} \bb{\Gamma}_{u_f} \cdot
@@ -407,11 +410,11 @@ The first term on the right-hand side is treated implicitly, while the second te
 \end{equation}
 	
 \begin{equation} \label{eq:diffusion_exp}
-	    \oint_{\mathrm{\Gamma}_u}{K_{imp} \; \bb{n}_u\cdot \bb{\nabla} \left(\Delta\bb{u}\right)}\ d\mathrm{\Gamma}_u
+	    \underbrace{ \oint_{\mathrm{\Gamma}_u}{K_{imp} \; \bb{n}_u\cdot \bb{\nabla} \left(\Delta\bb{u}\right)}\ d\mathrm{\Gamma}_u }_{\text {explicit}}
 	    %= 
 %	    \sum_{F}\int_{\mathrm{\Gamma}_{uf}}{\left(\frac{4}{3}\mu+K\right)\bb{n}_u\cdot\nabla\left(\Delta\bb{u}\right)}\ d\mathrm{\Gamma}_{uf}
 	\approx
-	\sum_{f \in N_f} K_{imp} \; \bb{\Gamma}_{u_f} \cdot \left[\bb{\nabla}\left(\mathrm{\Delta}\bb{u}\right)\right]_f
+	\sum_{f \in N_f} K_{imp}^f \; \bb{\Gamma}_{u_f} \cdot \left[\bb{\nabla}\left(\mathrm{\Delta}\bb{u}\right)\right]_f
 \end{equation}
 
 The terms at a face, indicated by the subscript $f$, are calculated by linearly interpolating from the adjacent cell-centres.
@@ -438,8 +441,8 @@ The displacement boundary condition, a Dirichlet condition, may be constant in t
 The corresponding displacement increment at the boundary face $\Delta \bb{u}_b = \bb{u}^{[m+1]} - \bb{u}^{m}$ is substituted into the calculation of the surface normal gradient term in Equation \ref{eq:diffusion}.
 The resulting contribution of a boundary face $b$ to the discretised diffusion term becomes:
 \begin{eqnarray} \label{eq:diffusionBC}
-	\int_{\mathrm{\Gamma}_{u_b}}
-	K_{imp} \bb{n}_{u_b} \cdot\nabla\left(\Delta\bb{u}\right) d\mathrm{\Gamma}_{u_b}
+	\underbrace{ \int_{\mathrm{\Gamma}_{u_b}}
+	 K_{imp} \bb{n}_{u_b} \cdot\nabla\left(\Delta\bb{u}\right) d\mathrm{\Gamma}_{u_b} }_{\text {implicit}}
 	&\approx&
 	K_{imp}^b \left|\boldsymbol{\Delta}_{u_b}\right|\left(\frac{\Delta \bb{u}_{b} - \Delta \bb{u}_P}{\left|\bb{d}_b\right|}\right)\left|\bb{\Gamma}_{u_b}\right| \notag \\
 	    &&+ K_{imp}^b \; \bb{k}_{u_b} \cdot
@@ -456,8 +459,8 @@ where $\bb{d}_b$ connects the centre of cell $P$ with the boundary face centre i
 The traction boundary condition, constant in time or time-varying, is implemented as a Neumann condition where the normal gradient, $\bb{g}_b \equiv \bb{n} \cdot \boldsymbol{\nabla} \left(\mathrm{\Delta}\bb{u}\right)$, of the displacement increment is specified on the boundary face.
 The specified normal boundary gradient, may be directly substituted into the discretised diffusion term, Equation \ref{eq:diffusion}:
 \begin{eqnarray}
-	\int_{\mathrm{\Gamma}_{u_b}}
-	K_{imp} \bb{n}_{u_b} \cdot\nabla \left(\Delta\bb{u}\right) d\mathrm{\Gamma}_{u_b}
+	\underbrace{ \int_{\mathrm{\Gamma}_{u_b}}
+	K_{imp} \bb{n}_{u_b} \cdot\nabla \left(\Delta\bb{u}\right) d\mathrm{\Gamma}_{u_b} }_{\text {implicit}}
 	&\approx&
 	K_{imp}^b \, \bb{g}_b \left|\bb{\Gamma}_{u_f}\right|
 \end{eqnarray}
@@ -655,9 +658,31 @@ Values in the range $1 \leq \mathcal{R}_p \leq 10^3$ are suitable for the types 
 %%%%
 The linear momentum equation is discretised for each control volume $P$ in component form, and three linear algebraic equations of the following form is assembled \cite{jasak_application_2000}:
 \begin{equation}
-a_p \Delta {u}_p^i + \sum_{f \in N_f}  a_n \Delta {u}_{N_f}^i = {b}_p^i
+a_P \Delta {u}_P^i + \sum_{f \in N_f}  a_{n_f} \Delta {u}_{N_f}^i = \bb{b}_P^i
 \end{equation}
-where $a_{p}$ is the scalar central coefficient, $a_{n}$ are the scalar coefficients associated with the centre of neighbouring cells, $\Delta {u}_p^i$ is the i$^{th}$ component of the displacement increment at cell $P$, $\Delta {u}_{N_f}^i$ is the i$^{th}$ component of the displacement increment at neighbouring cell $N_f$, and ${b}_p^i$ is i$^{th}$ component of the source vector contribution.
+where $\Delta {u}_p^i$ is the i$^{th}$ component of the displacement increment at cell $P$, $\Delta {u}_{N_f}^i$ is the i$^{th}$ component of the displacement increment at neighbouring cell $N_f$, and ${b}_p^i$ is i$^{th}$ component of the source vector contribution.
+The scalar central coefficient $a_{p}$, the scalar coefficients associated with the centre of neighbouring cell ${a}_{n_f}$ (which shares a face $f$ with cell $P$), and the source vector $\bb{b}_P$ are
+\begin{eqnarray}
+	{a}_p &=&
+		\frac{\rho_{u_P} \mathrm{\Omega}_P^{[m+1]} }{\Delta t^2}	 	
+		+ \sum_{f \in N_f} K_{imp}^f  \left|\bb{\Gamma}_{u_f}\right| \frac{ \left|\boldsymbol{\Delta}_{u_f}\right| }{\left|\bb{d}_f\right|} \\
+	a_{n_f} &=&
+		- K_{imp}^f  \left|\bb{\Gamma}_{u_f}\right| \frac{ \left|\boldsymbol{\Delta}_{u_f}\right| }{\left|\bb{d}_f\right|} \\
+	\bb{b}_P &=&
+		\frac{\mathrm{\Omega}_P}{\Delta t^2} \left[
+		\left(\rho_{u_P}^{[m+1]} + \rho_{u_P}^{[m]} \right)  \Delta \bb{u}^{[m]}_P
+		- \rho_{u_P}^{[m]}  \Delta \bb{u}^{[m-1]}_P 
+		\right] \notag \\
+		&&+ \sum_{f \in N_f} \bb{\Gamma}_{u_f} \cdot	\left(j\boldsymbol{\sigma} \bb{f}^{-T}\right)_f \notag \\
+		&&- \sum_{f \in N_f} K_{imp}^f \; \bb{\Gamma}_{u_f} \cdot \left[\bb{\nabla}\left(\mathrm{\Delta}\bb{u}\right)\right]_f \notag \\
+		&&+ \sum_{f \in N_f} K_{imp}^f \; \bb{k}_{u_f} \cdot
+		    \left[
+		    \boldsymbol{\nabla} \left(\mathrm{\Delta}\bb{u}\right)
+		    \right]_f
+		    \left|\bb{\Gamma}_{u_f}\right|
+\end{eqnarray}
+
+
 
 These linear algebraic equations are then assembled for all control volumes, creating a system of linear algebraic equations for each direction $i$:
 \begin{equation}
@@ -1475,28 +1500,28 @@ This equation can be viewed as a smoothing equation ($\bar{D}$ is a spatially sm
 %The Algorithm for incorporating the non-local damage is provided in Algorithm 4. As can be seen, the procedure is very similar to that in the local Lemaitre damage model. Algorithm 4 is provided to clarify how the non-local damage is coupled with the elasto-plastic model and the steps involved prior to solving the non-local damage gradient equation.
 To discretise this equation using the cell-centred finite volume method, we express it in integral form:
 \begin{eqnarray} \label{eqn:nonLocalEquationIntegral}
-	\int_{\Omega_u} \bar{D} \, d \Omega_u
-	- \oint_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left( l_c^2 \nabla \bar{D} \right) \,  d\mathrm{\Gamma}_u
-	 &=&  \int_{\Omega_u} D \, d \Omega_u
+	\underbrace{ \int_{\Omega_u} \bar{D} \, d \Omega_u }_{\text {implicit}}
+	- \underbrace{  \oint_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left( l_c^2 \nabla \bar{D} \right) \,  d\mathrm{\Gamma}_u }_{\text {implicit}}
+	 &=&  \underbrace{ \int_{\Omega_u} D \, d \Omega_u }_{\text {explicit}}
 \end{eqnarray}
 where the divergence theorem has been used to express the diffusion term (second on the left-hand side) in terms of a surface integral.
-
+As indicated by underbraces, the terms on the left-hand side are treated implicitly (coefficients in the linear system matrix), while the term of the right-hand side is treated explicitly in a deferred correction manner using values from the previous outer (Picard) iteration.
 
 Assuming a linear variation of $\bar{D}$ within cell $P$, the mid-point rule is used to approximate the first term on the left-hand side of Equation \ref{eqn:nonLocalEquationIntegral}:
 \begin{eqnarray}
-	\int_{\Omega_u} \bar{D} \, d \Omega_u &\approx& \bar{D}_P \Omega_{u_P} 
+	\underbrace{ \int_{\Omega_u} \bar{D} \, d \Omega_u }_{\text {implicit}} &\approx& \bar{D}_P \Omega_{u_P} 
 \end{eqnarray}
 This term is treated implicitly with the resulting linear system matrix coefficient contribution being $\Omega_{u_P}$ on the diagonal.
 
 Similarly, the right-hand side term is approximated using the mid-point rule:
 \begin{eqnarray}
-	\int_{\Omega_u} D \, d \Omega_u &\approx& D_P \Omega_{u_P} 
+	\underbrace{ \int_{\Omega_u} D \, d \Omega_u }_{\text {explicit}} &\approx& D_P \Omega_{u_P} 
 \end{eqnarray}
 where this term is treated in a deferred correction manner, where $ D_P \Omega_{u_P} $ is added to the linear system source.
 
 The surface integral term (second on the left-hand side) is discretised by assuming a linear various of the integrand over the face and applying the mid-point rule about the face centre $f$:
 \begin{eqnarray}
-	\oint_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left( l_c^2 \nabla \bar{D} \right) \,  d\mathrm{\Gamma}_u
+	\underbrace{ \oint_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left( l_c^2 \nabla \bar{D} \right) \,  d\mathrm{\Gamma}_u }_{\text {implicit}}
 		&=&
 		\sum_{f \in N_f} \int_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left( l_c^2 \nabla \bar{D} \right) \,  d\mathrm{\Gamma}_u \notag \\
 		&\approx&
@@ -1506,7 +1531,7 @@ The surface integral term (second on the left-hand side) is discretised by assum
 		    \left|\bb{\Gamma}_{u_f}\right|
 \end{eqnarray}
 
-The first term on the right-hand side is treated implicitly (coefficients in the linear system matrix) and the second term is treated in a deferred correction manner (contributes to the linear system source) using values from the previous outer (Picard) iteration.
+%The first term on the right-hand side is treated implicitly (coefficients in the linear system matrix) and the second term is treated in a deferred correction manner (contributes to the linear system source) using values from the previous outer (Picard) iteration.
 This equation is solved with zero-flux Neumann boundary conditions on all boundaries, that is,  $\bb{n} \cdot \nabla \bar{D} = 0$.
 Consequently, the contributions coming from boundary faces are dropped.
 
@@ -2625,9 +2650,9 @@ Similar to the non-local equations in the Lemaitre and GTN models, in this work,
 To facilitate the cell-centred finite volume method, we express the phase field equation in integral form:
 \begin{eqnarray}
 	%\frac{G_c}{2l} \left(d - 4 l^2 \bb{\nabla}^2 d \right) = \mathcal{H} \\
-	\int_{\Omega_u} d \, d \Omega_u
-	- \oint_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left(  4 l^2 \nabla d \right) \,  d\mathrm{\Gamma}_u
-	 &=&  \int_{\Omega_u} \frac{2l}{G_c} \mathcal{H} \, d \Omega_u
+	\underbrace{ \int_{\Omega_u} d \, d \Omega_u }_{\text {implicit}}
+	- \underbrace{ \oint_{\mathrm{\Gamma}_u}  \bb{n}_u \cdot \left(  4 l^2 \nabla d \right) \,  d\mathrm{\Gamma}_u }_{\text {implicit}}
+	 &=&  \underbrace{ \int_{\Omega_u} \frac{2l}{G_c} \mathcal{H} \, d \Omega_u }_{\text {explicit}}
 \end{eqnarray}
 where both sides have been multipled by $\frac{2l}{G_c}$ and the divergence theorem has been used to express the diffusion term (second on the left-hand side) in terms of a surface integral.
 
