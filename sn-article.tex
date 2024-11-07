@@ -163,7 +163,9 @@ These models can, in turn, be split into surface models (cohesive zone models), 
 Cohesive zone models have found widespread use, and may or may not require a pre-defined crack path and exhibit mesh dependency depending on the implementation.
 With these limitations in mind, this work focuses on the volume or \emph{continuum} damage mechanics approaches, stemming from the work of Lemaitre \cite{lemaitre_continuous_1985, lemaitre_engineering_2005}, and micro-mechanical approaches, as originally proposed by Gurson-Tvergaard-Needleman (GTN) \cite{gurson_continuum_1977, tvergaard_analysis_1984}.
 A review of these approaches is left to Section \ref{sec:constitutive_laws}.
-Within the past 15 years, an alternative volume ductile damage model has emerged, known as the phase field model approach \cite{ambati_phase-field_2015, borden_phase-field_2016, miehe_phase_2016, dittmann_variational_2018, samaniego_phase-field_2021}. This approach involves diffusing the sharp crack over a continuum.
+Within the past 15 years, an alternative volume ductile damage model has emerged, known as the phase field model approach \cite{ambati_phase-field_2015, borden_phase-field_2016, miehe_phase_2016, dittmann_variational_2018, samaniego_phase-field_2021}. 
+Additionally, studies comparing different non-local damage models, such as the work by \citet{andrade2014assessment}, provide insights into the performance and characteristics of non-local approaches, reinforcing the applicability of gradient damage models to mitigate mesh dependency. 
+This approach involves diffusing the sharp crack over a continuum.
 Models of this form are also implemented in this work and are described in Section \ref{sec:constitutive_laws}.
 
 
